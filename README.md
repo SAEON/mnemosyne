@@ -15,6 +15,9 @@ However, it's pretty trivial to write a streaming server in Node.js that respect
   - The GET route is completely public. I.e. for publicly shared files only
   - The POST route is either protected via basic auth, or is accessible via a different port to the GET route (i.e on saeon.int network vs saeon.ac.za)
 
+- Logging/metrics
+  - You can determine which pixels are being downloaded (and by which user if authentication is forced). so over time SAEON could say 'these pixels were downloaded N number of times'
+
 ## Some reference code
 - https://github.com/phoenixinfotech1984/node-content-range
 - https://gist.github.com/padenot/1324734
