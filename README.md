@@ -8,7 +8,7 @@ However, it's pretty trivial to write a streaming server in Node.js that respect
 
 ## Ideas for functionality
 - Two routes based on the HTTP method
-  - `GET/{optional filename}`: without a file you can explore the directory
+  - `GET/{optional filename}`: without a file you can explore the directory. with a filename/path (i.e. `GET /some/path/to/file.tif`) - that is the COG for downloading/exploring
   - `POST/path/to/file body={..file contents}`: Streams your file to disk if it doesn't already exist. Errors if it does
   
 - Authentication
