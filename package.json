@@ -1,0 +1,27 @@
+{
+  "name": "@saeon/mnemosyne",
+  "version": "0.0.1",
+  "description": "A very simple HTTP-range supporting file server. Stream your file in, and stream your file out! Named after the goddess of memory in Greek mythology.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SAEON/mnemosyne.git"
+  },
+  "author": "zd.smith@saeon.nrf.ac.za",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SAEON/mnemosyne/issues"
+  },
+  "homepage": "https://github.com/SAEON/mnemosyne#readme",
+  "keywords": [
+    "http-server",
+    "range",
+    "cloud",
+    "optimized",
+    "geotiff",
+    "zarr"
+  ],
+  "devDependencies": {
+    "prettier": "^2.7.1"
+  }
+}

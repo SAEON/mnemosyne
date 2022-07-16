@@ -1,0 +1,19 @@
+version = 0.1
+default-task = 'start'
+
+[[task]]
+name = 'start'
+env = { TZ='UTC', NODE_ENV='development'}
+deps = [ 'src/**/*.js' ]
+run = """
+prettier \
+  --loglevel warn \
+  --cache \
+  --cache-strategy metadata \
+  --ignore-path .prettierignore \
+  --write "src/**/*.@(js|json)" \
+    && node \
+      --trace-warnings \
+      src \
+        --auth-key localhost-auth-key
+"""
