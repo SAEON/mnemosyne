@@ -1,6 +1,6 @@
-import server from './server.js'
-import { PORT, HOSTNAME } from './args.js'
-import { info } from './log.js'
+import server from './server/index.js'
+import { PORT, HOSTNAME } from './config/index.js'
+import { info } from './logger/index.js'
 
 server.listen(PORT, HOSTNAME, () => {
   info('===============================================')

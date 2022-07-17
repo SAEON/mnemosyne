@@ -23,5 +23,9 @@
   ],
   "devDependencies": {
     "prettier": "^2.7.1"
+  },
+  "dependencies": {
+    "he": "^1.2.0",
+    "mime": "^3.0.0"
   }
 }

@@ -13,3 +13,8 @@ export const info = (...msg) => {
   const t = getTimestamp()
   console.info(t, ...msg)
 }
+
+export const warn = (...msg) => {
+  const t = getTimestamp()
+  console.warn(t, ...msg)
+}

@@ -8,8 +8,11 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
 - [Background](#background)
 - [Development](#development)
   - [Deployment](#deployment)
-- [Ideas for functionality](#ideas-for-functionality)
-- [Some reference code](#some-reference-code)
+- [Usage](#usage)
+  - [Viewing/retrieving files](#viewingretrieving-files)
+  - [Uploading files](#uploading-files)
+- [Future functionality](#future-functionality)
+- [TODO](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -55,24 +58,45 @@ NODE_ENV=production \
 TZ=UTC \
   node \
     src \
-      --auth-key <super-long-secret>
+      --key <super-long-secret>
       --volume /path/to/directory
 ```
 
+# Usage
+- Serve directory listings / files via `HTTP GET` requests
+  - Folders that contain `index.html` files wil be served as websites.
+  - CORS is enabled (`*`), so the file server can be perused automatically via client-side JavaScript
+- Upload files via `HTTP PUT` requests
 
 
-# Ideas for functionality
-- Two routes based on the HTTP method
-  - `GET/{optional filename}`: without a file you can explore the directory. with a filename/path (i.e. `GET /some/path/to/file.tif`) - that is the COG for downloading/exploring
-  - `POST/path/to/file body={..file contents}`: Streams your file to disk if it doesn't already exist. Errors if it does
-  
-- Authentication
-  - The GET route is completely public. I.e. for publicly shared files only
-  - The POST route is either protected via basic auth, or is accessible via a different port to the GET route (i.e on saeon.int network vs saeon.ac.za)
+## Viewing/retrieving files
+Tools that understand cloud-optimized formats (i.e. COGs, Zarrs, etc.) should work flawlessly when pointed to files hosted on this server. Otherwise, some examples:
 
-- Logging/metrics
-  - You can determine which pixels are being downloaded (and by which user if authentication is forced). so over time SAEON could say 'these pixels were downloaded N number of times'
+***Download entire file via cURL***
+```
+curl -X GET https://<domain>/filename.tif
+```
 
-# Some reference code
-- https://github.com/phoenixinfotech1984/node-content-range
-- https://gist.github.com/padenot/1324734
+***Download partial file via cURL***
+```
+curl -H "Range bytes=12-20" -X GET https://<domain>/filename.tif
+```
+
+**NOTE - all files are publicly available**
+
+## Uploading files
+Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint.
+
+
+# Future functionality
+Please submit ideas/feature-requests on the [GitHub issues feed](https://github.com/SAEON/mnemosyne/issues). Some ideas
+
+
+- Logging/metrics: It's possible to determine which pixels are being downloaded (and even by which user if authentication is forced). so over time SAEON could say 'these pixels were downloaded N number of times by these users'
+- Compression: I've chosen NOT to compress (i.e. 'zip') the downloads for now since I'm not sure how that effects byte-range requests. However this should be possible and it would greatly lighten the load on the network.
+- Roles/permissions on a folder-by-folder / file-by-file basis. Currently everything uploaded is public. But potentially it could be useful to provide some access controls
+
+# TODO
+ - Uploading API endpoint
+ - Some basic client authentication
+ - Deployment

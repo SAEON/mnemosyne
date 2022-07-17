@@ -15,5 +15,5 @@ prettier \
     && node \
       --trace-warnings \
       src \
-        --auth-key localhost-auth-key
+        --volume /home/zach/somisana-data
 """

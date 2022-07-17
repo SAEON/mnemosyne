@@ -28,10 +28,10 @@ args.port = args.port || 3000
 // --hostname
 args.hostname = args.hostname || '0.0.0.0'
 
-// --auth-key
-if (!args['auth-key']) {
+// --key
+if (!args['key']) {
   console.warn(
-    '\n*** WARNING ***\nAuthentication key CLI argument (--auth-key) missing.\nUploading is disabled'
+    '\n*** WARNING ***\nAuthentication key CLI argument (--key) missing.\nUploading is disabled\n'
   )
 }
 
@@ -58,4 +58,4 @@ if (!args['volume']) {
 export const PORT = args.port
 export const HOSTNAME = args.hostname
 export const VOLUME = args.volume
-export const KEY = args['auth-key']
+export const KEY = args['key']
