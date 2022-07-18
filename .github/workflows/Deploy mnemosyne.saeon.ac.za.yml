@@ -3,8 +3,9 @@ name: Deploy mnemosyne.saeon.ac.za
 on: workflow_dispatch
 
 jobs:
-  runs-on: github-runner.saeon.int
-  steps:
-    - name: Test
-      run: |
-        echo "Setting up the action"
+  Deploy:
+    runs-on: github-runner.saeon.int
+    steps:
+      - name: Test
+        run: |
+          echo "Setting up the action"
