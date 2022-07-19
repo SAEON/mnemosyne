@@ -1,35 +1,48 @@
 import { createServer } from 'http'
-import { info } from '../logger/index.js'
+import { info, error } from '../logger/index.js'
 import options from './routes/options/index.js'
 import head from './routes/head/index.js'
 import get from './routes/get/index.js'
 import put from './routes/put/index.js'
 import _404 from './routes/404.js'
+import parseResource from './middleware/parse-resource.js'
 
 const server = createServer(async (req, res) => {
-  info('HTTP request', req.url)
-  const method = req.method?.toUpperCase()
+  info('HTTP request path', req.url)
 
-  switch (method) {
-    case 'HEAD':
-      await head(req, res)
-      break
+  // Request context
+  const ctx = { req, res }
 
-    case 'OPTIONS':
-      await options(req, res)
-      break
+  try {
+    // Middleware
+    await parseResource.call(ctx)
 
-    case 'GET':
-      await get(req, res)
-      break
+    // Router
+    switch (req.method?.toUpperCase()) {
+      case 'HEAD':
+        await head.call(ctx, req, res)
+        break
 
-    case 'PUT':
-      await put(req, res)
-      break
+      case 'OPTIONS':
+        await options.call(ctx, req, res)
+        break
 
-    default:
-      await _404(req, res)
-      break
+      case 'GET':
+        await get.call(ctx, req, res)
+        break
+
+      case 'PUT':
+        await put.call(ctx, req, res)
+        break
+
+      default:
+        await _404.call(ctx, req, res)
+        break
+    }
+  } catch (e) {
+    error('Unexpected server error', e)
+    res.statusCode = 500
+    res.end()
   }
 })
 

@@ -2,10 +2,109 @@ name: Deploy mnemosyne.saeon.ac.za
 
 on: workflow_dispatch
 
+env:
+  BRANCH_REF: stable
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}_mnemosyne
+  NGINX_IMAGE_NAME: ${{ github.repository }}_nginx_stable
+  DEPLOY_SOURCE: deploy/stable/stack.yml
+  STACK_COMPOSE_PATH: /home/runner/mnemosyne/deploy/stable/stack.yml
+  STACK_CONFIG_PATH: /home/runner/mnemosyne/deploy/stable/stack.env
+
 jobs:
-  Deploy:
+  Build:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.BRANCH_REF }}
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          build-args: |
+            NODE_ENV=production
+            TZ=utc
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  build-nginx:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: Check out source code (shared)
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.BRANCH_REF }}
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.NGINX_IMAGE_NAME }}
+          tags: |
+            type=sha
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          build-args: |
+            NGINX_CONFIG=nginx/config
+          file: nginx/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    needs: [build, build-nginx]
     runs-on: github-runner.saeon.int
     steps:
-      - name: Test
-        run: |
-          echo "Setting up the action"
+      - name: Check out source code (shared)
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.BRANCH_REF }}
+
+      - name: (SCP) Copy stack configuration to app server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.ULWAPPSWARM01_HOSTNAME }}
+          username: ${{ secrets.ULWAPPSWARM01_HOST_USERNAME }}
+          password: ${{ secrets.ULWAPPSWARM01_HOST_PASSWORD }}
+          port: ${{ secrets.ULWAPPSWARM01_HOST_SSH_PORT }}
+          source: ${{ env.DEPLOY_SOURCE }}
+          target: 'mnemosyne'
+
+      - name: (SSH) Deploy stack
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.ULWAPPSWARM01_HOSTNAME }}
+          username: ${{ secrets.ULWAPPSWARM01_HOST_USERNAME }}
+          password: ${{ secrets.ULWAPPSWARM01_HOST_PASSWORD }}
+          port: ${{ secrets.ULWAPPSWARM01_HOST_SSH_PORT }}
+          script: |
+            echo "DOCKER_IMAGE=${{ needs.build.outputs.image }}" > ${{ env.STACK_CONFIG_PATH }}
+            echo "NGINX_IMAGE=${{ needs.build-nginx.outputs.image }}" >> ${{ env.STACK_CONFIG_PATH }}
+            sudo /opt/deploy-docker-stack.sh ${{ env.STACK_COMPOSE_PATH }} ${{ env.STACK_CONFIG_PATH }} mnemosyne_stable

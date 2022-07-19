@@ -1,4 +1,5 @@
-export default async (req, res) => {
-  res.write('im the 404 route')
+export default async function () {
+  const { res } = this
+  res.statusCode = 404
   res.end()
 }

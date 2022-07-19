@@ -9,12 +9,17 @@ const getTimestamp = () => {
   )}:${pad(dt.getMinutes())}:${pad(dt.getSeconds())}`
 }
 
-export const info = (...msg) => {
+export const info = (...args) => {
   const t = getTimestamp()
-  console.info(t, ...msg)
+  console.info(t, ...args)
 }
 
-export const warn = (...msg) => {
+export const warn = (...args) => {
   const t = getTimestamp()
-  console.warn(t, ...msg)
+  console.warn(t, ...args)
+}
+
+export const error = (...args) => {
+  const t = getTimestamp()
+  console.error(t, ...args)
 }

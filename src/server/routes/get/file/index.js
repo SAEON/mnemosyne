@@ -2,7 +2,13 @@ import { stat } from 'fs/promises'
 import mime from 'mime'
 import { createReadStream } from 'fs'
 
-export default async (req, res, file) => {
+export default async function () {
+  const {
+    req,
+    res,
+    resource: { absolutePath: file },
+  } = this
+
   const { size } = await stat(file)
   const { range } = req.headers
   const contentType = mime.getType(file)

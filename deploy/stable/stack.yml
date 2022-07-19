@@ -1,0 +1,46 @@
+version: '3.8'
+
+networks:
+  mnemosyne_next:
+    name: mnemosyne_next
+    driver: overlay
+    attachable: true
+
+services:
+  nginx:
+    image: $NGINX_IMAGE
+    deploy:
+      replicas: 1
+      rollback_config:
+        parallelism: 0
+      update_config:
+        parallelism: 0
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: any
+        delay: 30s
+    ports:
+      - 7010:80
+    networks:
+      - mnemosyne_next
+
+  node:
+    image: $DOCKER_IMAGE
+    deploy:
+      replicas: 1
+      rollback_config:
+        parallelism: 0
+      update_config:
+        parallelism: 0
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: any
+        delay: 30s
+    environment:
+      ALLOWED_ORIGINS: "*"
+    volumes:
+      - /opt/mnemosyne:/mnemosyne
+    networks:
+      - mnemosyne_next
