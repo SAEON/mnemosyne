@@ -5,7 +5,7 @@ on: workflow_dispatch
 env:
   BRANCH_REF: stable
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}_mnemosyne
+  IMAGE_NAME: ${{ github.repository }}_node_stable
   NGINX_IMAGE_NAME: ${{ github.repository }}_nginx_stable
   DEPLOY_SOURCE: deploy/stable/stack.yml
   STACK_COMPOSE_PATH: /home/runner/mnemosyne/deploy/stable/stack.yml
