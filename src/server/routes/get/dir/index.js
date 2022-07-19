@@ -94,7 +94,7 @@ export default async function () {
 
     <!-- PAGE HEADER -->
     <div id="header">
-      <h1><a href="${protocol}://${host}">Mnemosyne HTTP-range server</a></h1>
+      <h1><a href="${protocol}://${host}">Mnemosyne COG server</a></h1>
     </div>
 
     <!-- CONTENTS LISTINGS -->
