@@ -10,6 +10,7 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
   - [Deployment](#deployment)
 - [Usage](#usage)
   - [Viewing/retrieving files](#viewingretrieving-files)
+    - [Customize GET requests via URL params](#customize-get-requests-via-url-params)
     - [Serving websites](#serving-websites)
   - [Uploading files](#uploading-files)
 - [Future functionality](#future-functionality)
@@ -83,12 +84,36 @@ curl -X GET https://<domain>/filename.tif
 curl -H "Range bytes=12-20" -X GET https://<domain>/filename.tif
 ```
 
+### Customize GET requests via URL params
+By default a GET request will serve (in order of preference):
+
+- A file if specified
+- An `index.html` file (served as a website) if present
+- The directory listing
+
+You can override this logic via specifying URL params:
+
+- `?noindex`: For directories with an `index.html` file, this will serve the directory listing instead of a website
+- `?json`: This will return a JSON representation of a directory listing
+
 **NOTE - all files are publicly available**
 
 ### Serving websites
-Any folder that includes an `index.html` file will be served as a website. One potential use-case of this is to provide a branded / themed landing page for a particular directory. A folder that includes an `index.html` file will not show the directory listings, but those listings are still accessible as direct links.
+Any folder that includes an `index.html` file will be served as a website. One potential use-case of this is to provide a branded / themed landing page for a particular directory. A folder that includes an `index.html` file will not show the directory listings, but those listings are still accessible as direct links or via a JavaScript request. For example, to request the directory listing as `JSON` in JavaScript, and then append the result to the DOM:
+
+```js
+// Client side JavaScript
+fetch('https://<domain>/directory?json')
+  .then(res => res.json())
+  .then(json => {
+    document
+      .getElementsByTagName('body')[0]
+      .append(JSON.stringify(json))
+  })
+```
 
 You can serve the website on a custom domain via registering a CNAME record and then configuring URL-rewrites to the desired folder. Currently this has to be done by manually adjusting Nginx configuration - [ask me to make this user-configurable](https://github.com/SAEON/mnemosyne/issues)!!
+
 
 ## Uploading files
 Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint.

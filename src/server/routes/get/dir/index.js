@@ -27,7 +27,13 @@ const getBackLinks = ctx => {
 export default async function () {
   const {
     res,
-    resource: { protocol, host, pathname, absolutePath: directory },
+    resource: {
+      protocol,
+      host,
+      pathname,
+      absolutePath: directory,
+      query: { noindex = false, json = false },
+    },
   } = this
 
   const listings = (await readdir(directory)).sort((a, b) => {
@@ -37,87 +43,104 @@ export default async function () {
   })
 
   // Serve an index.html file if it exists
-  if (listings.includes('index.html')) {
+  if (listings.includes('index.html') && !noindex && !json) {
     return serveFile.call({
       ...this,
       resource: { ...this.resource, absolutePath: normalize(join(directory, 'index.html')) },
     })
   }
 
-  // Set headers
-  res.setHeader('content-type', 'text/html')
+  if (!json) {
+    // Set headers
+    res.setHeader('content-type', 'text/html')
 
-  // Create directory listing HTML
-  const html = `
-  <!doctype html>
-  <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width">
-      <title>${he.encode(pathname)}</title>
+    // Create directory listing HTML
+    const html = `
+      <!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width">
+          <title>${he.encode(pathname)}</title>
 
-      <style>
-        html, body {
-          margin: 0;
-          padding: 0;
-          font-family: monospace;
-        }
+          <style>
+            html, body {
+              margin: 0;
+              padding: 0;
+              font-family: monospace;
+            }
 
-        #header {
-          display: flex;
-          justify-content: center;
-          border-bottom: 1px solid grey;
-          margin-bottom: 12px;
-        }
-        
-        #header h1 {
-          margin: 12px;
-          align-items: center;
-          font-size: 24px;
-        }
+            #header {
+              display: flex;
+              justify-content: center;
+              border-bottom: 1px solid grey;
+              margin-bottom: 12px;
+            }
+            
+            #header h1 {
+              margin: 12px;
+              align-items: center;
+              font-size: 24px;
+            }
 
-        #listing {
-          margin: 2px 8px;
-        }
+            #listing {
+              margin: 2px 8px;
+            }
 
-        #listing h2 {
-          font-size: 16px;
-        }
+            #listing h2 {
+              font-size: 16px;
+            }
 
-        #listing #entries a {
-          display: block;
-          margin: 4px 0;
-        }
-      </style>
-    </head>
-    <body>
+            #listing #entries a {
+              display: block;
+              margin: 4px 0;
+            }
+          </style>
+        </head>
+        <body>
 
-    <!-- PAGE HEADER -->
-    <div id="header">
-      <h1><a href="${protocol}://${host}">Mnemosyne COG server</a></h1>
-    </div>
+        <!-- PAGE HEADER -->
+        <div id="header">
+          <h1><a href="${protocol}://${host}">Mnemosyne COG server</a></h1>
+        </div>
 
-    <!-- CONTENTS LISTINGS -->
-    <div id="listing">
-      <h2>${getBackLinks(this)}${he.encode(pathname.split('/').pop())}</h2>
-      <div id="entries">
-        ${(
-          await Promise.all(
-            listings.map(async l => {
-              const p = normalize(join(directory, l))
-              const isFile = (await stat(p)).isFile()
-              return `<a href="${he.encode(normalize(join(pathname, l)))}">${
-                isFile ? '🗎' : '📁'
-              } ${l}</a>`
-            })
-          )
-        ).join('\n')}
-      </div>
-    </div>
-    </body>
-  </html>
-  `
+        <!-- CONTENTS LISTINGS -->
+        <div id="listing">
+          <h2>${getBackLinks(this)}${he.encode(pathname.split('/').pop())}</h2>
+          <div id="entries">
+            ${(
+              await Promise.all(
+                listings.map(async l => {
+                  const p = normalize(join(directory, l))
+                  const isFile = (await stat(p)).isFile()
+                  return `<a href="${he.encode(normalize(join(pathname, l)))}">${
+                    isFile ? '🗎' : '📁'
+                  } ${l}</a>`
+                })
+              )
+            ).join('\n')}
+          </div>
+        </div>
+        </body>
+      </html>`
 
-  res.write(html)
-  res.end()
+    res.write(html)
+    res.end()
+  } else {
+    // Set headers
+    res.setHeader('content-type', 'application/json')
+    res.write(
+      JSON.stringify(
+        await Promise.all(
+          listings.map(async l => {
+            const p = normalize(join(directory, l))
+            const isFile = (await stat(p)).isFile()
+            const isDirectory = (await stat(p)).isDirectory()
+            return { entry: l, isFile, isDirectory }
+          })
+        )
+      )
+    )
+    res.end()
+  }
 }

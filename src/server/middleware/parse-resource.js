@@ -11,7 +11,16 @@ export default async function () {
   const host = req.headers.host
   const root = `${protocol}://${host}`
   const url = new URL(req.url, root)
-  const { pathname } = url
+  const { pathname, search } = url
+
+  // Parse the query string
+  const query = search
+    .slice(1)
+    .split('&')
+    .reduce((params, c) => {
+      const [key, value = true] = c.split('=')
+      return { ...params, [key]: value }
+    }, {})
 
   /**
    * Work out the absolute path
@@ -35,5 +44,6 @@ export default async function () {
     url,
     pathname,
     absolutePath,
+    query,
   }
 }
