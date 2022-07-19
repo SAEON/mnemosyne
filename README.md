@@ -10,6 +10,7 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
   - [Deployment](#deployment)
 - [Usage](#usage)
   - [Viewing/retrieving files](#viewingretrieving-files)
+    - [Serving websites](#serving-websites)
   - [Uploading files](#uploading-files)
 - [Future functionality](#future-functionality)
 - [TODO](#todo)
@@ -83,6 +84,11 @@ curl -H "Range bytes=12-20" -X GET https://<domain>/filename.tif
 ```
 
 **NOTE - all files are publicly available**
+
+### Serving websites
+Any folder that includes an `index.html` file will be served as a website. One potential use-case of this is to provide a branded / themed landing page for a particular directory. A folder that includes an `index.html` file will not show the directory listings, but those listings are still accessible as direct links.
+
+You can serve the website on a custom domain via registering a CNAME record and then configuring URL-rewrites to the desired folder. Currently this has to be done by manually adjusting Nginx configuration - [ask me to make this user-configurable](https://github.com/SAEON/mnemosyne/issues)!!
 
 ## Uploading files
 Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint.
