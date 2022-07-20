@@ -4,6 +4,16 @@ default-task = 'start'
 [[task]]
 name = 'start'
 env = { TZ='UTC', NODE_ENV='development'}
+deps = [ "prettier"]
+run = """
+node \
+  --trace-warnings \
+  src \
+    --volume /home/zach/somisana-data
+"""
+
+[[task]]
+name = 'prettier'
 deps = [ 'src/**/*.js' ]
 run = """
 prettier \
@@ -11,9 +21,7 @@ prettier \
   --cache \
   --cache-strategy metadata \
   --ignore-path .prettierignore \
-  --write "src/**/*.@(js|json)" \
-    && node \
-      --trace-warnings \
-      src \
-        --volume /home/zach/somisana-data
+  --write "src/**/*.@(js|json|yml)" \
+  --write "./.github/**/*.@(js|json|yml)" \
+  --write "./deploy/**/*.@(js|json|yml)" \
 """

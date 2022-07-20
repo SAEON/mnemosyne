@@ -6,6 +6,7 @@ import get from './routes/get/index.js'
 import put from './routes/put/index.js'
 import _404 from './routes/404.js'
 import parseResource from './middleware/parse-resource.js'
+import setResponseHeaders from './middleware/set-response-headers.js'
 
 const server = createServer(async (req, res) => {
   info('HTTP request path', req.url)
@@ -16,6 +17,7 @@ const server = createServer(async (req, res) => {
   try {
     // Middleware
     await parseResource.call(ctx)
+    await setResponseHeaders.call(ctx)
 
     // Router
     switch (req.method?.toUpperCase()) {

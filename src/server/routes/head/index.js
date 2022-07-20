@@ -57,6 +57,7 @@ export default async function () {
     res.writeHead(200, {
       'Content-Length': size,
       'Content-Type': contentType,
+      'Accept-Ranges': 'bytes',
     })
   }
 

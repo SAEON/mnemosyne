@@ -9,7 +9,7 @@ const getBackLinks = ctx => {
   } = ctx
 
   if (pathname === '/') {
-    return ''
+    return `<a href="${protocol}://${host}">.</a>/`
   }
 
   return pathname
@@ -91,7 +91,7 @@ export default async function () {
               font-size: 16px;
             }
 
-            #listing #entries a {
+            #listing #entries .entry {
               display: block;
               margin: 4px 0;
             }
@@ -113,9 +113,9 @@ export default async function () {
                 listings.map(async l => {
                   const p = normalize(join(directory, l))
                   const isFile = (await stat(p)).isFile()
-                  return `<a href="${he.encode(normalize(join(pathname, l)))}">${
-                    isFile ? '🗎' : '📁'
-                  } ${l}</a>`
+                  return `<span class="entry">${isFile ? '🗎' : '📁'} <a href="${he.encode(
+                    normalize(join(pathname, l))
+                  )}">${l}</a></span>`
                 })
               )
             ).join('\n')}
