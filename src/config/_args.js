@@ -6,10 +6,10 @@ import { info, warn } from '../logger/index.js'
 const args = {}
 
 const _args = arg({
-  '--port': Number,
-  '--hostname': String,
-  '--key': String,
-  '--volume': String,
+  '--port': process.env.PORT ? arg.flag(() => process.env.PORT) : Number,
+  '--hostname': process.env.HOSTNAME ? arg.flag(() => process.env.HOSTNAME) : String,
+  '--key': process.env.KEY ? arg.flag(() => process.env.KEY) : String,
+  '--volume': process.env.VOLUME ? arg.flag(() => process.env.VOLUME) : String,
   '-p': '--port',
   '-h': '--hostname',
   '-k': '--key',
