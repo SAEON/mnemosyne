@@ -2,6 +2,7 @@ import arg from 'arg'
 import { join, normalize } from 'path'
 import { homedir } from 'os'
 import { info, warn } from '../logger/index.js'
+import mkdirp from 'mkdirp'
 
 const args = {}
 
@@ -52,6 +53,8 @@ if (!_args['--volume'] || _args['--volume'].toLowerCase() === 'false') {
   warn()
 
   args.volume = volume
+} else {
+  args.volume = _args['--volume']
 }
 
 info('--hostname', args.hostname)
@@ -60,6 +63,10 @@ info('--volume', args.volume)
 info('--key', args.key ? '***' : undefined)
 info()
 
+// Ensure the volume directory exists
+await mkdirp(args.volume)
+
+// Export env
 export const PORT = args.port
 export const HOSTNAME = args.hostname
 export const VOLUME = args.volume
