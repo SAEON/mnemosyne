@@ -11,7 +11,6 @@ env:
   DEPLOY_SOURCE: deploy/stable/stack.yml
   STACK_COMPOSE_PATH: /home/runner/mnemosyne/deploy/stable/stack.yml
   STACK_CONFIG_PATH: /home/runner/mnemosyne/deploy/stable/stack.env
-  KEY: ${{ secrets.KEY }}
 
 jobs:
   Build-node:
@@ -143,5 +142,5 @@ jobs:
             echo "DOCKER_IMAGE=${{ needs.build-node.outputs.image }}" > ${{ env.STACK_CONFIG_PATH }}
             echo "PUBLIC_NGINX_IMAGE=${{ needs.build-nginx-public.outputs.image }}" >> ${{ env.STACK_CONFIG_PATH }}
             echo "INTERNAL_NGINX_IMAGE=${{ needs.build-nginx-internal.outputs.image }}" >> ${{ env.STACK_CONFIG_PATH }}
-            echo "KEY=${{ env.KEY }}" >> ${{ env.STACK_CONFIG_PATH }}
+            echo "KEY=${{ secrets.APP_KEY }}" >> ${{ env.STACK_CONFIG_PATH }}
             sudo /opt/deploy-docker-stack.sh ${{ env.STACK_COMPOSE_PATH }} ${{ env.STACK_CONFIG_PATH }} mnemosyne_stable
