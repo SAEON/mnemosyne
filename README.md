@@ -64,6 +64,37 @@ TZ=UTC \
       --volume /path/to/directory
 ```
 
+### Docker
+***Build a Docker image locally***
+```sh
+docker build -t mnemosyne .
+```
+
+***Run a containerized instance of the server***
+```sh
+# default volume (cache directory), uploads disabled
+docker run --rm -p 3000:3000 --name mnemosyne
+
+# Mount a host volume, uploads disabled
+docker run \
+  --rm \
+  -p 3000:3000 \
+  --name mnemosyne \
+  -v /some/host/directory:/mounted-directory \
+  -e VOLUME=/mounted-directory \
+  mnemosyne
+
+# Mount a host volume, uploads enabled
+docker run \
+  --rm \
+  -p 3000:3000 \
+  --name mnemosyne \
+  -v /some/host/directory:/mounted-directory \
+  -e VOLUME=/mounted-directory \
+  -e KEY=yoursupersecretkey \
+  mnemosyne
+```
+
 # Usage
 - Serve directory listings / files via `HTTP GET` requests
   - Folders that contain `index.html` files wil be served as websites.
