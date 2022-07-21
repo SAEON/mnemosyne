@@ -1,9 +1,8 @@
 import { KEY } from '../../../config/index.js'
 import { createWriteStream } from 'fs'
 import mkdirp from 'mkdirp'
-import { stat, access } from 'fs/promises'
-import { extname, dirname, basename } from 'path'
-import mime from 'mime'
+import { access } from 'fs/promises'
+import { extname, dirname } from 'path'
 
 export default async function () {
   const {
@@ -52,7 +51,6 @@ export default async function () {
 
   // Get upload path
   const dir = dirname(absolutePath)
-  const filename = basename(absolutePath)
 
   // Ensure dir exists
   await mkdirp(dir)

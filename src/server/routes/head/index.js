@@ -18,6 +18,7 @@ export default async function () {
   } catch (error) {
     res.statusCode = 404
     res.end()
+    return
   }
 
   if (range) {
