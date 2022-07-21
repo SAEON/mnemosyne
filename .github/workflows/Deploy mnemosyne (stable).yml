@@ -6,13 +6,14 @@ env:
   BRANCH_REF: stable
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}_node_stable
-  NGINX_IMAGE_NAME: ${{ github.repository }}_nginx_stable
+  PUBLIC_NGINX_IMAGE: ${{ github.repository }}_nginx_stable_public
+  INTERNAL_NGINX_IMAGE: ${{ github.repository }}_nginx_stable_internal
   DEPLOY_SOURCE: deploy/stable/stack.yml
   STACK_COMPOSE_PATH: /home/runner/mnemosyne/deploy/stable/stack.yml
   STACK_CONFIG_PATH: /home/runner/mnemosyne/deploy/stable/stack.env
 
 jobs:
-  Build:
+  Build-node:
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.meta.outputs.tags }}
@@ -45,7 +46,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  build-nginx:
+  build-nginx-public:
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.meta.outputs.tags }}
@@ -64,7 +65,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY }}/${{ env.NGINX_IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.PUBLIC_NGINX_IMAGE }}
           tags: |
             type=sha
       - name: Build and push
@@ -72,14 +73,47 @@ jobs:
         with:
           context: .
           build-args: |
-            NGINX_CONFIG=nginx/config
+            NGINX_CONFIG=nginx/config-public
+          file: nginx/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  build-nginx-internal:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
+    steps:
+      - name: Check out source code (shared)
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ env.BRANCH_REF }}
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.INTERNAL_NGINX_IMAGE }}
+          tags: |
+            type=sha
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          build-args: |
+            NGINX_CONFIG=nginx/config-internal
           file: nginx/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
   deploy:
-    needs: [build, build-nginx]
+    needs: [build-node, build-nginx-public, build-nginx-internal]
     runs-on: github-runner.saeon.int
     steps:
       - name: Check out source code (shared)
@@ -105,6 +139,7 @@ jobs:
           password: ${{ secrets.ULWAPPSWARM01_HOST_PASSWORD }}
           port: ${{ secrets.ULWAPPSWARM01_HOST_SSH_PORT }}
           script: |
-            echo "DOCKER_IMAGE=${{ needs.build.outputs.image }}" > ${{ env.STACK_CONFIG_PATH }}
-            echo "NGINX_IMAGE=${{ needs.build-nginx.outputs.image }}" >> ${{ env.STACK_CONFIG_PATH }}
+            echo "DOCKER_IMAGE=${{ needs.build-node.outputs.image }}" > ${{ env.STACK_CONFIG_PATH }}
+            echo "PUBLIC_NGINX_IMAGE=${{ needs.build-nginx-public.outputs.image }}" >> ${{ env.STACK_CONFIG_PATH }}
+            echo "INTERNAL_NGINX_IMAGE=${{ needs.build-nginx-internal.outputs.image }}" >> ${{ env.STACK_CONFIG_PATH }}
             sudo /opt/deploy-docker-stack.sh ${{ env.STACK_COMPOSE_PATH }} ${{ env.STACK_CONFIG_PATH }} mnemosyne_stable
