@@ -1,8 +1,12 @@
 version: '3.8'
 
 networks:
-  mnemosyne_stable:
-    name: mnemosyne_stable
+  mnemosyne_stable_public:
+    name: mnemosyne_stable_public
+    driver: overlay
+    attachable: true
+  mnemosyne_stable_private:
+    name: mnemosyne_stable_private
     driver: overlay
     attachable: true
 
@@ -23,7 +27,7 @@ services:
     ports:
       - 7010:80
     networks:
-      - mnemosyne_stable
+      - mnemosyne_stable_public
 
   private-nginx:
     image: $NGINX_IMAGE
@@ -41,7 +45,7 @@ services:
     ports:
       - 6008:80
     networks:
-      - mnemosyne_stable
+      - mnemosyne_stable_public
 
   private-node:
     image: $DOCKER_IMAGE
@@ -61,7 +65,7 @@ services:
     volumes:
       - /opt/mnemosyne:/mnemosyne
     networks:
-      - mnemosyne_stable
+      - mnemosyne_stable_private
 
   public-node:
     image: $DOCKER_IMAGE
@@ -81,4 +85,4 @@ services:
     volumes:
       - /opt/mnemosyne:/mnemosyne
     networks:
-      - mnemosyne_stable
+      - mnemosyne_stable_private

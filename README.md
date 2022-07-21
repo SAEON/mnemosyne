@@ -72,7 +72,7 @@ TZ=UTC \
 
 
 ## Viewing/retrieving files
-Tools that understand cloud-optimized formats (i.e. COGs, Zarrs, etc.) should work flawlessly when pointed to files hosted on this server. Otherwise, some examples:
+Tools that understand cloud-optimized formats (i.e. COGs, Zarrs, etc.) should work flawlessly when pointed to files hosted on this server. Otherwise, some examples of explicit HTTP requests:
 
 ***Download entire file via cURL***
 ```
@@ -116,7 +116,14 @@ You can serve the website on a custom domain via registering a CNAME record and 
 
 
 ## Uploading files
-Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint.
+Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint. For example
+
+```sh
+# -T means 'transfer file'
+curl -X PUT -T ./some/local/cog.tiff https://<domain>/some/deep/nested/directory/cog.tif
+```
+
+And then that file can be retrieved at `https://<domain>/some/deep/nested/directory/cog.tif`.
 
 
 # Future functionality

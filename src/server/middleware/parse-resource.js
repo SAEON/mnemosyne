@@ -11,16 +11,13 @@ export default async function () {
   const host = req.headers.host
   const root = `${protocol}://${host}`
   const url = new URL(req.url, root)
-  const { pathname, search } = url
+  const { pathname, searchParams } = url
 
   // Parse the query string
-  const query = search
-    .slice(1)
-    .split('&')
-    .reduce((params, c) => {
-      const [key, value = true] = c.split('=')
-      return { ...params, [key]: value }
-    }, {})
+  const query = [...searchParams.keys()].reduce(
+    (params, key) => ({ ...params, [key]: searchParams.get(key) || true }),
+    {}
+  )
 
   /**
    * Work out the absolute path
@@ -31,6 +28,16 @@ export default async function () {
    */
   const absolutePath = normalize(join(VOLUME, pathname))
   info('Resource request path', absolutePath)
+
+  /**
+   * Prevent directory traversal
+   * Not sure this is actually required
+   * since from testing I can't seem to
+   * trigger a directory traversal request
+   */
+  if (!absolutePath.includes(VOLUME)) {
+    throw new Error('Directory traversal not allowed')
+  }
 
   /**
    * Append the 'resource'

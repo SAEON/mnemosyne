@@ -9,7 +9,8 @@ run = """
 node \
   --trace-warnings \
   src \
-    --volume /home/zach/somisana-data
+    --volume /home/zach/somisana-data \
+    --key localhost-development
 """
 
 [[task]]
