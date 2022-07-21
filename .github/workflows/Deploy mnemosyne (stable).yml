@@ -1,4 +1,4 @@
-name: Deploy mnemosyne.saeon.ac.za
+name: Deploy mnemosyne (stable)
 
 on: workflow_dispatch
 
