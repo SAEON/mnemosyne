@@ -1,42 +1,42 @@
+import arg from 'arg'
 import { join, normalize } from 'path'
 import { homedir } from 'os'
-const argv = process.argv.slice(2)
+import { info, warn } from '../logger/index.js'
 
-// Validate argv: one value per flag
-argv.forEach((str, i) => {
-  if (i % 2 === 0 && !str.startsWith('--')) {
-    throw new Error('CLI error. Expected flag (--<flag-name>)')
-  }
+const args = {}
+
+const _args = arg({
+  '--port': Number,
+  '--hostname': String,
+  '--key': String,
+  '--volume': String,
+  '-p': '--port',
+  '-h': '--hostname',
+  '-k': '--key',
+  '-v': '--volume',
 })
 
-// Validate argv: All flags have a value
-if (argv.length % 2) {
-  throw new Error('CLI error. Every flag should have a value')
-}
-
-// Parse args
-const args = argv.reduce((a, c, i) => {
-  if (argv[i].startsWith('--')) {
-    a[argv[i].replace('--', '')] = argv[i + 1]
-  }
-  return a
-}, {})
+info('Starting mnemosyne server...')
+info()
 
 // --port
-args.port = args.port || 3000
+args.port = _args['--port'] || 3000
 
 // --hostname
-args.hostname = args.hostname || '0.0.0.0'
+args.hostname = _args['--hostname'] || '0.0.0.0'
 
 // --key
-if (!args['key']) {
-  console.warn(
-    '\n*** WARNING ***\nAuthentication key CLI argument (--key) missing.\nUploading is disabled\n'
-  )
+if (!_args['--key'] || _args['--key'].toLowerCase() === 'false') {
+  warn('*** WARNING ***')
+  warn('Authentication key CLI argument (--key) missing.')
+  warn('Uploading is disabled')
+  warn()
+} else {
+  args.key = _args['--key']
 }
 
 // --volume
-if (!args['volume']) {
+if (!_args['--volume'] || _args['--volume'].toLowerCase() === 'false') {
   const volume =
     process.platform === 'darwin'
       ? normalize(join(homedir(), 'Library', 'Caches', 'mnemosyne'))
@@ -46,16 +46,21 @@ if (!args['volume']) {
         )
       : normalize(join(process.env.XDG_CACHE_HOME || join(homedir(), '.cache'), 'mnemosyne'))
 
-  console.warn(
-    '\n*** WARNING ***\nVolume CLI argument (--volume) missing.\nUsing temporary cache',
-    volume,
-    '\n'
-  )
+  warn('*** WARNING ***')
+  warn('Volume CLI argument (--volume) missing.')
+  warn('Using temporary cache', volume)
+  warn()
 
   args.volume = volume
 }
 
+info('--hostname', args.hostname)
+info('--port', args.port)
+info('--volume', args.volume)
+info('--key', args.key ? '***' : undefined)
+info()
+
 export const PORT = args.port
 export const HOSTNAME = args.hostname
 export const VOLUME = args.volume
-export const KEY = args['key']
+export const KEY = args.key

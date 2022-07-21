@@ -11,10 +11,9 @@ networks:
     attachable: true
 
 services:
-
-###
-# Public
-###
+  ###
+  # Public
+  ###
 
   public-node:
     image: $DOCKER_IMAGE
@@ -30,7 +29,7 @@ services:
         condition: any
         delay: 5s
     environment:
-      ALLOWED_ORIGINS: '*'
+      VOLUME: /mnemosyne
     volumes:
       - /opt/mnemosyne:/mnemosyne
     networks:
@@ -54,9 +53,9 @@ services:
     networks:
       - mnemosyne_stable_public
 
-###
-# Internal
-###
+  ###
+  # Internal
+  ###
 
   internal-node:
     image: $DOCKER_IMAGE
@@ -72,7 +71,8 @@ services:
         condition: any
         delay: 5s
     environment:
-      ALLOWED_ORIGINS: '*'
+      VOLUME: /mnemosyne
+      KEY: $KEY
     volumes:
       - /opt/mnemosyne:/mnemosyne
     networks:
