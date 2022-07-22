@@ -147,8 +147,9 @@ You can serve the website on a custom domain via registering a CNAME record and 
 
 
 ## Uploading files
-Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint. For example
+Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint. Here are some examples I've found with cURL - I'n not sure what the differences are:
 
+***Specifying a filename***
 ```sh
 # -T means 'transfer file'
 
@@ -162,6 +163,33 @@ curl \
   https://<domain>/some/deep/nested/directory/cog.tif \
     | cat
 ```
+
+***Testing streaming from a file - but doesn't seem to work any differently to the above example***
+```sh
+cat ./some/local/cog.tiff \
+  | curl \
+    --progress-bar \
+    -X PUT \
+    --data-binary @- \
+    -H "Content-Type: application/octet-stream" \
+    https://<domain>/some/deep/nested/directory/cog.tif \
+      | cat
+```
+
+***Streaming from a file using mbuffer***
+```sh
+mbuffer \
+  -i ./some/local/cog.tiff \
+  -r 2M \
+  | curl \
+    --progress-bar \
+    -X PUT \
+    --data-binary @- \
+    -H "Content-Type: application/octet-stream" \
+    https://<domain>/some/deep/nested/directory/cog.tif \
+      | cat
+```
+
 
 And then that file can be retrieved at `https://<domain>/some/deep/nested/directory/cog.tif`.
 

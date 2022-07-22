@@ -59,7 +59,13 @@ export default async function () {
 
   // Stream file contents to disk
   const stream = createWriteStream(absolutePath)
-  stream.on('open', () => req.pipe(stream))
+  req.pipe(stream)
+
+  // Keep track of how much is received
+  let received = 0
+  req.on('data', chunk => {
+    received += chunk.length
+  })
 
   // Wait until the file is written
   await new Promise(resolve => {
@@ -67,9 +73,12 @@ export default async function () {
   })
 
   // Respond with new resource info
-  res.writeHead(201, {
+  const msg = `Received ${received} bytes`
+  res.writeHead(201, msg, {
+    'Content-Type': 'text/plain',
     'Content-Location': href,
   })
+  res.write(msg)
 
   res.end()
 }
