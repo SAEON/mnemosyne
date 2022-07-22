@@ -35,7 +35,8 @@ if (_args['--user'] && _args['--users']) {
 }
 
 // --tokens
-args.users = _args['--logins']?.split(',') || _args['--login'] || []
+args.users =
+  _args['--logins']?.split(',').filter(l => l.toLowerCase() !== 'false') || _args['--login'] || []
 
 // --key
 if (!_args['--key'] || _args['--key'].toLowerCase() === 'false') {
