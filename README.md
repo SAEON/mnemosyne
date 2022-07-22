@@ -40,6 +40,8 @@ npm install
 
 # Start the app and write code!
 chomp --watch
+
+# The server will print access tokens that can be used for uploads
 ```
 
 ## Deployment
@@ -62,6 +64,12 @@ TZ=UTC \
     src \
       --key <super-long-secret>
       --volume /path/to/directory
+      --user some-user
+      --user some-user2
+      --user some-user@gmail.com
+      # Or --users=user1,user2,user3,etc
+
+# Look at the startup logs, and pass access tokens to the relevant users
 ```
 
 ### Docker
@@ -92,6 +100,7 @@ docker run \
   -v /some/host/directory:/mounted-directory \
   -e VOLUME=/mounted-directory \
   -e KEY=yoursupersecretkey \
+  -e USERS=user1,user2 \
   mnemosyne
 ```
 
@@ -159,6 +168,7 @@ Any files/folder in the exposed volume will be served. To upload files to the se
 curl \
   --progress-bar \
   -X PUT \
+  -H "Authorization: Bearer <token>" \
   -T ./some/local/cog.tiff \
   https://<domain>/some/deep/nested/directory/cog.tif \
     | cat
@@ -170,6 +180,7 @@ cat ./some/local/cog.tiff \
   | curl \
     --progress-bar \
     -X PUT \
+    -H "Authorization: Bearer <token>" \
     --data-binary @- \
     -H "Content-Type: application/octet-stream" \
     https://<domain>/some/deep/nested/directory/cog.tif \
@@ -184,6 +195,7 @@ mbuffer \
   | curl \
     --progress-bar \
     -X PUT \
+    -H "Authorization: Bearer <token>" \
     --data-binary @- \
     -H "Content-Type: application/octet-stream" \
     https://<domain>/some/deep/nested/directory/cog.tif \

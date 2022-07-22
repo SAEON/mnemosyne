@@ -1,5 +1,6 @@
-import { KEY } from '../../../config/index.js'
+import { KEY, decrypt, USERS } from '../../../config/index.js'
 import { createWriteStream } from 'fs'
+import { error, info } from '../../../logger/index.js'
 import mkdirp from 'mkdirp'
 import { access } from 'fs/promises'
 import { extname, dirname } from 'path'
@@ -20,6 +21,22 @@ export default async function () {
       'Content-Type': 'text/plain',
     })
     res.write('PUT has been disabled for this server')
+    res.end()
+    return
+  }
+
+  // Ensure that a valid token is used
+  const { authorization } = req.headers
+  try {
+    if (!authorization) throw 401
+    const token = authorization.match(/((?![Bearer\s+])).*$/i)[0]
+    const user = decrypt(token)
+    if (!USERS.includes(user)) throw 401
+    info('Authenticated', user, absolutePath)
+  } catch (e) {
+    error(e)
+    res.statusCode = 401
+    res.write('Unauthorized')
     res.end()
     return
   }

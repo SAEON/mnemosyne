@@ -73,6 +73,8 @@ services:
     environment:
       VOLUME: /mnemosyne
       KEY: $KEY
+      ACCESS_TOKENS: $ACCESS_TOKENS
+      LOGINS: $LOGINS
     volumes:
       - /opt/mnemosyne:/mnemosyne
     networks:

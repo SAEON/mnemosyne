@@ -10,7 +10,8 @@ node \
   --trace-warnings \
   src \
     --volume /home/zach/somisana-data \
-    --key localhost-development
+    --key TjWnZr4u7w!z%C*F-JaNdRgUkXp2s5v8 \
+    --login localhost
 """
 
 [[task]]
