@@ -1,29 +1,33 @@
 # mnemosyne
+
 A very simple HTTP-range supporting file server. Stream your file in, and stream your file out! Named after the goddess of memory in Greek mythology.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+**Table of Contents** _generated with [DocToc](https://github.com/thlorenz/doctoc)_
 
 - [Background](#background)
 - [Development](#development)
   - [Deployment](#deployment)
+    - [Docker](#docker)
 - [Usage](#usage)
   - [Viewing/retrieving files](#viewingretrieving-files)
     - [Customize GET requests via URL params](#customize-get-requests-via-url-params)
     - [Serving websites](#serving-websites)
   - [Uploading files](#uploading-files)
 - [Future functionality](#future-functionality)
-- [TODO](#todo)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # Background
+
 I started looking at using a file server that supports the HTTP GET Range header, thinking that this would be a good way of registering out-db NetCDF files in PostGIS. However this doesn't work - NetCDF files over a network require an OPeNDAP interface.
 
 But a new format for cloud-optimized, multidimensional data (Zarr), and the potential need for SAEON to host (or at least test hosting) cloud-optimized-geotifs (COGs) makes this quick project worthwhile.
 
 # Development
+
 Install Node.js v18.6. Then setup the project:
 
 ```sh
@@ -45,6 +49,7 @@ chomp --watch
 ```
 
 ## Deployment
+
 - Install Node.js
 - Install dependencies from the lockfile (`package-lock.json`)
 - Start the application. Use a process manager such as `pm2` to restart on failure. See below for Dockerized deployment
@@ -73,12 +78,15 @@ TZ=UTC \
 ```
 
 ### Docker
-***Build a Docker image locally***
+
+**_Build a Docker image locally_**
+
 ```sh
 docker build -t mnemosyne .
 ```
 
-***Run a containerized instance of the server***
+**_Run a containerized instance of the server_**
+
 ```sh
 # default volume (cache directory), uploads disabled
 docker run --rm -p 3000:3000 --name mnemosyne
@@ -105,26 +113,30 @@ docker run \
 ```
 
 # Usage
+
 - Serve directory listings / files via `HTTP GET` requests
   - Folders that contain `index.html` files wil be served as websites.
   - CORS is enabled (`*`), so the file server can be perused automatically via client-side JavaScript
 - Upload files via `HTTP PUT` requests
 
-
 ## Viewing/retrieving files
+
 Tools that understand cloud-optimized formats (i.e. COGs, Zarrs, etc.) should work flawlessly when pointed to files hosted on this server. Otherwise, some examples of explicit HTTP requests:
 
-***Download entire file via cURL***
+**_Download entire file via cURL_**
+
 ```
 curl -X GET https://<domain>/filename.tif
 ```
 
-***Download partial file via cURL***
+**_Download partial file via cURL_**
+
 ```
 curl -H "Range bytes=12-20" -X GET https://<domain>/filename.tif
 ```
 
 ### Customize GET requests via URL params
+
 By default a GET request will serve (in order of preference):
 
 - A file if specified
@@ -139,6 +151,7 @@ You can override this logic via specifying URL params:
 **NOTE - all files are publicly available**
 
 ### Serving websites
+
 Any folder that includes an `index.html` file will be served as a website. One potential use-case of this is to provide a branded / themed landing page for a particular directory. A folder that includes an `index.html` file will not show the directory listings, but those listings are still accessible as direct links or via a JavaScript request. For example, to request the directory listing as `JSON` in JavaScript, and then append the result to the DOM:
 
 ```js
@@ -146,19 +159,18 @@ Any folder that includes an `index.html` file will be served as a website. One p
 fetch('https://<domain>/directory?json')
   .then(res => res.json())
   .then(json => {
-    document
-      .getElementsByTagName('body')[0]
-      .append(JSON.stringify(json))
+    document.getElementsByTagName('body')[0].append(JSON.stringify(json))
   })
 ```
 
 You can serve the website on a custom domain via registering a CNAME record and then configuring URL-rewrites to the desired folder. Currently this has to be done by manually adjusting Nginx configuration - [ask me to make this user-configurable](https://github.com/SAEON/mnemosyne/issues)!!
 
-
 ## Uploading files
+
 Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint. Here are some examples I've found with cURL - I'n not sure what the differences are:
 
-***Specifying a filename***
+**_Specifying a filename_**
+
 ```sh
 # -T means 'transfer file'
 
@@ -174,7 +186,8 @@ curl \
     | cat
 ```
 
-***Testing streaming from a file - but doesn't seem to work any differently to the above example***
+**_Testing streaming from a file - but doesn't seem to work any differently to the above example_**
+
 ```sh
 cat ./some/local/cog.tiff \
   | curl \
@@ -187,7 +200,8 @@ cat ./some/local/cog.tiff \
       | cat
 ```
 
-***Streaming from a file using mbuffer***
+**_Streaming from a file using mbuffer_**
+
 ```sh
 mbuffer \
   -i ./some/local/cog.tiff \
@@ -202,19 +216,18 @@ mbuffer \
       | cat
 ```
 
-
 And then that file can be retrieved at `https://<domain>/some/deep/nested/directory/cog.tif`.
 
-
 # Future functionality
-Please submit ideas/feature-requests on the [GitHub issues feed](https://github.com/SAEON/mnemosyne/issues). Some ideas
 
+Please submit ideas/feature-requests on the [GitHub issues feed](https://github.com/SAEON/mnemosyne/issues). Some ideas
 
 - Logging/metrics: It's possible to determine which pixels are being downloaded (and even by which user if authentication is forced). so over time SAEON could say 'these pixels were downloaded N number of times by these users'
 - Compression: I've chosen NOT to compress (i.e. 'zip') the downloads for now since I'm not sure how that effects byte-range requests. However this should be possible and it would greatly lighten the load on the network.
 - Roles/permissions on a folder-by-folder / file-by-file basis. Currently everything uploaded is public. But potentially it could be useful to provide some access controls
-
-# TODO
- - Uploading API endpoint
- - Some basic client authentication
- - Deployment
+- CRUD management from a UI - should be possible for a user to delete things they have uploaded (?? or should it).
+- Perhaps certain folders should be immutable, and some folders should not be
+- A better UI?
+- Metadata?
+- A drag/drop website creator for static sites?
+- URL rewriting - specifically being able to define this at runtime and via a UI rather than in source code

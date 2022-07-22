@@ -24,6 +24,7 @@ prettier \
   --cache-strategy metadata \
   --ignore-path .prettierignore \
   --write "src/**/*.@(js|json|yml)" \
+  --write "./*.@(js|json|yml|md)" \
   --write "./.github/**/*.@(js|json|yml)" \
   --write "./deploy/**/*.@(js|json|yml)" \
 """
