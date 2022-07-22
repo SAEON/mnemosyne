@@ -151,7 +151,16 @@ Any files/folder in the exposed volume will be served. To upload files to the se
 
 ```sh
 # -T means 'transfer file'
-curl -X PUT -T ./some/local/cog.tiff https://<domain>/some/deep/nested/directory/cog.tif
+
+# The response is piped to cat
+# because cURL doesn't print POST
+# and PUT info by default
+curl \
+  --progress-bar \
+  -X PUT \
+  -T ./some/local/cog.tiff \
+  https://<domain>/some/deep/nested/directory/cog.tif \
+    | cat
 ```
 
 And then that file can be retrieved at `https://<domain>/some/deep/nested/directory/cog.tif`.

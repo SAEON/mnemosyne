@@ -31,7 +31,9 @@ export default async function () {
 
   // If it exists return 409
   if (exists) {
-    res.statusCode = 409
+    const msg = 'Conflict. Upload path already exists'
+    res.writeHead(409, msg)
+    res.write(msg)
     res.end()
     return
   }

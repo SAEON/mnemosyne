@@ -7,12 +7,13 @@ import put from './routes/put/index.js'
 import _404 from './routes/404.js'
 import parseResource from './middleware/parse-resource.js'
 import setResponseHeaders from './middleware/set-response-headers.js'
+import checkContinue from './middleware/check-continue.js'
 
 const server = createServer(async (req, res) => {
   info('HTTP request path', req.url)
 
   // Request context
-  const ctx = { req, res }
+  const ctx = { req, res, server }
 
   try {
     // Middleware
@@ -46,6 +47,6 @@ const server = createServer(async (req, res) => {
     res.statusCode = 500
     res.end()
   }
-})
+}).on('checkContinue', async (...args) => await checkContinue.call(server, ...args))
 
 export default server
