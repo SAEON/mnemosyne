@@ -1,63 +1,13 @@
 version: '3.8'
 
 networks:
-  mnemosyne_stable_public:
-    name: mnemosyne_stable_public
-    driver: overlay
-    attachable: true
-  mnemosyne_stable_internal:
-    name: mnemosyne_stable_internal
+  mnemosyne_stable:
+    name: mnemosyne_stable
     driver: overlay
     attachable: true
 
 services:
-  ###
-  # Public
-  ###
-
-  public-node:
-    image: $DOCKER_IMAGE
-    deploy:
-      replicas: 1
-      rollback_config:
-        parallelism: 0
-      update_config:
-        parallelism: 0
-        order: start-first
-        failure_action: rollback
-      restart_policy:
-        condition: any
-        delay: 5s
-    environment:
-      VOLUME: /mnemosyne
-    volumes:
-      - /opt/mnemosyne:/mnemosyne
-    networks:
-      - mnemosyne_stable_public
-
-  public-nginx:
-    image: $PUBLIC_NGINX_IMAGE
-    deploy:
-      replicas: 1
-      rollback_config:
-        parallelism: 0
-      update_config:
-        parallelism: 0
-        order: start-first
-        failure_action: rollback
-      restart_policy:
-        condition: any
-        delay: 5s
-    ports:
-      - 7010:80
-    networks:
-      - mnemosyne_stable_public
-
-  ###
-  # Internal
-  ###
-
-  internal-node:
+  node:
     image: $DOCKER_IMAGE
     deploy:
       replicas: 1
@@ -76,23 +26,8 @@ services:
       LOGINS: $LOGINS
     volumes:
       - /opt/mnemosyne:/mnemosyne
-    networks:
-      - mnemosyne_stable_internal
-
-  internal-nginx:
-    image: $INTERNAL_NGINX_IMAGE
-    deploy:
-      replicas: 1
-      rollback_config:
-        parallelism: 0
-      update_config:
-        parallelism: 0
-        order: start-first
-        failure_action: rollback
-      restart_policy:
-        condition: any
-        delay: 5s
     ports:
-      - 6008:80
+      - 7010:3000
+      - 6008:3000
     networks:
-      - mnemosyne_stable_internal
+      - mnemosyne_stable
