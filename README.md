@@ -176,7 +176,7 @@ Any files/folder in the exposed volume will be served. To upload files to the se
 - For `PUT` requests I find it's necessary to pipe the output to `cat`, since `cURL` won't print output to stdout (who knows why) when using `POST` and `PUT` requests
 - The `-T` header means 'transfer file'. Use this instead of `--data-binary`, since the latter will try to load your entire file into memory before sending
 - The `--keepalive-time` header is necessary when you are uploading large files. By default `cURL` will only use 60 seconds as the default time to keep a connection open, which is not long enough to upload large files
-- In some cases it may be helpful to use the `--limit-rate` flag. Ffor example, if you have an incredibly fast internet connection and uploads are failing, try limiting the upload speed to 3MB/sec (`--limit-rate 3m`)
+- In some cases it may be helpful to use the `--limit-rate` flag. For example, if you have an incredibly fast internet connection and uploads are failing, try limiting the upload speed to 3MB/sec (`--limit-rate 3m`)
 - [Here is a helpful list of cURL flags](https://gist.github.com/zachsa/085b3cdfb3534c6da7d0b9967da9647e)
 
 **_Specifying a filename_**
