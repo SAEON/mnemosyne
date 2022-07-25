@@ -5,8 +5,6 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-**Table of Contents** _generated with [DocToc](https://github.com/thlorenz/doctoc)_
-
 - [Background](#background)
 - [Development](#development)
   - [Deployment](#deployment)
@@ -126,13 +124,19 @@ Tools that understand cloud-optimized formats (i.e. COGs, Zarrs, etc.) should wo
 **_Download entire file via cURL_**
 
 ```
-curl -X GET https://<domain>/filename.tif
+curl \
+  -X GET \
+  --keepalive-time 1200 \
+  https://<domain>/filename.tif
 ```
 
 **_Download partial file via cURL_**
 
 ```
-curl -H "Range bytes=12-20" -X GET https://<domain>/filename.tif
+curl \
+  -H "Range bytes=12-20" \
+  -X GET \
+  https://<domain>/filename.tif
 ```
 
 ### Customize GET requests via URL params
@@ -167,18 +171,20 @@ You can serve the website on a custom domain via registering a CNAME record and 
 
 ## Uploading files
 
-Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint. Here are some examples I've found with cURL - I'n not sure what the differences are:
+Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint. Here are some examples using `cURL` (and some notes):
+
+- For `PUT` requests I find it's necessary to pipe the output to `cat`, since `cURL` won't print output to stdout (who knows why) when using `POST` and `PUT` requests
+- The `-T` header means 'transfer file'. Use this instead of `--data-binary`, since the latter will try to load your entire file into memory before sending
+- The `--keepalive-time` header is necessary when you are uploading large files. By default `cURL` will only use 60 seconds as the default time to keep a connection open, which is not long enough to upload large files
+- In some cases it may be helpful to use the `--limit-rate` flag. Ffor example, if you have an incredibly fast internet connection and uploads are failing, try limiting the upload speed to 3MB/sec (`--limit-rate 3m`)
+- [Here is a helpful list of cURL flags](https://gist.github.com/zachsa/085b3cdfb3534c6da7d0b9967da9647e)
 
 **_Specifying a filename_**
 
 ```sh
-# -T means 'transfer file'
-
-# The response is piped to cat
-# because cURL doesn't print POST
-# and PUT info by default
 curl \
   --progress-bar \
+  --keepalive-time 1200 \
   -X PUT \
   -H "Authorization: Bearer <token>" \
   -T ./some/local/cog.tiff \
@@ -186,12 +192,13 @@ curl \
     | cat
 ```
 
-**_Testing streaming from a file - but doesn't seem to work any differently to the above example_**
+**_Streaming from a file - not sure if this is different to the above example_**
 
 ```sh
 cat ./some/local/cog.tiff \
   | curl \
     --progress-bar \
+    --keepalive-time 1200 \
     -X PUT \
     -H "Authorization: Bearer <token>" \
     --data-binary @- \
@@ -208,6 +215,7 @@ mbuffer \
   -r 2M \
   | curl \
     --progress-bar \
+    --keepalive-time 1200 \
     -X PUT \
     -H "Authorization: Bearer <token>" \
     --data-binary @- \
