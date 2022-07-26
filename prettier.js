@@ -12,7 +12,7 @@ Chomp.registerTemplate(
       check = false,
       write = true,
       config = null,
-      logLevel = false,
+      loglevel = false,
       noErrorOnUnmatchedPattern = false,
       ignorePath = false,
       autoInstall,
@@ -33,8 +33,7 @@ Chomp.registerTemplate(
         watchInvalidation: 'skip-running',
         invalidation: 'always',
         env,
-        echo: true,
-        run: `prettier --cache --cache-strategy metadata --loglevel ${logLevel || 'log'}${
+        run: `prettier --cache --cache-strategy metadata --loglevel ${loglevel || 'log'}${
           ignorePath ? ` --ignore-path ${ignorePath}` : ''
         }${config ? ` --config ${config}` : ''}${
           noErrorOnUnmatchedPattern ? ' --no-error-on-unmatched-pattern' : ''

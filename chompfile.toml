@@ -18,7 +18,6 @@ node \
 
 [[task]]
 name = 'prettier'
-watch-invalidation = 'skip-running'
 deps = ['prettier:other', 'prettier:server']
 
 [[task]]
@@ -28,7 +27,7 @@ template = 'prettier'
 [task.template-options]
 ignore-path = '.prettierignore'
 files = 'src/**/*.@(js|json|yml)'
-log-level = 'warn'
+loglevel = 'warn'
 config = '.prettierrc'
 
 [[task]]
@@ -36,6 +35,6 @@ name = 'prettier:other'
 template = 'prettier'
 [task.template-options]
 ignore-path = '.prettierignore'
-files = 'src/**/*.@(js|json|yml) ./*.@(js|json|yml|md) ./.github/**/*.@(js|json|yml) ./deploy/**/*.@(js|json|yml)'
-log-level = 'log'
+files = './*.@(js|json|yml|md) ./.github/**/*.@(js|json|yml) ./deploy/**/*.@(js|json|yml)'
+loglevel = 'warn'
 config = '.prettierrc'
