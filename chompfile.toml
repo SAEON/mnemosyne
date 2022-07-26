@@ -4,7 +4,7 @@ default-task = 'start'
 [[task]]
 name = 'start'
 env = { TZ='UTC', NODE_ENV='development'}
-deps = [ "prettier"]
+deps = [ "prettier:server"]
 run = """
 node \
   --trace-warnings \
@@ -16,6 +16,10 @@ node \
 
 [[task]]
 name = 'prettier'
+deps = ['prettier:other', 'prettier:server']
+
+[[task]]
+name = 'prettier:server'
 deps = [ 'src/**/*.js' ]
 run = """
 prettier \
@@ -23,7 +27,17 @@ prettier \
   --cache \
   --cache-strategy metadata \
   --ignore-path .prettierignore \
-  --write "src/**/*.@(js|json|yml)" \
+  --write "src/**/*.@(js|json|yml)"
+"""
+
+[[task]]
+name = 'prettier:other'
+run = """
+prettier \
+  --loglevel warn \
+  --cache \
+  --cache-strategy metadata \
+  --ignore-path .prettierignore \
   --write "./*.@(js|json|yml|md)" \
   --write "./.github/**/*.@(js|json|yml)" \
   --write "./deploy/**/*.@(js|json|yml)" \
