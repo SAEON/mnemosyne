@@ -1,6 +1,8 @@
 version = 0.1
 default-task = 'start'
 
+extensions = ['./prettier.js']
+
 [[task]]
 name = 'start'
 env = { TZ='UTC', NODE_ENV='development'}
@@ -16,19 +18,28 @@ node \
 
 [[task]]
 name = 'prettier'
+watch-invalidation = 'skip-running'
 deps = ['prettier:other', 'prettier:server']
 
 [[task]]
 name = 'prettier:server'
 deps = [ 'src/**/*.js' ]
-run = """
-prettier \
-  --loglevel warn \
-  --cache \
-  --cache-strategy metadata \
-  --ignore-path .prettierignore \
-  --write "src/**/*.@(js|json|yml)"
-"""
+template = 'prettier'
+[task.template-options]
+ignore-path = '.prettierignore'
+files = 'src/**/*.@(js|json|yml)'
+log-level = 'log'
+
+
+
+# [[task]]
+# name = 'prettier:server'
+# deps = [ 'src/**/*.js' ]
+# watch-invalidation = 'skip-running'
+# run = """
+# prettier \
+#   --write "src/**/*.@(js|json|yml)"
+# """
 
 [[task]]
 name = 'prettier:other'
