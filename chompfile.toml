@@ -1,10 +1,12 @@
 version = 0.1
 default-task = 'start'
 
+extensions = ['./prettier.js']
+
 [[task]]
 name = 'start'
 env = { TZ='UTC', NODE_ENV='development'}
-deps = [ "prettier"]
+deps = [ "prettier:server"]
 run = """
 node \
   --trace-warnings \
@@ -16,15 +18,23 @@ node \
 
 [[task]]
 name = 'prettier'
+deps = ['prettier:other', 'prettier:server']
+
+[[task]]
+name = 'prettier:server'
 deps = [ 'src/**/*.js' ]
-run = """
-prettier \
-  --loglevel warn \
-  --cache \
-  --cache-strategy metadata \
-  --ignore-path .prettierignore \
-  --write "src/**/*.@(js|json|yml)" \
-  --write "./*.@(js|json|yml|md)" \
-  --write "./.github/**/*.@(js|json|yml)" \
-  --write "./deploy/**/*.@(js|json|yml)" \
-"""
+template = 'prettier'
+[task.template-options]
+ignore-path = '.prettierignore'
+files = 'src/**/*.@(js|json|yml)'
+loglevel = 'warn'
+config = '.prettierrc'
+
+[[task]]
+name = 'prettier:other'
+template = 'prettier'
+[task.template-options]
+ignore-path = '.prettierignore'
+files = './*.@(js|json|yml|md) ./.github/**/*.@(js|json|yml) ./deploy/**/*.@(js|json|yml)'
+loglevel = 'warn'
+config = '.prettierrc'
