@@ -33,23 +33,19 @@ Chomp.registerTemplate(
         watchInvalidation: 'skip-running',
         invalidation: 'always',
         env,
-        run: `prettier \
-                --cache \
-                --cache-strategy metadata \
-                --loglevel ${logLevel || 'log'} \
-                ${ignorePath ? `--ignore-path ${ignorePath}` : ''} \
-                ${
-                  files
-                    ? files
-                        .split(' ')
-                        .map(ex => `"${ex}"`)
-                        .join(' ')
-                    : '.'
-                } \
-                ${check ? ' --check' : ''} \
-                ${write ? ' --write' : ''} \
-                ${config ? ` --config ${config}` : ''} \
-                ${noErrorOnUnmatchedPattern ? ' --no-error-on-unmatched-pattern' : ''}`,
+        echo: true,
+        run: `prettier --cache --cache-strategy metadata --loglevel ${logLevel || 'log'}${
+          ignorePath ? ` --ignore-path ${ignorePath}` : ''
+        }${config ? ` --config ${config}` : ''}${
+          noErrorOnUnmatchedPattern ? ' --no-error-on-unmatched-pattern' : ''
+        }${check ? ' --check' : ''}${write ? ' --write' : ''} ${
+          files
+            ? files
+                .split(' ')
+                .map(ex => `"${ex}"`)
+                .join(' ')
+            : '.'
+        }`,
       },
       ...(ENV.CHOMP_EJECT
         ? []

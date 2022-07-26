@@ -28,28 +28,14 @@ template = 'prettier'
 [task.template-options]
 ignore-path = '.prettierignore'
 files = 'src/**/*.@(js|json|yml)'
-log-level = 'log'
-
-
-
-# [[task]]
-# name = 'prettier:server'
-# deps = [ 'src/**/*.js' ]
-# watch-invalidation = 'skip-running'
-# run = """
-# prettier \
-#   --write "src/**/*.@(js|json|yml)"
-# """
+log-level = 'warn'
+config = '.prettierrc'
 
 [[task]]
 name = 'prettier:other'
-run = """
-prettier \
-  --loglevel warn \
-  --cache \
-  --cache-strategy metadata \
-  --ignore-path .prettierignore \
-  --write "./*.@(js|json|yml|md)" \
-  --write "./.github/**/*.@(js|json|yml)" \
-  --write "./deploy/**/*.@(js|json|yml)" \
-"""
+template = 'prettier'
+[task.template-options]
+ignore-path = '.prettierignore'
+files = 'src/**/*.@(js|json|yml) ./*.@(js|json|yml|md) ./.github/**/*.@(js|json|yml) ./deploy/**/*.@(js|json|yml)'
+log-level = 'log'
+config = '.prettierrc'
