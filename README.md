@@ -245,6 +245,7 @@ find \
   -exec \
     curl \
     --progress-bar \
+    --keepalive-time 1200 \
     -X PUT \
     -H "Authorization: Bearer <token>" \
     --create-dirs \
