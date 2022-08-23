@@ -226,6 +226,22 @@ mbuffer \
 
 And then that file can be retrieved at `https://<domain>/some/deep/nested/directory/cog.tif`.
 
+**_Uploading a Zarr directory_**
+```sh
+find \
+  /path/to/directory.zarr \
+  -type f \
+  -exec \
+    curl \
+    --progress-bar \
+    -X PUT \
+    -H "Authorization: Bearer <token>" \
+    --create-dirs \
+    -T {} \
+    https://<domain>/some/root/directory/{} \; |
+      cat
+```
+
 # Future functionality
 
 Please submit ideas/feature-requests on the [GitHub issues feed](https://github.com/SAEON/mnemosyne/issues). Some ideas
