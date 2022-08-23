@@ -1,6 +1,6 @@
 import { stat } from 'fs/promises'
 import mime from 'mime'
-import { createReadStream } from 'fs'
+import streamFile from './_stream-file.js'
 
 export default async function () {
   const {
@@ -51,15 +51,13 @@ export default async function () {
       'Content-Type': contentType,
     })
 
-    const readable = createReadStream(file, { start, end })
-    readable.pipe(res)
+    streamFile(res, file, start, end)
   } else {
     res.writeHead(200, {
       'Content-Length': size,
       'Content-Type': contentType,
     })
 
-    const readable = createReadStream(file)
-    readable.pipe(res)
+    streamFile(res, file)
   }
 }

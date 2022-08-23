@@ -38,3 +38,17 @@ ignore-path = '.prettierignore'
 files = './*.@(js|json|yml|md) ./.github/**/*.@(js|json|yml) ./deploy/**/*.@(js|json|yml)'
 loglevel = 'warn'
 config = '.prettierrc'
+
+[[task]]
+name = 'reset'
+run = """
+rm -rf node_modules
+find . \
+  -name node_modules \
+  -type d \
+  -exec rm -rv {} + \
+    && find . \
+      -name package-lock.json \
+      -type f \
+      -delete
+"""
