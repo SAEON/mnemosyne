@@ -14,6 +14,11 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
     - [Customize GET requests via URL params](#customize-get-requests-via-url-params)
     - [Serving websites](#serving-websites)
   - [Uploading files](#uploading-files)
+    - [cURL examples](#curl-examples)
+      - [Specify a file to upload](#specify-a-file-to-upload)
+      - [Stream from a file](#stream-from-a-file)
+      - [Stream from a file using mbuffer](#stream-from-a-file-using-mbuffer)
+      - [Uploading a directory recursively](#uploading-a-directory-recursively)
 - [Future functionality](#future-functionality)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -171,7 +176,10 @@ You can serve the website on a custom domain via registering a CNAME record and 
 
 ## Uploading files
 
-Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint. Here are some examples using `cURL` (and some notes):
+Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint. 
+
+### cURL examples
+Here are some examples using `cURL` (and some notes):
 
 - For `PUT` requests I find it's necessary to pipe the output to `cat`, since `cURL` won't print output to stdout (who knows why) when using `POST` and `PUT` requests
 - The `-T` header means 'transfer file'. Use this instead of `--data-binary`, since the latter will try to load your entire file into memory before sending
@@ -179,7 +187,7 @@ Any files/folder in the exposed volume will be served. To upload files to the se
 - In some cases it may be helpful to use the `--limit-rate` flag. For example, if you have an incredibly fast internet connection and uploads are failing, try limiting the upload speed to 3MB/sec (`--limit-rate 3m`)
 - [Here is a helpful list of cURL flags](https://gist.github.com/zachsa/085b3cdfb3534c6da7d0b9967da9647e)
 
-**_Specifying a filename_**
+#### Specify a file to upload
 
 ```sh
 curl \
@@ -192,7 +200,10 @@ curl \
     | cat
 ```
 
-**_Streaming from a file - not sure if this is different to the above example_**
+And then that file can be retrieved at `https://<domain>/some/deep/nested/directory/cog.tif`.
+
+#### Stream from a file
+I'm not actually sure if this is different to the above example, but could open up possibilities I haven't thought of.
 
 ```sh
 cat ./some/local/cog.tiff \
@@ -207,7 +218,7 @@ cat ./some/local/cog.tiff \
       | cat
 ```
 
-**_Streaming from a file using mbuffer_**
+#### Stream from a file using mbuffer
 
 ```sh
 mbuffer \
@@ -224,9 +235,9 @@ mbuffer \
       | cat
 ```
 
-And then that file can be retrieved at `https://<domain>/some/deep/nested/directory/cog.tif`.
+#### Uploading a directory recursively
+(i.e. a Zarr directory)
 
-**_Uploading a Zarr directory_**
 ```sh
 find \
   /path/to/directory.zarr \
