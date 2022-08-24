@@ -176,9 +176,10 @@ You can serve the website on a custom domain via registering a CNAME record and 
 
 ## Uploading files
 
-Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint. 
+Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint.
 
 ### cURL examples
+
 Here are some examples using `cURL` (and some notes):
 
 - For `PUT` requests I find it's necessary to pipe the output to `cat`, since `cURL` won't print output to stdout (who knows why) when using `POST` and `PUT` requests
@@ -203,6 +204,7 @@ curl \
 And then that file can be retrieved at `https://<domain>/some/deep/nested/directory/cog.tif`.
 
 #### Stream from a file
+
 I'm not actually sure if this is different to the above example, but could open up possibilities I haven't thought of.
 
 ```sh
@@ -236,6 +238,7 @@ mbuffer \
 ```
 
 #### Uploading a directory recursively
+
 (i.e. a Zarr directory)
 
 ```sh

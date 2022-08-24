@@ -3,7 +3,7 @@ import { createWriteStream } from 'fs'
 import { error, info } from '../../../logger/index.js'
 import mkdirp from 'mkdirp'
 import { access } from 'fs/promises'
-import { extname, dirname } from 'path'
+import { dirname } from 'path'
 
 export default async function () {
   const {
@@ -51,19 +51,6 @@ export default async function () {
     const msg = 'Conflict. Upload path already exists'
     res.writeHead(409, msg)
     res.write(msg)
-    res.end()
-    return
-  }
-
-  // Get resource has a file extension
-  const ext = extname(absolutePath)
-
-  // All uploads must have a file extension
-  if (!ext) {
-    res.writeHead(400, {
-      'Content-Type': 'text/plain',
-    })
-    res.write('All uploads must have a file extension')
     res.end()
     return
   }
