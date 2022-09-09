@@ -3,6 +3,7 @@
     "Dockerized",
     "mbuffer",
     "mnemosyne",
+    "noindex",
     "Zarr"
   ]
 }

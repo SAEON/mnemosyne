@@ -2,6 +2,8 @@ import { readdir, stat } from 'fs/promises'
 import { join, normalize } from 'path'
 import he from 'he'
 import serveFile from '../../get/file/index.js'
+import humanReadableBytes from '../../../../lib/human-readable-bytes.js'
+import getSize from 'get-folder-size'
 
 const getBackLinks = ctx => {
   const {
@@ -77,7 +79,7 @@ export default async function () {
               margin-bottom: 12px;
             }
             
-            #header h1 {
+            #header > h1 {
               margin: 12px;
               align-items: center;
               font-size: 24px;
@@ -87,13 +89,36 @@ export default async function () {
               margin: 2px 8px;
             }
 
-            #listing h2 {
+            #listing > h2 {
               font-size: 16px;
             }
 
-            #listing #entries .entry {
-              display: block;
+            #listing > #entries {
+              display: table;
+            }
+
+            #listing > #entries > .entry {
+              display: table-row;
               margin: 4px 0;
+            }
+
+            #listing > #entries > .entry > .cell {
+              display: table-cell;
+            }
+
+            #listing > #entries > .entry > .cell:not(:first-child) {
+              padding-left: 12px;
+            }
+
+            #footer {
+              position: absolute;
+              bottom: 0;
+              right: 0;
+            }
+
+            #footer > p {
+              margin: 6px 8px;
+              font-style: italic;
             }
           </style>
         </head>
@@ -101,7 +126,7 @@ export default async function () {
 
         <!-- PAGE HEADER -->
         <div id="header">
-          <h1><a href="${protocol}://${host}">Mnemosyne COG server</a></h1>
+          <h1><a href="${protocol}://${host}">Mnemosyne file server</a></h1>
         </div>
 
         <!-- CONTENTS LISTINGS -->
@@ -112,14 +137,28 @@ export default async function () {
               await Promise.all(
                 listings.map(async l => {
                   const p = normalize(join(directory, l))
-                  const isFile = (await stat(p)).isFile()
-                  return `<span class="entry">${isFile ? '🗎' : '📁'} <a href="${he.encode(
-                    normalize(join(pathname, l))
-                  )}">${l}</a></span>`
+                  const stats = await stat(p)
+                  const isFile = stats.isFile()
+                  const size = humanReadableBytes((await getSize(p)).size)
+                  return `
+                  <span class="entry">
+                    <span class="cell">
+                      ${isFile ? '🖺' : '🗀'}
+                    </span>
+                    <span class="cell">
+                      ${size}
+                    </span>
+                    <a class="cell" href="${he.encode(normalize(join(pathname, l)))}">${l}</a> 
+                  </span>`
                 })
               )
             ).join('\n')}
           </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div id="footer">
+          <p>Node.js ${process.version}</p>
         </div>
         </body>
       </html>`
@@ -134,9 +173,11 @@ export default async function () {
         await Promise.all(
           listings.map(async l => {
             const p = normalize(join(directory, l))
-            const isFile = (await stat(p)).isFile()
-            const isDirectory = (await stat(p)).isDirectory()
-            return { entry: l, isFile, isDirectory }
+            const stats = await stat(p)
+            const isFile = stats.isFile()
+            const isDirectory = stats.isDirectory()
+            const size = (await getSize(p)).size
+            return { entry: l, isFile, isDirectory, size }
           })
         )
       )
