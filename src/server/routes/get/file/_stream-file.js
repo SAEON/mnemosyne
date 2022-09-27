@@ -1,5 +1,5 @@
 // https://nodejs.org/api/zlib.html#compressing-http-requests-and-responses
-
+import Accept from '@hapi/accept'
 import { createReadStream } from 'node:fs'
 import zlib, { createBrotliCompress, createDeflate, createGzip } from 'node:zlib'
 import { pipeline } from 'node:stream'
@@ -11,10 +11,11 @@ export default (size, contentLength, request, response, file, start, end) => {
 
   const raw = createReadStream(file, { start, end })
 
-  let acceptEncoding = request.headers['accept-encoding']
-  if (!acceptEncoding) {
-    acceptEncoding = ''
-  }
+  const acceptEncoding = Accept.encoding(request.headers['accept-encoding'], [
+    'gzip',
+    'deflate',
+    'br',
+  ])
 
   if (acceptEncoding) {
     response.setHeader('Transfer-Encoding', 'chunked')
@@ -29,46 +30,54 @@ export default (size, contentLength, request, response, file, start, end) => {
     }
   }
 
-  if (/\bdeflate\b/.test(acceptEncoding)) {
-    response.setHeader('Content-Encoding', 'deflate')
-    pipeline(
-      raw,
-      createDeflate({
-        level: 6,
-        finishFlush: zlib.constants.Z_SYNC_FLUSH,
-      }),
-      response,
-      onError
-    )
-  } else if (/\bgzip\b/.test(acceptEncoding)) {
-    response.setHeader('Content-Encoding', 'gzip')
-    pipeline(
-      raw,
-      createGzip({
-        level: 6,
-        finishFlush: zlib.constants.Z_SYNC_FLUSH,
-      }),
-      response,
-      onError
-    )
-  } else if (/\bbr\b/.test(acceptEncoding)) {
-    response.setHeader('Content-Encoding', 'br')
-    pipeline(
-      raw,
-      createBrotliCompress({
-        flush: zlib.constants.BROTLI_OPERATION_PROCESS,
-        finishFlush: zlib.constants.BROTLI_OPERATION_FINISH,
-        chunkSize: 16 * 1024,
-        params: {
-          [zlib.constants.BROTLI_PARAM_MODE]: zlib.constants.BROTLI_MODE_GENERIC,
-          [zlib.constants.BROTLI_PARAM_QUALITY]: 6,
-          [zlib.constants.BROTLI_PARAM_SIZE_HINT]: size,
-        },
-      }),
-      response,
-      onError
-    )
-  } else {
-    pipeline(raw, response, onError)
+  switch (acceptEncoding) {
+    case 'deflate':
+      response.setHeader('Content-Encoding', 'deflate')
+      pipeline(
+        raw,
+        createDeflate({
+          level: 9,
+          finishFlush: zlib.constants.Z_SYNC_FLUSH,
+        }),
+        response,
+        onError
+      )
+      break
+
+    case 'gzip':
+      response.setHeader('Content-Encoding', 'gzip')
+      pipeline(
+        raw,
+        createGzip({
+          level: 9,
+          finishFlush: zlib.constants.Z_SYNC_FLUSH,
+        }),
+        response,
+        onError
+      )
+      break
+
+    case 'br':
+      response.setHeader('Content-Encoding', 'br')
+      pipeline(
+        raw,
+        createBrotliCompress({
+          flush: zlib.constants.BROTLI_OPERATION_PROCESS,
+          finishFlush: zlib.constants.BROTLI_OPERATION_FINISH,
+          chunkSize: 16 * 1024,
+          params: {
+            [zlib.constants.BROTLI_PARAM_MODE]: zlib.constants.BROTLI_MODE_GENERIC,
+            [zlib.constants.BROTLI_PARAM_QUALITY]: 6,
+            [zlib.constants.BROTLI_PARAM_SIZE_HINT]: size,
+          },
+        }),
+        response,
+        onError
+      )
+      break
+
+    default:
+      pipeline(raw, response, onError)
+      break
   }
 }

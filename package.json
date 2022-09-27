@@ -25,6 +25,7 @@
     "prettier": "^2.7.1"
   },
   "dependencies": {
+    "@hapi/accept": "^6.0.0",
     "arg": "^5.0.2",
     "get-folder-size": "^4.0.0",
     "he": "^1.2.0",
