@@ -1,5 +1,4 @@
 import { stat } from 'fs/promises'
-import mime from 'mime'
 import streamFile from './_stream-file.js'
 
 export default async function () {
@@ -11,7 +10,6 @@ export default async function () {
 
   const { size } = await stat(file)
   const { range } = req.headers
-  const contentType = mime.getType(file)
 
   /**
    * Support requests with range
@@ -44,20 +42,12 @@ export default async function () {
     }
 
     // Otherwise serve partial content (206)
-    res.writeHead(206, {
-      'Content-Range': `bytes ${start}-${end}/${size}`,
-      'Accept-Ranges': 'bytes',
-      'Content-Length': end - start + 1,
-      'Content-Type': contentType,
-    })
-
-    streamFile(res, file, start, end)
+    res.statusCode = 206
+    res.setHeader('Content-Range', `bytes ${start}-${end}/${size}`)
+    res.setHeader('Accept-Ranges', 'bytes')
+    streamFile(size, end - start + 1, req, res, file, start, end)
   } else {
-    res.writeHead(200, {
-      'Content-Length': size,
-      'Content-Type': contentType,
-    })
-
-    streamFile(res, file)
+    res.statusCode = 200
+    streamFile(size, size, req, res, file)
   }
 }
