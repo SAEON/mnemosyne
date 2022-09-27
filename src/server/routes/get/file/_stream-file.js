@@ -1,4 +1,3 @@
-// https://nodejs.org/api/zlib.html#compressing-http-requests-and-responses
 import Accept from '@hapi/accept'
 import { createReadStream } from 'node:fs'
 import zlib, { createBrotliCompress, createDeflate, createGzip } from 'node:zlib'
