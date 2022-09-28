@@ -35,7 +35,7 @@ export default (size, contentLength, request, response, file, start, end) => {
       pipeline(
         raw,
         createDeflate({
-          level: 9,
+          level: 4,
           finishFlush: zlib.constants.Z_SYNC_FLUSH,
         }),
         response,
@@ -48,7 +48,7 @@ export default (size, contentLength, request, response, file, start, end) => {
       pipeline(
         raw,
         createGzip({
-          level: 9,
+          level: 4,
           finishFlush: zlib.constants.Z_SYNC_FLUSH,
         }),
         response,
@@ -66,7 +66,7 @@ export default (size, contentLength, request, response, file, start, end) => {
           chunkSize: 16 * 1024,
           params: {
             [zlib.constants.BROTLI_PARAM_MODE]: zlib.constants.BROTLI_MODE_GENERIC,
-            [zlib.constants.BROTLI_PARAM_QUALITY]: 6,
+            [zlib.constants.BROTLI_PARAM_QUALITY]: 4,
             [zlib.constants.BROTLI_PARAM_SIZE_HINT]: size,
           },
         }),
