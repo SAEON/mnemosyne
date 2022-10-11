@@ -3,7 +3,6 @@ import { join, normalize } from 'path'
 import he from 'he'
 import serveFile from '../../get/file/index.js'
 import humanReadableBytes from '../../../../lib/human-readable-bytes.js'
-import getSize from 'get-folder-size'
 
 const getBackLinks = ctx => {
   const {
@@ -139,7 +138,7 @@ export default async function () {
                   const p = normalize(join(directory, l))
                   const stats = await stat(p)
                   const isFile = stats.isFile()
-                  const size = humanReadableBytes((await getSize(p)).size)
+                  const size = humanReadableBytes(stats.size)
                   return `
                   <span class="entry">
                     <span class="cell">
@@ -176,7 +175,7 @@ export default async function () {
             const stats = await stat(p)
             const isFile = stats.isFile()
             const isDirectory = stats.isDirectory()
-            const size = (await getSize(p)).size
+            const size = stats.size
             return { entry: l, isFile, isDirectory, size }
           })
         )
