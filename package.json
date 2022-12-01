@@ -22,7 +22,7 @@
     "zarr"
   ],
   "devDependencies": {
-    "prettier": "^2.7.1"
+    "prettier": "^2.8.0"
   },
   "dependencies": {
     "@hapi/accept": "^6.0.0",
