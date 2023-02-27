@@ -20,7 +20,7 @@ export default async ({ size, contentLength, request, response, file, start, end
 
   const raw = createReadStream(file, { start, end })
   const throttleFileRead = new FileStreamThrottle({ bytesPerSecond: 1e7 }) // 10 MB/s
-  const throttleResStream = new HttpResStreamThrottle({ chunkSize: 2048 }) // 2 KB
+  const throttleResStream = new HttpResStreamThrottle({ chunkSize: 2048 }) // 2 KB/s
 
   let transform = null
   let contentEncoding = null

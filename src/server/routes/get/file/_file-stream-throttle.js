@@ -13,25 +13,29 @@ class ThrottleTransform extends Transform {
   }
 
   _transform(chunk, encoding, callback) {
-    if (!this.startTime) {
-      this.startTime = Date.now()
-    }
+    try {
+      if (!this.startTime) {
+        this.startTime = Date.now()
+      }
 
-    this.byteCount += chunk.length
+      this.byteCount += chunk.length
 
-    const elapsedTime = Date.now() - this.startTime
-    const expectedBytes = Math.floor(elapsedTime * (this.bytesPerSecond / 1000))
-    const remainingBytes = expectedBytes - this.byteCount
+      const elapsedTime = Date.now() - this.startTime
+      const expectedBytes = Math.floor(elapsedTime * (this.bytesPerSecond / 1000))
+      const remainingBytes = expectedBytes - this.byteCount
 
-    if (remainingBytes <= 0) {
-      this.pause()
-      const delay = (remainingBytes / this.bytesPerSecond) * 1000
-      setTimeout(() => {
-        this.resume()
+      if (remainingBytes <= 0) {
+        this.pause()
+        const delay = (remainingBytes / this.bytesPerSecond) * 1000
+        setTimeout(() => {
+          this.resume()
+          callback(null, chunk)
+        }, delay)
+      } else {
         callback(null, chunk)
-      }, delay)
-    } else {
-      callback(null, chunk)
+      }
+    } catch (err) {
+      callback(err)
     }
   }
 }
