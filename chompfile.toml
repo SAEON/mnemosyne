@@ -6,7 +6,7 @@ extensions = ['chomp@0.1:prettier']
 [[task]]
 name = 'start'
 env = { TZ='UTC', NODE_ENV='development'}
-deps = [ "prettier:server"]
+deps = [ 'src/**/*.js' ]
 run = """
 node \
   --trace-warnings \
@@ -16,9 +16,7 @@ node \
     --login localhost
 """
 
-[[task]]
-name = 'prettier'
-deps = ['prettier:other', 'prettier:server']
+
 
 [[task]]
 name = 'prettier:server'

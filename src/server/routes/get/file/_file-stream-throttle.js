@@ -20,16 +20,16 @@ class ThrottleTransform extends Transform {
     this.byteCount += chunk.length
 
     const elapsedTime = Date.now() - this.startTime
-    const expectedBytes = elapsedTime * (this.bytesPerSecond / 1000)
+    const expectedBytes = Math.floor(elapsedTime * (this.bytesPerSecond / 1000))
     const remainingBytes = expectedBytes - this.byteCount
 
     if (remainingBytes <= 0) {
-      // Pause the stream until the remaining bytes have been processed
       this.pause()
+      const delay = (remainingBytes / this.bytesPerSecond) * 1000
       setTimeout(() => {
         this.resume()
         callback(null, chunk)
-      }, Math.abs(remainingBytes / this.bytesPerSecond) * 1000)
+      }, delay)
     } else {
       callback(null, chunk)
     }

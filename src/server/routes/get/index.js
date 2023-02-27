@@ -6,8 +6,6 @@ import serveDir from './dir/index.js'
 
 export default async function () {
   const {
-    req,
-    res,
     resource: { absolutePath },
   } = this
 

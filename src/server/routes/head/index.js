@@ -1,66 +1,49 @@
 import { stat } from 'fs/promises'
 import mime from 'mime'
+import { parseRangeHeader } from '../get/file/index.js'
 
 export default async function () {
   const {
-    req,
-    res,
+    req: request,
+    res: response,
     resource: { absolutePath: file },
   } = this
 
-  const { range } = req.headers
+  const { range } = request.headers
 
-  let size
+  let contentLength
   let contentType
   try {
-    size = (await stat(file)).size
+    contentLength = (await stat(file)).size
     contentType = mime.getType(file)
   } catch (error) {
-    res.statusCode = 404
-    res.end()
+    response.statusCode = 404
+    response.end()
     return
   }
 
   if (range) {
-    // Extract Start and End value from Range Header
-    let [start, end] = range.replace(/bytes=/, '').split('-')
-    start = parseInt(start, 10)
-    end = end ? parseInt(end, 10) : size - 1
+    const { start, end } = parseRangeHeader(range, contentLength)
 
-    // Check that range-start is a valid number
-    if (isNaN(start) && !isNaN(end)) {
-      start = size - end
-      end = size - 1
-    }
-
-    // Check that range-end is a valid number
-    if (!isNaN(start) && isNaN(end)) {
-      start = start
-      end = size - 1
-    }
-
-    // Handle unavailable range (416. Range not suitable)
-    if (start >= size || end >= size) {
-      res.writeHead(416, {
-        'Content-Range': `bytes */${size}`,
-      })
-      return res.end()
+    if (start === null || end === null || start >= contentLength || end >= contentLength) {
+      response.writeHead(416, { 'Content-Range': `bytes */${contentLength}` })
+      return response.end()
     }
 
     // Otherwise serve range-accepting response
-    res.writeHead(206, {
-      'Content-Range': `bytes ${start}-${end}/${size}`,
+    response.writeHead(206, {
+      'Content-Range': `bytes ${start}-${end}/${contentLength}`,
       'Accept-Ranges': 'bytes',
       'Content-Length': end - start + 1,
       'Content-Type': contentType,
     })
   } else {
-    res.writeHead(200, {
-      'Content-Length': size,
+    response.writeHead(200, {
+      'Content-Length': contentLength,
       'Content-Type': contentType,
       'Accept-Ranges': 'bytes',
     })
   }
 
-  res.end()
+  response.end()
 }

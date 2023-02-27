@@ -1,7 +1,27 @@
 import { stat } from 'fs/promises'
 import streamFile from './_stream-file.js'
 
-export default async function () {
+export const parseRangeHeader = function (rangeHeader, contentLength) {
+  const range = rangeHeader.replace(/bytes=/, '').split('-')
+  const start = parseInt(range[0], 10)
+  const end = range[1] ? parseInt(range[1], 10) : contentLength - 1
+
+  if (isNaN(start) && isNaN(end)) {
+    return { start: null, end: null }
+  }
+
+  if (isNaN(start)) {
+    return { start: contentLength - end, end }
+  }
+
+  if (isNaN(end)) {
+    return { start, end: contentLength - 1 }
+  }
+
+  return { start, end }
+}
+
+export default async function serveFile() {
   const {
     req: request,
     res: response,
@@ -11,37 +31,14 @@ export default async function () {
   const { size: contentLength } = await stat(file)
   const { range } = request.headers
 
-  /**
-   * Support requests with range
-   * or without range specification
-   */
   if (range) {
-    // Extract Start and End value from Range Header
-    let [start, end] = range.replace(/bytes=/, '').split('-')
-    start = parseInt(start, 10)
-    end = end ? parseInt(end, 10) : contentLength - 1
+    const { start, end } = parseRangeHeader(range, contentLength)
 
-    // Check that range-start is a valid number
-    if (isNaN(start) && !isNaN(end)) {
-      start = contentLength - end
-      end = contentLength - 1
-    }
-
-    // Check that range-end is a valid number
-    if (!isNaN(start) && isNaN(end)) {
-      start = start
-      end = contentLength - 1
-    }
-
-    // Handle unavailable range (416. Range not suitable)
-    if (start >= contentLength || end >= contentLength) {
-      response.writeHead(416, {
-        'Content-Range': `bytes */${contentLength}`,
-      })
+    if (start === null || end === null || start >= contentLength || end >= contentLength) {
+      response.writeHead(416, { 'Content-Range': `bytes */${contentLength}` })
       return response.end()
     }
 
-    // Otherwise serve partial content (206)
     response.statusCode = 206
     response.setHeader('Content-Range', `bytes ${start}-${end}/${contentLength}`)
     response.setHeader('Accept-Ranges', 'bytes')
