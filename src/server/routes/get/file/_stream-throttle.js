@@ -1,11 +1,11 @@
 import { Transform } from 'stream'
 
-const CHUNK_SIZE = 1e7 // 10 MB
+const CHUNK_SIZE = 1e7 // 10MB
 
 class ThrottleTransform extends Transform {
   constructor(options) {
-    super({ ...options, highWaterMark: options?.chunkSize || CHUNK_SIZE })
-    this.chunkSize = options?.bytesPerSecond || CHUNK_SIZE
+    super({ ...options, highWaterMark: options?.rate || CHUNK_SIZE })
+    this.chunkSize = options?.rate || CHUNK_SIZE
     this.bytesRead = 0
     this.lastTime = null
     this.delay = 0

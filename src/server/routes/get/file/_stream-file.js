@@ -3,8 +3,7 @@ import { createReadStream } from 'node:fs'
 import zlib, { createBrotliCompress, createDeflate, createGzip } from 'node:zlib'
 import { pipeline } from 'node:stream/promises'
 import mime from 'mime'
-import FileStreamThrottle from './_file-stream-throttle.js'
-import HttpResStreamThrottle from './_res-stream-throttle.js'
+import StreamThrottle from './_stream-throttle.js'
 
 export default async ({ size, contentLength, request, response, file, start, end }) => {
   const encoding = Accept.encoding(request.headers['accept-encoding'], ['gzip', 'deflate', 'br'])
@@ -19,8 +18,8 @@ export default async ({ size, contentLength, request, response, file, start, end
   }
 
   const raw = createReadStream(file, { start, end })
-  const throttleFileRead = new FileStreamThrottle({ bytesPerSecond: 1e7 }) // 10 MB/s
-  const throttleResStream = new HttpResStreamThrottle({ bytesPerSecond: 2e6 }) // 2 MB/s
+  const throttleFileRead = new StreamThrottle({ rate: 1e7 }) // 10MB
+  const throttleResStream = new StreamThrottle({ rate: 1e7 }) // 10MB
 
   let transform = null
   let contentEncoding = null
