@@ -22,13 +22,13 @@
     "zarr"
   ],
   "devDependencies": {
-    "prettier": "^2.8.0"
+    "prettier": "^2.8.4"
   },
   "dependencies": {
-    "@hapi/accept": "^6.0.0",
+    "@hapi/accept": "^6.0.1",
     "arg": "^5.0.2",
     "he": "^1.2.0",
     "mime": "^3.0.0",
-    "mkdirp": "^1.0.4"
+    "mkdirp": "^2.1.3"
   }
 }
