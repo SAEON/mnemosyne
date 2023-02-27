@@ -3,13 +3,13 @@ import streamFile from './_stream-file.js'
 
 export default async function () {
   const {
-    req,
-    res,
+    req: request,
+    res: response,
     resource: { absolutePath: file },
   } = this
 
-  const { size } = await stat(file)
-  const { range } = req.headers
+  const { size: contentLength } = await stat(file)
+  const { range } = request.headers
 
   /**
    * Support requests with range
@@ -19,35 +19,43 @@ export default async function () {
     // Extract Start and End value from Range Header
     let [start, end] = range.replace(/bytes=/, '').split('-')
     start = parseInt(start, 10)
-    end = end ? parseInt(end, 10) : size - 1
+    end = end ? parseInt(end, 10) : contentLength - 1
 
     // Check that range-start is a valid number
     if (isNaN(start) && !isNaN(end)) {
-      start = size - end
-      end = size - 1
+      start = contentLength - end
+      end = contentLength - 1
     }
 
     // Check that range-end is a valid number
     if (!isNaN(start) && isNaN(end)) {
       start = start
-      end = size - 1
+      end = contentLength - 1
     }
 
     // Handle unavailable range (416. Range not suitable)
-    if (start >= size || end >= size) {
-      res.writeHead(416, {
-        'Content-Range': `bytes */${size}`,
+    if (start >= contentLength || end >= contentLength) {
+      response.writeHead(416, {
+        'Content-Range': `bytes */${contentLength}`,
       })
-      return res.end()
+      return response.end()
     }
 
     // Otherwise serve partial content (206)
-    res.statusCode = 206
-    res.setHeader('Content-Range', `bytes ${start}-${end}/${size}`)
-    res.setHeader('Accept-Ranges', 'bytes')
-    streamFile(size, end - start + 1, req, res, file, start, end)
+    response.statusCode = 206
+    response.setHeader('Content-Range', `bytes ${start}-${end}/${contentLength}`)
+    response.setHeader('Accept-Ranges', 'bytes')
+    await streamFile({
+      size: contentLength,
+      contentLength: end - start + 1,
+      request,
+      response,
+      file,
+      start,
+      end,
+    })
   } else {
-    res.statusCode = 200
-    streamFile(size, size, req, res, file)
+    response.statusCode = 200
+    streamFile({ size: contentLength, contentLength, request, response, file })
   }
 }
