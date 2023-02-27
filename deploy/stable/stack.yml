@@ -28,7 +28,7 @@ services:
       KEY: $KEY
       LOGINS: $LOGINS
     volumes:
-      - /mnemosyne:/mnemosyne
+      - /somisana/mnemosyne:/mnemosyne
     ports:
       - 7010:3000
       - 6008:3000
