@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 networks:
   mnemosyne_stable:
@@ -32,5 +32,32 @@ services:
     ports:
       - 7010:3000
       - 6008:3000
+    networks:
+      - mnemosyne_stable
+  titiler:
+    image: developmentseed/titiler:latest
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.service == apps
+      rollback_config:
+        parallelism: 0
+      update_config:
+        parallelism: 0
+        order: stop-first
+        failure_action: rollback
+      restart_policy:
+        condition: any
+        delay: 5s
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2048M
+    environment:
+      - PORT=8000
+      - WORKERS_PER_CORE=1
+    ports:
+      - 8000:8000
     networks:
       - mnemosyne_stable
