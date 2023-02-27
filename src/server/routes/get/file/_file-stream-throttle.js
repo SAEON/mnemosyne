@@ -6,7 +6,7 @@ const MAX_BYTES_PER_SECOND = 1e9 // 1 GB/s
 // Create a custom transform stream that throttles the rate of data
 class ThrottleTransform extends Transform {
   constructor(options) {
-    super(options)
+    super({ ...options, highWaterMark: options?.bytesPerSecond || MAX_BYTES_PER_SECOND })
     this.bytesPerSecond = options?.bytesPerSecond || MAX_BYTES_PER_SECOND
     this.byteCount = 0
     this.startTime = null
