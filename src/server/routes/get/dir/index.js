@@ -145,7 +145,7 @@ export default async function () {
                       ${isFile ? '🖺' : '🗀'}
                     </span>
                     <span class="cell">
-                      ${size}
+                      ${isFile ? size : '..'}
                     </span>
                     <a class="cell" href="${he.encode(normalize(join(pathname, l)))}">${l}</a> 
                   </span>`
