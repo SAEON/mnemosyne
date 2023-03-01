@@ -15,9 +15,11 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
     - [Serving websites](#serving-websites)
   - [Uploading files](#uploading-files)
     - [cURL examples](#curl-examples)
+      - [Upload file as binary](#upload-file-as-binary)
       - [Specify a file to upload](#specify-a-file-to-upload)
-      - [Stream from a file](#stream-from-a-file)
-      - [Stream from a file using mbuffer](#stream-from-a-file-using-mbuffer)
+      - [Chunked uploads](#chunked-uploads)
+        - [Stream from a file](#stream-from-a-file)
+        - [Stream from a file using mbuffer](#stream-from-a-file-using-mbuffer)
       - [Uploading a directory recursively](#uploading-a-directory-recursively)
 - [Future functionality](#future-functionality)
 
@@ -188,7 +190,26 @@ Here are some examples using `cURL` (and some notes):
 - In some cases it may be helpful to use the `--limit-rate` flag. For example, if you have an incredibly fast internet connection and uploads are failing, try limiting the upload speed to 3MB/sec (`--limit-rate 3m`)
 - [Here is a helpful list of cURL flags](https://gist.github.com/zachsa/085b3cdfb3534c6da7d0b9967da9647e)
 
+#### Upload file as binary
+
+This loads the entire file into memory first, so should probably be avoided unless the file is small. I think this is faster than other options (for small files).
+
+```sh
+cat ./some/local/cog.tiff \
+  | curl \
+    --progress-bar \
+    --keepalive-time 1200 \
+    -X PUT \
+    -H "Authorization: Bearer <token>" \
+    -H "Content-Type: application/octet-stream" \
+    --data-binary @- \
+    https://<domain>/some/deep/nested/directory/cog.tif \
+      | cat
+```
+
 #### Specify a file to upload
+
+Like the previous example, I think this loads the whole of the file into memory before uploading. Refer to next examples for chunked uploads.
 
 ```sh
 curl \
@@ -196,14 +217,19 @@ curl \
   --keepalive-time 1200 \
   -X PUT \
   -H "Authorization: Bearer <token>" \
-  -T ./some/local/cog.tiff \
+  -T \
+  ./some/local/cog.tiff \
   https://<domain>/some/deep/nested/directory/cog.tif \
     | cat
 ```
 
 And then that file can be retrieved at `https://<domain>/some/deep/nested/directory/cog.tif`.
 
-#### Stream from a file
+#### Chunked uploads
+
+This is useful for uploading large files via cURL as contents are never fully buffered in memory.
+
+##### Stream from a file
 
 I'm not actually sure if this is different to the above example, but could open up possibilities I haven't thought of.
 
@@ -214,13 +240,16 @@ cat ./some/local/cog.tiff \
     --keepalive-time 1200 \
     -X PUT \
     -H "Authorization: Bearer <token>" \
-    --data-binary @- \
     -H "Content-Type: application/octet-stream" \
+    -T \
+    - \
     https://<domain>/some/deep/nested/directory/cog.tif \
       | cat
 ```
 
-#### Stream from a file using mbuffer
+##### Stream from a file using mbuffer
+
+This is definitely quite nifty as you get buffer information
 
 ```sh
 mbuffer \
@@ -230,14 +259,16 @@ mbuffer \
     --progress-bar \
     --keepalive-time 1200 \
     -X PUT \
+    -H "Content-Type: application/octet-stream" \
     -H "Authorization: Bearer <token>" \
     --data-binary @- \
-    -H "Content-Type: application/octet-stream" \
     https://<domain>/some/deep/nested/directory/cog.tif \
       | cat
 ```
 
 #### Uploading a directory recursively
+
+TODO - convert to use chunked stream (if this doesn't already)
 
 (i.e. a Zarr directory)
 
