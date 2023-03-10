@@ -209,7 +209,7 @@ cat ./some/local/cog.tiff \
 
 #### Specify a file to upload
 
-Like the previous example, I think this loads the whole of the file into memory before uploading. Refer to next examples for chunked uploads.
+Better than the previous example because the file is streamed (`-T`)
 
 ```sh
 curl \
@@ -230,8 +230,6 @@ And then that file can be retrieved at `https://<domain>/some/deep/nested/direct
 This is useful for uploading large files via cURL as contents are never fully buffered in memory.
 
 ##### Stream from a file
-
-I'm not actually sure if this is different to the above example, but could open up possibilities I haven't thought of.
 
 ```sh
 cat ./some/local/cog.tiff \
@@ -268,9 +266,7 @@ mbuffer \
 
 #### Uploading a directory recursively
 
-TODO - convert to use chunked stream (if this doesn't already)
-
-(i.e. a Zarr directory)
+For example, a Zarr directory
 
 ```sh
 find \
