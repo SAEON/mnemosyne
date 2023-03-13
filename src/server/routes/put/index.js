@@ -1,11 +1,12 @@
 import { KEY, decrypt, USERS } from '../../../config/index.js'
-import { createWriteStream } from 'fs'
+import { createWriteStream, promises as fsPromises } from 'fs'
 import { error, info } from '../../../logger/index.js'
 import mkdirp from 'mkdirp'
-import { access } from 'fs/promises'
 import { dirname } from 'path'
 
-export default async function () {
+const { access, unlink } = fsPromises
+
+export default async function handleUploadRequest() {
   const {
     req,
     res,
@@ -17,9 +18,7 @@ export default async function () {
 
   // Ensure that uploads are enabled for this server
   if (!KEY) {
-    res.writeHead(405, {
-      'Content-Type': 'text/plain',
-    })
+    res.writeHead(405, { 'Content-Type': 'text/plain' })
     res.write('PUT has been disabled for this server')
     res.end()
     return
@@ -28,10 +27,10 @@ export default async function () {
   // Ensure that a valid token is used
   const { authorization } = req.headers
   try {
-    if (!authorization) throw 401
-    const token = authorization.match(/((?![Bearer\s+])).*$/i)[0]
+    if (!authorization) throw new Error('Unauthorized')
+    const token = authorization.replace(/^Bearer\s+/i, '')
     const user = decrypt(token)
-    if (!USERS.includes(user)) throw 401
+    if (!USERS.includes(user)) throw new Error('Unauthorized')
     info('Authenticated', user, absolutePath)
   } catch (e) {
     error(e)
@@ -42,14 +41,18 @@ export default async function () {
   }
 
   // Check if the resource exists
-  const exists = await access(absolutePath)
-    .then(() => true)
-    .catch(() => false)
+  let exists
+  try {
+    await access(absolutePath)
+    exists = true
+  } catch {
+    exists = false
+  }
 
   // If it exists return 409
   if (exists) {
     const msg = 'Conflict. Upload path already exists'
-    res.writeHead(409, msg)
+    res.writeHead(409, msg, { 'Content-Type': 'text/plain' })
     res.write(msg)
     res.end()
     return
@@ -63,7 +66,15 @@ export default async function () {
 
   // Stream file contents to disk
   const stream = createWriteStream(absolutePath)
-  req.pipe(stream)
+
+  // Delete failed uploads
+  stream.on('error', async err => {
+    await unlink(absolutePath)
+    error(err)
+    res.writeHead(500, { 'Content-Type': 'text/plain' })
+    res.write('Internal Server Error')
+    res.end()
+  })
 
   // Keep track of how much is received
   let received = 0
@@ -71,18 +82,28 @@ export default async function () {
     received += chunk.length
   })
 
-  // Wait until the file is written
+  req.pipe(stream)
+
+  // Handle aborted requests
+  req.on('aborted', async () => {
+    error('Connection terminated by client')
+    await unlink(absolutePath)
+    res.writeHead(400, { 'Content-Type': 'text/plain' })
+    res.write('Bad Request')
+    res.end()
+  })
+
   await new Promise(resolve => {
-    stream.on('close', resolve)
+    stream.on('close', async () => {
+      // Respond with new resource info
+      const msg = `Received ${received} bytes`
+      res.writeHead(201, {
+        'Content-Type': 'text/plain',
+        'Content-Location': href,
+      })
+      res.write(msg)
+      res.end()
+      resolve()
+    })
   })
-
-  // Respond with new resource info
-  const msg = `Received ${received} bytes`
-  res.writeHead(201, msg, {
-    'Content-Type': 'text/plain',
-    'Content-Location': href,
-  })
-  res.write(msg)
-
-  res.end()
 }

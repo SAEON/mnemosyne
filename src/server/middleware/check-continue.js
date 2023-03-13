@@ -18,6 +18,7 @@ export default async function (req, res) {
 
   // If it exists return 409
   if (exists) {
+    // TODO - only respond this to authenticated users
     const msg = 'Conflict. Upload path already exists'
     res.writeHead(409, msg)
     res.write(msg)
