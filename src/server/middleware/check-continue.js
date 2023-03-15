@@ -1,6 +1,23 @@
 import parseResource from './parse-resource.js'
+import { error, info } from '../../logger/index.js'
 import { access } from 'fs/promises'
+import authenticate from '../../lib/authenticate.js'
 
+/**
+ * This middleware function is only called
+ * for POST and PUT requests, when a client
+ * wants to check that it can send a large
+ * payload of data. So assume the attempt
+ * is to write a resource.
+ *
+ * In the future it may be necessary to update
+ * to allow GET requests with large bodies.
+ *
+ * (i.e. in the future it may be that non-
+ * authenticated requests to this may be
+ * required. For now, authentication is
+ * necessary)
+ */
 export default async function (req, res) {
   const server = this
 
@@ -10,6 +27,17 @@ export default async function (req, res) {
   const {
     resource: { absolutePath },
   } = ctx
+
+  try {
+    const user = authenticate(req)
+    info('Authenticated (checkContinue)', user, absolutePath)
+  } catch (e) {
+    error(e)
+    res.statusCode = 401
+    res.write('Unauthorized')
+    res.end()
+    return
+  }
 
   // Check if the resource exists
   const exists = await access(absolutePath)

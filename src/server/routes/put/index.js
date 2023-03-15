@@ -1,8 +1,9 @@
-import { KEY, decrypt, USERS } from '../../../config/index.js'
+import { KEY } from '../../../config/index.js'
 import { createWriteStream, promises as fsPromises } from 'fs'
 import { error, info } from '../../../logger/index.js'
 import mkdirp from 'mkdirp'
 import { dirname } from 'path'
+import authenticate from '../../../lib/authenticate.js'
 
 const { access, unlink } = fsPromises
 
@@ -25,12 +26,8 @@ export default async function handleUploadRequest() {
   }
 
   // Ensure that a valid token is used
-  const { authorization } = req.headers
   try {
-    if (!authorization) throw new Error('Unauthorized')
-    const token = authorization.replace(/^Bearer\s+/i, '')
-    const user = decrypt(token)
-    if (!USERS.includes(user)) throw new Error('Unauthorized')
+    const user = authenticate(req)
     info('Authenticated', user, absolutePath)
   } catch (e) {
     error(e)

@@ -17,36 +17,24 @@ node \
 """
 
 
-
 [[task]]
-name = 'prettier:server'
-deps = [ 'src/**/*.js' ]
+name = 'prettier'
 template = 'prettier'
 [task.template-options]
 ignore-path = '.prettierignore'
-files = 'src/**/*.@(js|json|yml)'
-loglevel = 'warn'
-config = '.prettierrc'
-
-[[task]]
-name = 'prettier:other'
-template = 'prettier'
-[task.template-options]
-ignore-path = '.prettierignore'
-files = './*.@(js|json|yml|md) ./.github/**/*.@(js|json|yml) ./deploy/**/*.@(js|json|yml)'
+files = 'src/**/*.@(js|json|yml) ./*.@(js|json|yml|md) ./.github/**/*.@(js|json|yml) ./deploy/**/*.@(js|json|yml)'
 loglevel = 'warn'
 config = '.prettierrc'
 
 [[task]]
 name = 'reset'
 run = """
-rm -rf node_modules
 find . \
   -name node_modules \
   -type d \
-  -exec rm -rv {} + \
-    && find . \
-      -name package-lock.json \
-      -type f \
-      -delete
+  -exec rm -rv {} +
+find . \
+  -name package-lock.json \
+  -type f \
+  -delete
 """
