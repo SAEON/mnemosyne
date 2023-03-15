@@ -298,3 +298,4 @@ Please submit ideas/feature-requests on the [GitHub issues feed](https://github.
 - A drag/drop website creator for static sites?
 - URL rewriting - specifically being able to define this at runtime and via a UI rather than in source code
 - Uploading directories is likely to incur some failed uploads. There should be some mechanism of handling that
+- Configuration and state management via embedded SQLite database
