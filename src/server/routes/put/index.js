@@ -1,7 +1,7 @@
 import { KEY } from '../../../config/index.js'
 import { createWriteStream, promises as fsPromises } from 'fs'
 import { error, info } from '../../../logger/index.js'
-import mkdirp from 'mkdirp'
+import { mkdirp } from 'mkdirp'
 import { dirname } from 'path'
 import authenticate from '../../../lib/authenticate.js'
 

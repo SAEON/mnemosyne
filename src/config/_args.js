@@ -2,7 +2,7 @@ import arg from 'arg'
 import { join, normalize } from 'path'
 import { homedir } from 'os'
 import { info, warn } from '../logger/index.js'
-import mkdirp from 'mkdirp'
+import { mkdirp } from 'mkdirp'
 import encryption from './_encryption.js'
 
 const args = {}
