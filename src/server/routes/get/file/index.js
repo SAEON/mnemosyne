@@ -25,7 +25,9 @@ export default async function serveFile() {
   const {
     req: request,
     res: response,
-    resource: { absolutePath: file },
+    resource: {
+      absolutePaths: [file],
+    },
   } = this
 
   const { size: contentLength } = await stat(file)

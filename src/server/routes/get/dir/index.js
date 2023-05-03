@@ -32,12 +32,21 @@ export default async function () {
       protocol,
       host,
       pathname,
-      absolutePath: directory,
+      absolutePaths: directories,
       query: { noindex = false, json = false },
     },
   } = this
 
-  const listings = (await readdir(directory)).sort((a, b) => {
+  const l = await Promise.allSettled(directories.map(async d => await readdir(d))).then(r =>
+    r.map(({ status, value, reason }) => {
+      if (reason) return null
+      return value
+    })
+  )
+
+  console.log('hi', l)
+
+  const listings = (await readdir(directories[0])).sort((a, b) => {
     if (a.toUpperCase() > b.toUpperCase()) return 1
     if (b.toUpperCase() > a.toUpperCase()) return -1
     return 0
@@ -47,7 +56,7 @@ export default async function () {
   if (listings.includes('index.html') && !noindex && !json) {
     return serveFile.call({
       ...this,
-      resource: { ...this.resource, absolutePath: normalize(join(directory, 'index.html')) },
+      resource: { ...this.resource, absolutePaths: normalize(join(directories, 'index.html')) },
     })
   }
 
@@ -135,7 +144,7 @@ export default async function () {
             ${(
               await Promise.all(
                 listings.map(async l => {
-                  const p = normalize(join(directory, l))
+                  const p = normalize(join(directories, l))
                   const stats = await stat(p)
                   const isFile = stats.isFile()
                   const size = humanReadableBytes(stats.size)
@@ -171,7 +180,7 @@ export default async function () {
       JSON.stringify(
         await Promise.all(
           listings.map(async l => {
-            const p = normalize(join(directory, l))
+            const p = normalize(join(directories, l))
             const stats = await stat(p)
             const isFile = stats.isFile()
             const isDirectory = stats.isDirectory()

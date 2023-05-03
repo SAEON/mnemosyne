@@ -1,5 +1,5 @@
 import { URL } from 'url'
-import { VOLUME } from '../../config/index.js'
+import { VOLUMES } from '../../config/index.js'
 import { normalize, join } from 'path'
 import { info } from '../../logger/index.js'
 
@@ -26,18 +26,8 @@ export default async function () {
    * lookups beyond the VOLUME
    * root)
    */
-  const absolutePath = normalize(join(VOLUME, pathname))
-  info('Resource request path', absolutePath)
-
-  /**
-   * Prevent directory traversal
-   * Not sure this is actually required
-   * since from testing I can't seem to
-   * trigger a directory traversal request
-   */
-  if (!absolutePath.includes(VOLUME)) {
-    throw new Error('Directory traversal not allowed')
-  }
+  const absolutePaths = VOLUMES.map(v => normalize(join(v, pathname)))
+  info('Resource request path (OR)\n', absolutePaths.join('\n '))
 
   /**
    * Append the 'resource'
@@ -50,7 +40,7 @@ export default async function () {
     root,
     url,
     pathname,
-    absolutePath,
+    absolutePaths,
     query,
   }
 }

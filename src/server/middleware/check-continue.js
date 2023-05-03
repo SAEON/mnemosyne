@@ -25,12 +25,12 @@ export default async function (req, res) {
   await parseResource.call(ctx)
 
   const {
-    resource: { absolutePath },
+    resource: { absolutePaths },
   } = ctx
 
   try {
     const user = authenticate(req)
-    info('Authenticated (checkContinue)', user, absolutePath)
+    info('Authenticated (checkContinue)', user, absolutePaths)
   } catch (e) {
     error(e)
     res.statusCode = 401
@@ -40,7 +40,7 @@ export default async function (req, res) {
   }
 
   // Check if the resource exists
-  const exists = await access(absolutePath)
+  const exists = await access(absolutePaths)
     .then(() => true)
     .catch(() => false)
 

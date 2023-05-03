@@ -11,9 +11,11 @@ run = """
 node \
   --trace-warnings \
   src \
-    --volume /home/zach/somisana-data \
     --key TjWnZr4u7w!z%C*F-JaNdRgUkXp2s5v8 \
-    --login localhost
+    --login localhost \
+    --login localhost2 \
+    --volume /home/zach/somisana-data \
+    --volume /home/zach/temp/somisana-data
 """
 
 

@@ -12,7 +12,7 @@ export default async function handleUploadRequest() {
     req,
     res,
     resource: {
-      absolutePath,
+      absolutePaths,
       url: { href },
     },
   } = this
@@ -28,7 +28,7 @@ export default async function handleUploadRequest() {
   // Ensure that a valid token is used
   try {
     const user = authenticate(req)
-    info('Authenticated', user, absolutePath)
+    info('Authenticated', user, absolutePaths)
   } catch (e) {
     error(e)
     res.statusCode = 401
@@ -40,7 +40,7 @@ export default async function handleUploadRequest() {
   // Check if the resource exists
   let exists
   try {
-    await access(absolutePath)
+    await access(absolutePaths)
     exists = true
   } catch {
     exists = false
@@ -56,17 +56,17 @@ export default async function handleUploadRequest() {
   }
 
   // Get upload path
-  const dir = dirname(absolutePath)
+  const dir = dirname(absolutePaths)
 
   // Ensure dir exists
   await mkdirp(dir)
 
   // Stream file contents to disk
-  const stream = createWriteStream(absolutePath)
+  const stream = createWriteStream(absolutePaths)
 
   // Delete failed uploads
   stream.on('error', async err => {
-    await unlink(absolutePath)
+    await unlink(absolutePaths)
     error(err)
     res.writeHead(500, { 'Content-Type': 'text/plain' })
     res.write('Internal Server Error')
@@ -84,7 +84,7 @@ export default async function handleUploadRequest() {
   // Handle aborted requests
   req.on('aborted', async () => {
     error('Connection terminated by client')
-    await unlink(absolutePath)
+    await unlink(absolutePaths)
     res.writeHead(400, { 'Content-Type': 'text/plain' })
     res.write('Bad Request')
     res.end()
