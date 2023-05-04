@@ -26,7 +26,7 @@ export default async function serveFile() {
     req: request,
     res: response,
     resource: {
-      absolutePaths: [file],
+      _paths: [{ path: file }],
     },
   } = this
 

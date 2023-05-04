@@ -14,7 +14,7 @@ await configureVolumes(args)
 
 export const PORT = args.port
 export const HOSTNAME = args.hostname
-export const VOLUMES = args.volume
+export const VOLUMES = args.volume.sort()
 export const KEY = args.key
 export const USERS = args.users
 export const encrypt = crypto ? crypto.encrypt : undefined

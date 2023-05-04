@@ -1,6 +1,6 @@
 import { mkdirp } from 'mkdirp'
 import { warn } from '../../logger/index.js'
-import getCacheDir from '../../lib/get-cache-dir.js'
+import { getCacheDir } from '../../lib/path-helpers.js'
 
 export default async function configureVolumes(args) {
   if (!args.volume.length) {

@@ -1,4 +1,4 @@
-import { readdir, stat } from 'fs/promises'
+import { stat } from 'fs/promises'
 import { join, normalize } from 'path'
 import he from 'he'
 import serveFile from '../../get/file/index.js'
@@ -16,13 +16,13 @@ const getBackLinks = ctx => {
   return pathname
     .split('/')
     .slice(0, -1)
-    .map((path, i, arr) => {
-      return arr.slice(0, i + 1)
-    })
+    .map((path, i, arr) => arr.slice(0, i + 1))
     .map(p => p.join('/'))
-    .reduce((str, p) => {
-      return `${str}${`<a href="${protocol}://${host}${p}">${p.split('/').pop() || '.'}</a>`}/`
-    }, '')
+    .reduce(
+      (str, p) =>
+        `${str}${`<a href="${protocol}://${host}${p}">${p.split('/').pop() || '.'}</a>`}/`,
+      ''
+    )
 }
 
 export default async function () {
@@ -32,35 +32,71 @@ export default async function () {
       protocol,
       host,
       pathname,
-      absolutePaths: directories,
+      _paths,
       query: { noindex = false, json = false },
     },
   } = this
 
-  const l = await Promise.allSettled(directories.map(async d => await readdir(d))).then(r =>
-    r.map(({ status, value, reason }) => {
-      if (reason) return null
-      return value
-    })
+  const listings = (
+    await Promise.all(
+      _paths.map(async _path => {
+        const { path, v } = _path
+        try {
+          return await Promise.all(
+            _path.entries?.map(async (entry, i) => {
+              const stats = await stat(normalize(join(path, entry)))
+              return {
+                v: v,
+                e: i,
+                directory: path,
+                entry,
+                isFile: stats.isFile(),
+                isDirectory: stats.isDirectory(),
+                size: stats.size,
+                pathname,
+              }
+            })
+          )
+        } catch (error) {
+          return []
+        }
+      })
+    )
   )
-
-  console.log('hi', l)
-
-  const listings = (await readdir(directories[0])).sort((a, b) => {
-    if (a.toUpperCase() > b.toUpperCase()) return 1
-    if (b.toUpperCase() > a.toUpperCase()) return -1
-    return 0
-  })
+    .flat()
+    .sort(({ entry: a }, { entry: b }) => {
+      if (a.toUpperCase() > b.toUpperCase()) return 1
+      if (b.toUpperCase() > a.toUpperCase()) return -1
+      return 0
+    })
 
   // Serve an index.html file if it exists
-  if (listings.includes('index.html') && !noindex && !json) {
+  const indexFiles = !noindex && !json && listings.filter(({ entry }) => entry === 'index.html')
+  if (indexFiles?.length === 1) {
+    const { directory, entry } = indexFiles[0]
     return serveFile.call({
       ...this,
-      resource: { ...this.resource, absolutePaths: normalize(join(directories, 'index.html')) },
+      resource: { ...this.resource, _paths: [{ path: normalize(join(directory, entry)) }] },
     })
   }
 
-  if (!json) {
+  if (json) {
+    // Set headers
+    res.setHeader('content-type', 'application/json')
+    res.write(
+      JSON.stringify(
+        listings.map(({ isFile, isDirectory, size, entry, e, v }) => ({
+          v,
+          e,
+          entry,
+          isFile,
+          isDirectory,
+          size,
+        }))
+      )
+    )
+    res.end()
+  } else {
     // Set headers
     res.setHeader('content-type', 'text/html')
 
@@ -141,26 +177,24 @@ export default async function () {
         <div id="listing">
           <h2>${getBackLinks(this)}${he.encode(pathname.split('/').pop())}</h2>
           <div id="entries">
-            ${(
-              await Promise.all(
-                listings.map(async l => {
-                  const p = normalize(join(directories, l))
-                  const stats = await stat(p)
-                  const isFile = stats.isFile()
-                  const size = humanReadableBytes(stats.size)
-                  return `
+            ${listings
+              .map(({ isFile, size, entry, pathname, v, e }) => {
+                const icon = isFile ? '🖺' : '🗀'
+                const text = isFile ? humanReadableBytes(size) : '..'
+                return `
                   <span class="entry">
                     <span class="cell">
-                      ${isFile ? '🖺' : '🗀'}
+                      ${icon}
                     </span>
                     <span class="cell">
-                      ${isFile ? size : '..'}
+                      ${text}
                     </span>
-                    <a class="cell" href="${he.encode(normalize(join(pathname, l)))}">${l}</a> 
+                    <a class="cell" href="${he.encode(
+                      `${normalize(join(pathname, entry))}?v=${v}&e=${e}`
+                    )}">${entry}</a> 
                   </span>`
-                })
-              )
-            ).join('\n')}
+              })
+              .join('\n')}
           </div>
         </div>
 
@@ -172,24 +206,6 @@ export default async function () {
       </html>`
 
     res.write(html)
-    res.end()
-  } else {
-    // Set headers
-    res.setHeader('content-type', 'application/json')
-    res.write(
-      JSON.stringify(
-        await Promise.all(
-          listings.map(async l => {
-            const p = normalize(join(directories, l))
-            const stats = await stat(p)
-            const isFile = stats.isFile()
-            const isDirectory = stats.isDirectory()
-            const size = stats.size
-            return { entry: l, isFile, isDirectory, size }
-          })
-        )
-      )
-    )
     res.end()
   }
 }

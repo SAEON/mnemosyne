@@ -1,4 +1,3 @@
-import { stat } from 'fs/promises'
 import { warn } from '../../../logger/index.js'
 import _404 from '../404.js'
 import serveFile from './file/index.js'
@@ -6,33 +5,25 @@ import serveDir from './dir/index.js'
 
 export default async function () {
   const {
-    resource: { absolutePaths },
+    resource: { _paths, query },
   } = this
 
-  /**
-   * If the URI points to a file
-   * serve that. Otherwise show
-   * the directory listing
-   */
   try {
-    const resources = await Promise.allSettled(
-      absolutePaths.map(async p => await stat(p).then(s => (s.isFile() ? p : [p])))
-    )
-      .then(r =>
-        r
-          .map(({ status, value, reason }) => {
-            // This path doesn't exist on on mount
-            if (reason) return null
+    // Test if there is a file to serve
+    const files = _paths.filter(({ isFile: f }) => f)
+    if (files.length) {
+      const file =
+        files.length === 1 ? files[0] : files.find(({ v }) => v === parseInt(query.v || '0', 10))
+      return serveFile.call({
+        ...this,
+        resource: { ...this.resource, _paths: [file] },
+      })
+    }
 
-            return value
-          })
-          .flat()
-      )
-      .then(r => r.filter(_ => _))
-
-    return resources.length == 1 ? serveFile.call(this) : serveDir.call(this)
+    // Otherwise serve the directory
+    return serveDir.call(this)
   } catch (error) {
-    warn('Requested resource', absolutePaths, 'does not exist')
+    warn('Requested resource', _paths, 'does not exist')
     return _404.call(this)
   }
 }

@@ -6,7 +6,7 @@ export default async function () {
   const {
     req: request,
     res: response,
-    resource: { absolutePaths: file },
+    resource: { _paths: file },
   } = this
 
   const { range } = request.headers

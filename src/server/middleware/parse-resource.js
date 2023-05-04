@@ -1,7 +1,7 @@
 import { URL } from 'url'
 import { VOLUMES } from '../../config/index.js'
-import { normalize, join } from 'path'
 import { info } from '../../logger/index.js'
+import { getAbsolutePaths } from '../../lib/path-helpers.js'
 
 export default async function () {
   const { req } = this
@@ -19,15 +19,9 @@ export default async function () {
     {}
   )
 
-  /**
-   * Work out the absolute path
-   * of the resource request (
-   * without allowing relative
-   * lookups beyond the VOLUME
-   * root)
-   */
-  const absolutePaths = VOLUMES.map(v => normalize(join(v, pathname)))
-  info('Resource request path (OR)\n', absolutePaths.join('\n '))
+  // Work out the possible absolute paths available for entry
+  const _paths = await getAbsolutePaths(VOLUMES, pathname)
+  info('Resource request path (OR)\n', _paths.map(({ path }) => path).join('\n '))
 
   /**
    * Append the 'resource'
@@ -40,7 +34,7 @@ export default async function () {
     root,
     url,
     pathname,
-    absolutePaths,
+    _paths,
     query,
   }
 }
