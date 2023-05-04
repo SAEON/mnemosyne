@@ -13,7 +13,10 @@ export default async function () {
     const files = _paths.filter(({ isFile: f }) => f)
     if (files.length) {
       const file =
-        files.length === 1 ? files[0] : files.find(({ v }) => v === parseInt(query.v || '0', 10))
+        files.length === 1 || !query.v
+          ? files[0]
+          : files.find(({ v }) => v === parseInt(query.v, 10))
+
       return serveFile.call({
         ...this,
         resource: { ...this.resource, _paths: [file] },
