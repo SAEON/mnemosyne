@@ -1,6 +1,6 @@
 import { KEY } from '../../../config/index.js'
 import { createWriteStream, promises as fsPromises } from 'fs'
-import { error, info } from '../../../logger/index.js'
+import { error } from '../../../logger/index.js'
 import { mkdirp } from 'mkdirp'
 import { dirname } from 'path'
 import authenticate from '../../../lib/authenticate.js'
@@ -27,8 +27,7 @@ export default async function handleUploadRequest() {
 
   // Ensure that a valid token is used
   try {
-    const user = authenticate(req)
-    info('Authenticated', user, _paths)
+    authenticate(req)
   } catch (e) {
     error(e)
     res.statusCode = 401
@@ -36,6 +35,8 @@ export default async function handleUploadRequest() {
     res.end()
     return
   }
+
+  console.log(href)
 
   // Check if the resource exists
   let exists

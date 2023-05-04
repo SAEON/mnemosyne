@@ -18,4 +18,6 @@ export default async function configureKeys(args) {
   const l = login.reduce((a, c) => (c.length > a ? c.length : a), 0)
   login.forEach(user => info(user.padEnd(l + 1, ' '), '::', encrypt(user)))
   info()
+
+  return crypto
 }
