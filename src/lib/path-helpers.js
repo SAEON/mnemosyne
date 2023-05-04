@@ -1,5 +1,5 @@
 import os from 'os'
-import { normalize, join } from 'path'
+import { normalize, join, parse, sep } from 'path'
 import { stat, readdir } from 'fs/promises'
 
 export function getCacheDir() {
@@ -13,8 +13,27 @@ export function getCacheDir() {
   }
 }
 
-export async function getAbsolutePath(directory, pathname, i) {
-  const normalizedPath = normalize(join(directory, pathname))
+export async function getAbsolutePath(volume, pathname, i, method) {
+  const normalizedPath = normalize(join(volume, pathname))
+
+  /**
+   * For PUT requests, the path
+   * is the resource being created
+   */
+  if (method === 'PUT') {
+    const dir =
+      parse(pathname)
+        .dir.split(sep)
+        .filter(_ => _)[0] || '/'
+
+    try {
+      await stat(normalize(join(volume, dir)))
+      return { path: normalizedPath }
+    } catch (error) {
+      return undefined
+    }
+  }
+
   try {
     const stats = await stat(normalizedPath)
     const size = stats.size
@@ -35,10 +54,16 @@ export async function getAbsolutePath(directory, pathname, i) {
   }
 }
 
-// Make sure to pass SORTED directories array!
-export async function getAbsolutePaths(directories, pathname) {
+/**
+ * Make sure to pass SORTED directories array!
+ * This allows for mounting directories with duplicated
+ * filenames, and retrieving the correct file
+ **/
+export async function getAbsolutePaths(volumes, pathname, method) {
   const paths = await Promise.all(
-    directories.map((volume, i) => getAbsolutePath(volume, pathname, i))
+    volumes.map(async (volume, i) => {
+      return await getAbsolutePath(volume, pathname, i, method)
+    })
   )
   return paths.filter(Boolean)
 }

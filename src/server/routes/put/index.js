@@ -17,6 +17,14 @@ export default async function handleUploadRequest() {
     },
   } = this
 
+  if (_paths.length !== 1) {
+    const msg = 'Conflict. Ambiguous upload path specified (multiple volumes are mounted)'
+    res.writeHead(409, msg, { 'Content-Type': 'text/plain' })
+    res.write(msg)
+    res.end()
+    return
+  }
+
   // Ensure that uploads are enabled for this server
   if (!KEY) {
     res.writeHead(405, { 'Content-Type': 'text/plain' })
@@ -36,12 +44,12 @@ export default async function handleUploadRequest() {
     return
   }
 
-  console.log(href)
+  const { path } = _paths[0]
 
   // Check if the resource exists
   let exists
   try {
-    await access(_paths)
+    await access(path)
     exists = true
   } catch {
     exists = false
@@ -57,17 +65,17 @@ export default async function handleUploadRequest() {
   }
 
   // Get upload path
-  const dir = dirname(_paths)
+  const dir = dirname(path)
 
   // Ensure dir exists
   await mkdirp(dir)
 
   // Stream file contents to disk
-  const stream = createWriteStream(_paths)
+  const stream = createWriteStream(path)
 
   // Delete failed uploads
   stream.on('error', async err => {
-    await unlink(_paths)
+    await unlink(path)
     error(err)
     res.writeHead(500, { 'Content-Type': 'text/plain' })
     res.write('Internal Server Error')
@@ -85,7 +93,7 @@ export default async function handleUploadRequest() {
   // Handle aborted requests
   req.on('aborted', async () => {
     error('Connection terminated by client')
-    await unlink(_paths)
+    await unlink(path)
     res.writeHead(400, { 'Content-Type': 'text/plain' })
     res.write('Bad Request')
     res.end()
