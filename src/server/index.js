@@ -10,17 +10,18 @@ import setResponseHeaders from './middleware/set-response-headers.js'
 import checkContinue from './middleware/check-continue.js'
 
 const server = createServer(async (req, res) => {
+  // Log incoming request
   info('HTTP request path', req.url)
 
-  // Request context
+  // Create request context
   const ctx = { req, res, server }
 
   try {
-    // Middleware
+    // Apply middleware
     await parseResource.call(ctx)
     await setResponseHeaders.call(ctx)
 
-    // Router
+    // Route request based on method
     switch (req.method?.toUpperCase()) {
       case 'HEAD':
         await head.call(ctx, req, res)
@@ -43,6 +44,7 @@ const server = createServer(async (req, res) => {
         break
     }
   } catch (e) {
+    // Handle unexpected server error
     error('Unexpected server error', e)
     res.statusCode = 500
     res.end()

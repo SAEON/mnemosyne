@@ -18,7 +18,8 @@ export default async function handleUploadRequest() {
   } = this
 
   if (_paths.length !== 1) {
-    const msg = 'Conflict. Ambiguous upload path specified (multiple volumes are mounted)'
+    const msg =
+      'Conflict. Ambiguous upload path specified targeting multiple possible volumes. Please specify an existing root directory.'
     res.writeHead(409, msg, { 'Content-Type': 'text/plain' })
     res.write(msg)
     res.end()

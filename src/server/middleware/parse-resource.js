@@ -20,7 +20,10 @@ export default async function () {
   )
 
   // Work out the possible absolute paths available for entry
-  const _paths = await getAbsolutePaths(VOLUMES, pathname, req.method.toUpperCase())
+  const _paths = await getAbsolutePaths(VOLUMES, pathname, req.method.toUpperCase()).then(__paths =>
+    __paths.filter(_path => !query.v || _path.v == query.v)
+  )
+
   info('Resource request path (OR)\n', _paths.map(({ path }) => path).join('\n '))
 
   /**

@@ -5,28 +5,23 @@ import serveDir from './dir/index.js'
 
 export default async function () {
   const {
-    resource: { _paths, query },
+    resource: { _paths, pathname },
   } = this
 
-  try {
-    // Test if there is a file to serve
-    const files = _paths.filter(({ isFile: f }) => f)
-    if (files.length) {
-      const file =
-        files.length === 1 || !query.v
-          ? files[0]
-          : files.find(({ v }) => v === parseInt(query.v, 10))
-
-      return serveFile.call({
-        ...this,
-        resource: { ...this.resource, _paths: [file] },
-      })
-    }
-
-    // Otherwise serve the directory
-    return serveDir.call(this)
-  } catch (error) {
-    warn('Requested resource', _paths, 'does not exist')
+  if (_paths.length === 0) {
+    warn('Requested resource does not exist', pathname)
     return _404.call(this)
   }
+
+  const file = _paths.find(({ isFile: f }) => f)
+
+  if (file) {
+    const updatedContext = {
+      ...this,
+      resource: { ...this.resource, _paths: [file] },
+    }
+    return serveFile.call(updatedContext)
+  }
+
+  return serveDir.call(this)
 }

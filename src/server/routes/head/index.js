@@ -6,16 +6,27 @@ export default async function () {
   const {
     req: request,
     res: response,
-    resource: { _paths: file },
+    resource: { _paths },
   } = this
+
+  if (_paths.length > 1) {
+    const msg =
+      "Conflict. An ambiguous resource path was provided. Please include the 'v' (volume) and 'e' (entry) URL parameters to specify the desired resource unambiguously."
+    response.writeHead(409, msg, { 'Content-Type': 'text/plain' })
+    response.write(msg)
+    response.end()
+    return
+  }
+
+  const { path } = _paths[0]
 
   const { range } = request.headers
 
   let contentLength
   let contentType
   try {
-    contentLength = (await stat(file)).size
-    contentType = mime.getType(file)
+    contentLength = (await stat(path)).size
+    contentType = mime.getType(path)
   } catch (error) {
     response.statusCode = 404
     response.end()

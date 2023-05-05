@@ -17,8 +17,9 @@ export async function getAbsolutePath(volume, pathname, i, method) {
   const normalizedPath = normalize(join(volume, pathname))
 
   /**
-   * For PUT requests, the path
-   * is the resource being created
+   * Some requests specify a
+   * path that doesn't exist yet
+   *  => PUT
    */
   if (method === 'PUT') {
     const dir =
@@ -33,6 +34,16 @@ export async function getAbsolutePath(volume, pathname, i, method) {
       return undefined
     }
   }
+
+  /**
+   * Other requests specify a
+   * path that needs to already
+   * exist
+   *  => GET
+   *  => HEAD
+   *  => OPTIONS
+   *  => POST
+   */
 
   try {
     const stats = await stat(normalizedPath)

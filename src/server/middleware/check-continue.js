@@ -25,12 +25,14 @@ export default async function (req, res) {
   await parseResource.call(ctx)
 
   const {
-    resource: { _paths },
+    resource: {
+      _paths: [{ path }],
+    },
   } = ctx
 
   try {
     const user = authenticate(req)
-    info('Authenticated (checkContinue)', user, _paths.map(({ path }) => path).join('\n '))
+    info('Authenticated (checkContinue)', user, path)
   } catch (e) {
     error(e)
     res.statusCode = 401
@@ -40,7 +42,7 @@ export default async function (req, res) {
   }
 
   // Check if the resource exists
-  const exists = await access(_paths)
+  const exists = await access(path)
     .then(() => true)
     .catch(() => false)
 

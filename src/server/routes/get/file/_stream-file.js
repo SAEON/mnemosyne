@@ -4,6 +4,7 @@ import zlib, { createBrotliCompress, createDeflate, createGzip } from 'node:zlib
 import { pipeline } from 'node:stream/promises'
 import mime from 'mime'
 import StreamThrottle from './_stream-throttle.js'
+import { error } from '../../../../logger/index.js'
 
 export default async ({ size, contentLength, request, response, file, start, end }) => {
   const encoding = Accept.encoding(request.headers['accept-encoding'], ['gzip', 'deflate', 'br'])
@@ -62,8 +63,8 @@ export default async ({ size, contentLength, request, response, file, start, end
     } else {
       await pipeline(raw, throttleFileRead, throttleResStream, response)
     }
-  } catch (error) {
-    console.error('An error occurred:', error)
+  } catch (e) {
+    error('An error occurred:', e)
     response.end()
   }
 }

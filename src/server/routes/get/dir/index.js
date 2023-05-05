@@ -43,11 +43,10 @@ export default async function () {
         const { path, v } = _path
         try {
           return await Promise.all(
-            _path.entries?.map(async (entry, i) => {
+            _path.entries?.map(async entry => {
               const stats = await stat(normalize(join(path, entry)))
               return {
-                v: v,
-                e: i,
+                v,
                 directory: path,
                 entry,
                 isFile: stats.isFile(),
@@ -85,9 +84,9 @@ export default async function () {
     res.setHeader('content-type', 'application/json')
     res.write(
       JSON.stringify(
-        listings.map(({ isFile, isDirectory, size, entry, e, v }) => ({
+        listings.map(({ isFile, isDirectory, size, entry, v }) => ({
+          path: `${normalize(join(pathname, entry))}?v=${v}${isDirectory ? '&json' : ''}`,
           v,
-          e,
           entry,
           isFile,
           isDirectory,
@@ -178,7 +177,7 @@ export default async function () {
           <h2>${getBackLinks(this)}${he.encode(pathname.split('/').pop())}</h2>
           <div id="entries">
             ${listings
-              .map(({ isFile, size, entry, pathname, v, e }) => {
+              .map(({ isFile, size, entry, pathname, v }) => {
                 const icon = isFile ? '🖺' : '🗀'
                 const text = isFile ? humanReadableBytes(size) : '..'
                 return `
@@ -190,7 +189,7 @@ export default async function () {
                       ${text}
                     </span>
                     <a class="cell" href="${he.encode(
-                      `${normalize(join(pathname, entry))}?v=${v}&e=${e}`
+                      `${normalize(join(pathname, entry))}?v=${v}`
                     )}">${entry}</a> 
                   </span>`
               })
