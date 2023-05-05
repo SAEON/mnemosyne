@@ -14,8 +14,6 @@ env:
   SWARM_USERNAME: ${{ secrets.SWARM_USERNAME }} # Organization secret
   SWARM_PASSWORD: ${{ secrets.SWARM_PASSWORD }} # Organization secret
   SWARM_SSH_PORT: ${{ secrets.SWARM_SSH_PORT }} # Organization secret
-  APP_KEY: ${{ secrets.APP_KEY }} # Repository secret
-  LOGINS: ${{ secrets.LOGINS }} # Repository secret
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   REGISTRY: ghcr.io
 
@@ -89,6 +87,5 @@ jobs:
           port: ${{ env.SWARM_SSH_PORT }}
           script: |
             echo "DOCKER_IMAGE=${{ needs.build.outputs.image }}" > ${{ env.STACK_CONFIG_PATH }}
-            echo "KEY=${{ env.APP_KEY }}" >> ${{ env.STACK_CONFIG_PATH }}
-            echo "LOGINS=${{ env.LOGINS }}" >> ${{ env.STACK_CONFIG_PATH }}
+            echo "KEY=${{ secrets.APP_KEY }}" >> ${{ env.STACK_CONFIG_PATH }}
             sudo /opt/deploy-docker-stack.sh ${{ env.STACK_COMPOSE_PATH }} ${{ env.STACK_CONFIG_PATH }} mnemosyne_${{ inputs.stack }}

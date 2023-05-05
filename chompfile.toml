@@ -12,7 +12,7 @@ node \
   --trace-warnings \
   src \
     --key TjWnZr4u7w!z%C*F-JaNdRgUkXp2s5v8 \
-    --login localhost \
+    --login zd.smith@saeon.nrf.ac.za \
     --login localhost2 \
     --volume /home/zach/somisana-data \
     --volume /home/zach/temp/somisana-data
