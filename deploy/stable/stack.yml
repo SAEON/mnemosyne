@@ -11,7 +11,8 @@ services:
     image: $DOCKER_IMAGE
     command: >-
       --key $KEY
-      --volume /mnemosyne
+      --volume /somisana
+      --volume /osgeo
       --login gr.moncrieff@saeon.nrf.ac.za
       --login zd.smith@saeon.nrf.ac.za
     deploy:
@@ -31,7 +32,10 @@ services:
     volumes:
       - type: bind
         source: /somisana/mnemosyne
-        target: /mnemosyne
+        target: /somisana
+      - type: bind
+        source: /osgeo/mnemosyne
+        target: /osgeo
     ports:
       - 7010:3000
       - 6008:3000
