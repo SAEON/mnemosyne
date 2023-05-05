@@ -1,5 +1,5 @@
 import { stat } from 'fs/promises'
-import { join, normalize } from 'path'
+import { join, normalize, dirname } from 'path'
 import he from 'he'
 import serveFile from '../../get/file/index.js'
 import humanReadableBytes from '../../../../lib/human-readable-bytes.js'
@@ -84,14 +84,17 @@ export default async function () {
     res.setHeader('content-type', 'application/json')
     res.write(
       JSON.stringify(
-        listings.map(({ isFile, isDirectory, size, entry, v }) => ({
-          path: `${normalize(join(pathname, entry))}?v=${v}${isDirectory ? '&json' : ''}`,
-          v,
-          entry,
-          isFile,
-          isDirectory,
-          size,
-        }))
+        listings.map(({ isFile, isDirectory, size, entry, v }) => {
+          return {
+            parent: `${normalize(join(pathname, '..'))}?v=${v}&json`,
+            path: `${normalize(join(pathname, entry))}?v=${v}${isDirectory ? '&json' : ''}`,
+            v,
+            entry,
+            isFile,
+            isDirectory,
+            size,
+          }
+        })
       )
     )
     res.end()
