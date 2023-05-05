@@ -1,5 +1,5 @@
 import { stat } from 'fs/promises'
-import { join, normalize, dirname } from 'path'
+import { join, normalize } from 'path'
 import he from 'he'
 import serveFile from '../../get/file/index.js'
 import humanReadableBytes from '../../../../lib/human-readable-bytes.js'
