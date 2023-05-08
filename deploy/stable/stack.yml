@@ -31,13 +31,12 @@ services:
         delay: 5s
     volumes:
       - type: bind
-        source: /somisana/mnemosyne
+        source: /mnt/somisana/mnemosyne
         target: /somisana
       - type: bind
-        source: /osgeo/mnemosyne
+        source: /mnt/osgeo/mnemosyne
         target: /osgeo
     ports:
       - 7010:3000
-      - 6008:3000
     networks:
       - mnemosyne_stable
