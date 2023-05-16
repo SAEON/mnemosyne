@@ -84,10 +84,15 @@ export default async function () {
     res.setHeader('content-type', 'application/json')
     res.write(
       JSON.stringify(
-        listings.map(({ isFile, isDirectory, size, entry, v }) => {
+        listings.map(({ isFile, isDirectory, size, entry, v }, i, arr) => {
+          const path = normalize(join(pathname, entry))
+          const unique =
+            arr.filter(({ pathname, entry }) => normalize(join(pathname, entry)) === path)
+              .length === 1
+
           return {
-            parent: `${normalize(join(pathname, '..'))}?v=${v}&json`,
-            path: `${normalize(join(pathname, entry))}?v=${v}${isDirectory ? '&json' : ''}`,
+            parent: `${normalize(join(pathname, '..'))}&json`,
+            path: `${path}${!unique ? `?v=${v}` : ''}${isDirectory ? '&json' : ''}`,
             v,
             entry,
             isFile,
@@ -180,9 +185,13 @@ export default async function () {
           <h2>${getBackLinks(this)}${he.encode(pathname.split('/').pop())}</h2>
           <div id="entries">
             ${listings
-              .map(({ isFile, size, entry, pathname, v }) => {
+              .map(({ isFile, size, entry, pathname, v }, i, arr) => {
                 const icon = isFile ? '🖺' : '🗀'
                 const text = isFile ? humanReadableBytes(size) : '..'
+                const path = normalize(join(pathname, entry))
+                const unique =
+                  arr.filter(({ pathname, entry }) => normalize(join(pathname, entry)) === path)
+                    .length === 1
                 return `
                   <span class="entry">
                     <span class="cell">
@@ -192,7 +201,7 @@ export default async function () {
                       ${text}
                     </span>
                     <a class="cell" href="${he.encode(
-                      `${normalize(join(pathname, entry))}?v=${v}`
+                      `${path}${!unique ? `?v=${v}` : ''}`
                     )}">${entry}</a> 
                   </span>`
               })
