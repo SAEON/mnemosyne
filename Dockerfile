@@ -1,12 +1,10 @@
-FROM node:20.1.0-alpine
+FROM node:20.2.0-alpine
 
 ARG TC=UTC
 ARG NODE_ENV=production
-ARG KEY=false
 
 ENV TC=$TC
 ENV NODE_ENV=$NODE_ENV
-ENV KEY=$KEY
 
 WORKDIR /app
 COPY . .

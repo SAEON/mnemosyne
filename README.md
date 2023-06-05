@@ -27,13 +27,11 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
 
 # Background
 
-I started looking at using a file server that supports the HTTP GET Range header, thinking that this would be a good way of registering out-db NetCDF files in PostGIS. However this doesn't work - NetCDF files over a network require an OPeNDAP interface.
-
-But a new format for cloud-optimized, multidimensional data (Zarr), and the potential need for SAEON to host (or at least test hosting) cloud-optimized-geotifs (COGs) makes this quick project worthwhile.
+A new format for cloud-optimized, multidimensional data (Zarr), and the potential need for SAEON to host (or at least test hosting) cloud-optimized-geotiffs (COGs) makes this quick project worthwhile.
 
 # Development
 
-Install Node.js v18.6. Then setup the project:
+Install Node.js v20.2. Then setup the project:
 
 ```sh
 # Clone the repository
@@ -49,15 +47,13 @@ npm install
 
 # Start the app and write code!
 chomp --watch
-
-# The server will print access tokens that can be used for uploads
 ```
+
+Refer to [chompfile.toml](/chompfile.toml) to see the start command used for local development
 
 ## Deployment
 
-- Install Node.js
-- Install dependencies from the lockfile (`package-lock.json`)
-- Start the application. Use a process manager such as `pm2` to restart on failure. See below for Dockerized deployment
+Use a process manager such as `pm2` to restart on failure. See below for Dockerized deployment
 
 ```sh
 # Clone the repository
@@ -74,10 +70,10 @@ TZ=UTC \
     src \
       --key <super-long-secret>
       --volume /path/to/directory
-      --user some-user
-      --user some-user2
-      --user some-user@gmail.com
-      # Or --users=user1,user2,user3,etc
+      --volume /other/path/to/directory
+      --login some-user
+      --login some-user2
+      --login some-user@gmail.com
 
 # Look at the startup logs, and pass access tokens to the relevant users
 ```
@@ -99,30 +95,36 @@ docker run --rm -p 3000:3000 --name mnemosyne
 # Mount a host volume, uploads disabled
 docker run \
   --rm \
-  -p 3000:3000 \
   --name mnemosyne \
+  -p 3000:3000 \
   -v /some/host/directory:/mounted-directory \
-  -e VOLUME=/mounted-directory \
-  mnemosyne
+  mnemosyne \
+    --volume /mounted-directory
 
 # Mount a host volume, uploads enabled
 docker run \
   --rm \
   -p 3000:3000 \
   --name mnemosyne \
-  -v /some/host/directory:/mounted-directory \
-  -e VOLUME=/mounted-directory \
-  -e KEY=yoursupersecretkey \
-  -e USERS=user1,user2 \
-  mnemosyne
+  -v /some/host/directory:/mnt1 \
+  -v /some/other/host/directory:/mnt2 \
+  mnemosyne \
+    --key yoursupersecretkey \
+    --volume /mnt1 \
+    --volume /mnt2 \
+    --login user1 \
+    --login user2
 ```
 
 # Usage
 
-- Serve directory listings / files via `HTTP GET` requests
-  - Folders that contain `index.html` files wil be served as websites.
-  - CORS is enabled (`*`), so the file server can be perused automatically via client-side JavaScript
-- Upload files via `HTTP PUT` requests
+Mnemosyne is a relatively simple file server - `GET` HTTP requests for viewing files, and `PUT` HTTP requests for uploading files. Start the application with the `--key` argument (and at least one `--login`) to enable uploads. Otherwise uploads are disabled by default, the idea being that it's straightforward to share any directory on a server via HTTP Range requests. Things to note:
+
+- Folders that contain `index.html` files wil be served as websites.
+- CORS is enabled (`*`), so the file server can be perused automatically via client-side JavaScript
+- Default GET retrieval options can be overridden via URL params (see below)
+- When mounting multiple directories, you cannot have duplicate top-level folders, but you can have duplicate top level files
+- Running Mnemosyne without specifying a volume results in the application creating a temporary volume on your file system. Mnemosyne will NOT try to create volumes that are mounted but don't exist on the file system
 
 ## Viewing/retrieving files
 
@@ -158,6 +160,8 @@ You can override this logic via specifying URL params:
 
 - `?noindex`: For directories with an `index.html` file, this will serve the directory listing instead of a website
 - `?json`: This will return a JSON representation of a directory listing
+
+In the case where there are duplicate filenames (only possible at the root), use the param `?v=N` to specify which mounted volume you are referring to (where N is an integer starting at 0).
 
 **NOTE - all files are publicly available**
 
