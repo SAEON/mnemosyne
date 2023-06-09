@@ -1,15 +1,26 @@
 {
   "name": "@saeon/mnemosyne",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A very simple HTTP-range supporting file server. Stream your file in, and stream your file out! Named after the goddess of memory in Greek mythology.",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SAEON/mnemosyne.git"
   },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md",
+    "package.json",
+    "LICENSE"
+  ],
   "scripts": {
-    "lint": "eslint ."
+    "?": "Refer to ./chompfile.toml"
   },
+  "bin": {
+    "mnemosyne": "./bin/mnemosyne.js"
+  },
+  "preferGlobal": true,
   "author": "zd.smith@saeon.nrf.ac.za",
   "license": "MIT",
   "bugs": {
@@ -36,5 +47,14 @@
     "mime": "^3.0.0",
     "mkdirp": "^3.0.1",
     "yargs": "^17.7.2"
-  }
+  },
+  "engines": {
+    "node": ">=18.16"
+  },
+  "contributors": [
+    {
+      "name": "Zach Smith",
+      "email": "zd.smith@saeon.nrf.ac.za"
+    }
+  ]
 }

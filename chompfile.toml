@@ -10,13 +10,18 @@ deps = [ 'src/**/*.js' ]
 run = """
 node \
   --trace-warnings \
-  src \
+  bin/mnemosyne.js \
     --key TjWnZr4u7w!z%C*F-JaNdRgUkXp2s5v8 \
-    --login zd.smith@saeon.nrf.ac.za \
-    --login localhost2 \
-    --volume /home/zach/somisana-data \
-    --volume /home/zach/temp/somisana-data
+    --login username \
+    --login username2 \
+    --volume ./test \
+    --volume ./test/mnt1 \
+    --volume ./test/mnt2
 """
+
+[[task]]
+name = 'lint'
+run = "eslint ."
 
 
 [[task]]
@@ -24,7 +29,7 @@ name = 'prettier'
 template = 'prettier'
 [task.template-options]
 ignore-path = '.prettierignore'
-files = 'src/**/*.@(js|json|yml) ./*.@(js|json|yml|md) ./.github/**/*.@(js|json|yml) ./deploy/**/*.@(js|json|yml)'
+files = 'bin/mnemosyne.js package.json src/**/*.@(js|json|yml) ./*.@(js|json|yml|md) ./.github/**/*.@(js|json|yml) ./deploy/**/*.@(js|json|yml)'
 loglevel = 'warn'
 config = '.prettierrc'
 

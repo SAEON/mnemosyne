@@ -5,13 +5,12 @@ import { readdir, stat } from 'fs/promises'
 import { join, normalize } from 'path'
 
 export default async function configureVolumes(args) {
-  if (!args.volume.length) {
+  if (!args.volume?.length) {
     const cacheDir = getCacheDir()
-    warn(
-      '*** WARNING ***\nVolume CLI argument (--volume) missing.\nUsing temporary cache:',
-      cacheDir,
-      '\n'
-    )
+    warn('*** WARNING ***')
+    warn('Volume CLI argument (--volume) missing')
+    warn('Using temporary cache:', cacheDir)
+    warn()
     args.volume = [cacheDir]
     await Promise.all(args.volume.map(v => mkdirp(v)))
   } else {

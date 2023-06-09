@@ -5,11 +5,11 @@ export default function (args) {
   info()
   info('--hostname', args.hostname)
   info('--port', args.port)
-  args.volume.forEach(v => {
+  args.volume?.forEach(v => {
     info('--volume', v)
   })
-  info('--key', args.key ? '***' : undefined)
-  args.login.forEach(v => {
+  if (args.key) info('--key', '***')
+  args.login?.forEach(v => {
     info('--login', v)
   })
   info()

@@ -11,7 +11,8 @@ export default async function () {
   const host = req.headers.host
   const root = `${protocol}://${host}`
   const url = new URL(req.url, root)
-  const { pathname, searchParams } = url
+  const { searchParams, pathname: pathnameRaw } = url
+  const pathname = decodeURIComponent(pathnameRaw)
 
   // Parse the query string
   const query = [...searchParams.keys()].reduce(
