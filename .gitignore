@@ -8,8 +8,12 @@ lerna-debug.log*
 
 # Local dev environment
 /test/*
-!/test/README.md
+!/test/
+/test/mnt1/*
+!/test/mnt1/
 !/test/mnt1/README.md
+/test/mnt2/*
+!/test/mnt2/
 !/test/mnt2/README.md
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
