@@ -6,9 +6,6 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 - [Background](#background)
-- [Development](#development)
-  - [Deployment](#deployment)
-    - [Docker](#docker)
 - [Usage](#usage)
   - [Viewing/retrieving files](#viewingretrieving-files)
     - [Customize GET requests via URL params](#customize-get-requests-via-url-params)
@@ -21,7 +18,10 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
         - [Stream from a file](#stream-from-a-file)
         - [Stream from a file using mbuffer](#stream-from-a-file-using-mbuffer)
       - [Uploading a directory recursively](#uploading-a-directory-recursively)
-- [Future functionality](#future-functionality)
+- [Development](#development)
+  - [Deployment](#deployment)
+    - [Docker](#docker)
+  - [Publishing](#publishing)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -29,96 +29,17 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
 
 A new format for cloud-optimized, multidimensional data (Zarr), and the potential need for SAEON to host (or at least test hosting) cloud-optimized-geotiffs (COGs) makes this quick project worthwhile.
 
-# Development
-
-Install Node.js v20.2. Then setup the project:
-
-```sh
-# Clone the repository
-git clone git@github.com:SAEON/mnemosyne.git
-cd mnemosyne
-
-# Install chomp CLI
-npm install -g chomp
-chomp --version # (wait for output)
-
-# Install dependencies
-npm install
-
-# Start the app and write code!
-chomp --watch
-```
-
-Refer to [chompfile.toml](/chompfile.toml) to see the start command used for local development
-
-## Deployment
-
-Use a process manager such as `pm2` to restart on failure. See below for Dockerized deployment
-
-```sh
-# Clone the repository
-git clone git@github.com:SAEON/mnemosyne.git
-cd mnemosyne
-
-# Install dependencies from lockfile
-npm ci --only=production
-
-# Start the app
-NODE_ENV=production \
-TZ=UTC \
-  node \
-    src \
-      --key <super-long-secret>
-      --volume /path/to/directory
-      --volume /other/path/to/directory
-      --login some-user
-      --login some-user2
-      --login some-user@gmail.com
-
-# Look at the startup logs, and pass access tokens to the relevant users
-```
-
-### Docker
-
-**_Build a Docker image locally_**
-
-```sh
-docker build -t mnemosyne .
-```
-
-**_Run a containerized instance of the server_**
-
-```sh
-# default volume (cache directory), uploads disabled
-docker run --rm -p 3000:3000 --name mnemosyne
-
-# Mount a host volume, uploads disabled
-docker run \
-  --rm \
-  --name mnemosyne \
-  -p 3000:3000 \
-  -v /some/host/directory:/mounted-directory \
-  mnemosyne \
-    --volume /mounted-directory
-
-# Mount a host volume, uploads enabled
-docker run \
-  --rm \
-  -p 3000:3000 \
-  --name mnemosyne \
-  -v /some/host/directory:/mnt1 \
-  -v /some/other/host/directory:/mnt2 \
-  mnemosyne \
-    --key yoursupersecretkey \
-    --volume /mnt1 \
-    --volume /mnt2 \
-    --login user1 \
-    --login user2
-```
-
 # Usage
 
-Mnemosyne is a relatively simple file server - `GET` HTTP requests for viewing files, and `PUT` HTTP requests for uploading files. Start the application with the `--key` argument (and at least one `--login`) to enable uploads. Otherwise uploads are disabled by default, the idea being that it's straightforward to share any directory on a server via HTTP Range requests. Things to note:
+Mnemosyne is a relatively simple file server - `GET` HTTP requests for viewing files, and `PUT` HTTP requests for uploading files. Start the application with the `--key` argument (and at least one `--login`) to enable uploads. Otherwise uploads are disabled by default, the idea being that it's straightforward to share any directory on a server via HTTP Range requests.
+
+Turn your current directory into a COG-sharing HTTP Range server with a single command!
+
+```sh
+npx @saeon/mnemosyne -v ./
+```
+
+Things to note:
 
 - Folders that contain `index.html` files wil be served as websites.
 - CORS is enabled (`*`), so the file server can be perused automatically via client-side JavaScript
@@ -288,18 +209,97 @@ find \
       | cat
 ```
 
-# Future functionality
+# Development
 
-Please submit ideas/feature-requests on the [GitHub issues feed](https://github.com/SAEON/mnemosyne/issues). Some ideas
+Install Node.js v20.2. Then setup the project:
 
-- Logging/metrics: It's possible to determine which pixels are being downloaded (and even by which user if authentication is forced). so over time SAEON could say 'these pixels were downloaded N number of times by these users'
-- Compression: I've chosen NOT to compress (i.e. 'zip') the downloads for now since I'm not sure how that effects byte-range requests. However this should be possible and it would greatly lighten the load on the network.
-- Roles/permissions on a folder-by-folder / file-by-file basis. Currently everything uploaded is public. But potentially it could be useful to provide some access controls
-- CRUD management from a UI - should be possible for a user to delete things they have uploaded (?? or should it).
-- Perhaps certain folders should be immutable, and some folders should not be
-- A better UI?
-- Metadata?
-- A drag/drop website creator for static sites?
-- URL rewriting - specifically being able to define this at runtime and via a UI rather than in source code
-- Uploading directories is likely to incur some failed uploads. There should be some mechanism of handling that
-- Configuration and state management via embedded SQLite database
+```sh
+# Clone the repository
+git clone git@github.com:SAEON/mnemosyne.git
+cd mnemosyne
+
+# Install chomp CLI
+npm install -g chomp
+chomp --version # (wait for output)
+
+# Install dependencies
+npm install
+
+# Start the app and write code!
+chomp --watch
+```
+
+Refer to [chompfile.toml](/chompfile.toml) to see the start command used for local development
+
+## Deployment
+
+Use a process manager such as `pm2` to restart on failure. See below for Dockerized deployment
+
+```sh
+# Clone the repository
+git clone git@github.com:SAEON/mnemosyne.git
+cd mnemosyne
+
+# Install dependencies from lockfile
+npm ci --only=production
+
+# Start the app
+NODE_ENV=production \
+TZ=UTC \
+  node \
+    src \
+      --key <super-long-secret>
+      --volume /path/to/directory
+      --volume /other/path/to/directory
+      --login some-user
+      --login some-user2
+      --login some-user@gmail.com
+
+# Look at the startup logs, and pass access tokens to the relevant users
+```
+
+### Docker
+
+**_Build a Docker image locally_**
+
+```sh
+docker build -t mnemosyne .
+```
+
+**_Run a containerized instance of the server_**
+
+```sh
+# default volume (cache directory), uploads disabled
+docker run --rm -p 3000:3000 --name mnemosyne
+
+# Mount a host volume, uploads disabled
+docker run \
+  --rm \
+  --name mnemosyne \
+  -p 3000:3000 \
+  -v /some/host/directory:/mounted-directory \
+  mnemosyne \
+    --volume /mounted-directory
+
+# Mount a host volume, uploads enabled
+docker run \
+  --rm \
+  -p 3000:3000 \
+  --name mnemosyne \
+  -v /some/host/directory:/mnt1 \
+  -v /some/other/host/directory:/mnt2 \
+  mnemosyne \
+    --key yoursupersecretkey \
+    --volume /mnt1 \
+    --volume /mnt2 \
+    --login user1 \
+    --login user2
+```
+
+## Publishing
+
+Publish as a public package to NPM
+
+```sh
+npm publish --access public
+```
