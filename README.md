@@ -18,6 +18,7 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
         - [Stream from a file](#stream-from-a-file)
         - [Stream from a file using mbuffer](#stream-from-a-file-using-mbuffer)
       - [Uploading a directory recursively](#uploading-a-directory-recursively)
+    - [PowerShell example (Windows)](#powershell-example-windows)
 - [Development](#development)
   - [Deployment](#deployment)
     - [Docker](#docker)
@@ -205,10 +206,27 @@ find \
     -H "Authorization: Bearer <token>" \
     --create-dirs \
     -T {} \
-    https://<domain>/some/root/directory/{} \; \
+    https://<domain>/some/nested/directory/{} \; \
       | cat
 ```
 
+### PowerShell example (Windows)
+The equivalent to the `cURL` utility on Windows Platform is the `Invoke-RestMethod` tool. This is an example on how to use it to upload a single file to Mnemosyne from the PowerShell tool
+
+```powershell
+cd /to/the/directory/with/your/file
+$FILENAME = "some-file.tiff"
+$headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+$headers.Add("Authorization", "Bearer <token>")
+
+Invoke-RestMethod `
+    -Uri "https://<domain>/some/bested/directory/$FILENAME" `
+    -Method Put `
+    -InFile "./$FILENAME" `
+    -Headers $headers `
+    -ContentType "application/octet-stream" `
+    -Verbose
+```
 # Development
 
 Install Node.js v20.2. Then setup the project:
