@@ -11,4 +11,4 @@ COPY . .
 RUN npm ci --omit=dev
 EXPOSE 3000
 
-ENTRYPOINT [ "node", "src/index.js" ]
+ENTRYPOINT [ "bin/mnemosyne.js" ]
