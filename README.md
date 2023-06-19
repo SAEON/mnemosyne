@@ -211,7 +211,7 @@ find \
 ```
 
 ### PowerShell example (Windows)
-The equivalent to the `cURL` utility on Windows Platform is the `Invoke-RestMethod` tool. This is an example on how to use it to upload a single file to Mnemosyne from the PowerShell tool
+The equivalent to the `cURL` utility on Windows Platform is the `Invoke-RestMethod` tool. This is an example on how to use it to upload a single file to Mnemosyne from the PowerShell terminal
 
 ```powershell
 cd /to/the/directory/with/your/file
