@@ -220,7 +220,7 @@ $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
 $headers.Add("Authorization", "Bearer <token>")
 
 Invoke-RestMethod `
-    -Uri "https://<domain>/some/bested/directory/$FILENAME" `
+    -Uri "https://<domain>/some/nested/directory/$FILENAME" `
     -Method Put `
     -InFile "./$FILENAME" `
     -Headers $headers `
@@ -229,7 +229,7 @@ Invoke-RestMethod `
 ```
 # Development
 
-Install Node.js v20.2. Then setup the project:
+Install Node.js v20.3. Then setup the project:
 
 ```sh
 # Clone the repository
