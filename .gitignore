@@ -7,14 +7,15 @@ yarn-error.log*
 lerna-debug.log*
 
 # Local dev environment
-/test/*
-!/test/
-/test/mnt1/*
-!/test/mnt1/
-!/test/mnt1/README.md
-/test/mnt2/*
-!/test/mnt2/
-!/test/mnt2/README.md
+/test-mnts/*
+!/test-mnts/
+!/test-mnts/README.md
+/test-mnts/mnt1/*
+!/test-mnts/mnt1/
+!/test-mnts/mnt1/README.md
+/test-mnts/mnt2/*
+!/test-mnts/mnt2/
+!/test-mnts/mnt2/README.md
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

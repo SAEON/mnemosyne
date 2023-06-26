@@ -1,5 +1,5 @@
 import { warn } from '../../../logger/index.js'
-import _404 from '../404.js'
+import _404 from '../404/index.js'
 import serveFile from './file/index.js'
 import serveDir from './dir/index.js'
 

@@ -58,7 +58,7 @@ Tools that understand cloud-optimized formats (i.e. COGs, Zarrs, etc.) should wo
 curl \
   -X GET \
   --keepalive-time 1200 \
-  https://<domain>/filename.tif
+  http://localhost:3000/filename.tif
 ```
 
 **_Download partial file via cURL_**
@@ -67,7 +67,7 @@ curl \
 curl \
   -H "Range bytes=12-20" \
   -X GET \
-  https://<domain>/filename.tif
+  http://localhost:3000/filename.tif
 ```
 
 ### Customize GET requests via URL params
@@ -93,7 +93,7 @@ Any folder that includes an `index.html` file will be served as a website. One p
 
 ```js
 // Client side JavaScript
-fetch('https://<domain>/directory?json')
+fetch('http://localhost:3000/directory?json')
   .then(res => res.json())
   .then(json => {
     document.getElementsByTagName('body')[0].append(JSON.stringify(json))
@@ -108,7 +108,7 @@ Any files/folder in the exposed volume will be served. To upload files to the se
 
 ### cURL examples
 
-Here are some examples using `cURL` (and some notes):
+Here are some examples using `cURL` (and some notes) using the default authentication token on localhost. (Look at server logs for authentication tokens):
 
 - For `PUT` requests I find it's necessary to pipe the output to `cat`, since `cURL` won't print output to stdout (who knows why) when using `POST` and `PUT` requests
 - The `-T` header means 'transfer file'. Use this instead of `--data-binary`, since the latter will try to load your entire file into memory before sending
@@ -126,10 +126,10 @@ cat ./some/local/cog.tiff \
     --progress-bar \
     --keepalive-time 1200 \
     -X PUT \
-    -H "Authorization: Bearer <token>" \
+    -H "Authorization: Bearer f7efafd138da71cdcb0aa4767da9b6ee:1cc83802e7a4a831b17efa9ffecf4822" \
     -H "Content-Type: application/octet-stream" \
     --data-binary @- \
-    https://<domain>/some/deep/nested/directory/cog.tif \
+    http://localhost:3000/some/deep/nested/directory/cog.tif \
       | cat
 ```
 
@@ -142,14 +142,14 @@ curl \
   --progress-bar \
   --keepalive-time 1200 \
   -X PUT \
-  -H "Authorization: Bearer <token>" \
+  -H "Authorization: Bearer f7efafd138da71cdcb0aa4767da9b6ee:1cc83802e7a4a831b17efa9ffecf4822" \
   -T \
   ./some/local/cog.tiff \
-  https://<domain>/some/deep/nested/directory/cog.tif \
+  http://localhost:3000/some/deep/nested/directory/cog.tif \
     | cat
 ```
 
-And then that file can be retrieved at `https://<domain>/some/deep/nested/directory/cog.tif`.
+And then that file can be retrieved at `http://localhost:3000/some/deep/nested/directory/cog.tif`.
 
 #### Chunked uploads
 
@@ -163,11 +163,11 @@ cat ./some/local/cog.tiff \
     --progress-bar \
     --keepalive-time 1200 \
     -X PUT \
-    -H "Authorization: Bearer <token>" \
+    -H "Authorization: Bearer f7efafd138da71cdcb0aa4767da9b6ee:1cc83802e7a4a831b17efa9ffecf4822" \
     -H "Content-Type: application/octet-stream" \
     -T \
     - \
-    https://<domain>/some/deep/nested/directory/cog.tif \
+    http://localhost:3000/some/deep/nested/directory/cog.tif \
       | cat
 ```
 
@@ -184,9 +184,9 @@ mbuffer \
     --keepalive-time 1200 \
     -X PUT \
     -H "Content-Type: application/octet-stream" \
-    -H "Authorization: Bearer <token>" \
+    -H "Authorization: Bearer f7efafd138da71cdcb0aa4767da9b6ee:1cc83802e7a4a831b17efa9ffecf4822" \
     --data-binary @- \
-    https://<domain>/some/deep/nested/directory/cog.tif \
+    http://localhost:3000/some/deep/nested/directory/cog.tif \
       | cat
 ```
 
@@ -203,10 +203,10 @@ find \
     --progress-bar \
     --keepalive-time 1200 \
     -X PUT \
-    -H "Authorization: Bearer <token>" \
+    -H "Authorization: Bearer f7efafd138da71cdcb0aa4767da9b6ee:1cc83802e7a4a831b17efa9ffecf4822" \
     --create-dirs \
     -T {} \
-    https://<domain>/some/nested/directory/{} \; \
+    http://localhost:3000/some/nested/directory/{} \; \
       | cat
 ```
 
@@ -217,10 +217,10 @@ The equivalent to the `cURL` utility on Windows Platform is the `Invoke-RestMeth
 cd /to/the/directory/with/your/file
 $FILENAME = "some-file.tiff"
 $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-$headers.Add("Authorization", "Bearer <token>")
+$headers.Add("Authorization", "Bearer f7efafd138da71cdcb0aa4767da9b6ee:1cc83802e7a4a831b17efa9ffecf4822")
 
 Invoke-RestMethod `
-    -Uri "https://<domain>/some/nested/directory/$FILENAME" `
+    -Uri "http://localhost:3000/some/nested/directory/$FILENAME" `
     -Method Put `
     -InFile "./$FILENAME" `
     -Headers $headers `

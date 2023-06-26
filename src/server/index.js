@@ -1,10 +1,6 @@
 import { createServer } from 'http'
 import { info, error } from '../logger/index.js'
-import options from './routes/options/index.js'
-import head from './routes/head/index.js'
-import get from './routes/get/index.js'
-import put from './routes/put/index.js'
-import _404 from './routes/404.js'
+import { options, head, get, put, _404, post, httpDelete } from './routes/index.js'
 import parseResource from './middleware/parse-resource.js'
 import setResponseHeaders from './middleware/set-response-headers.js'
 import checkContinue from './middleware/check-continue.js'
@@ -37,6 +33,14 @@ const server = createServer(async (req, res) => {
 
       case 'PUT':
         await put.call(ctx, req, res)
+        break
+
+      case 'POST':
+        await post.call(ctx, req, res)
+        break
+
+      case 'DELETE':
+        await httpDelete.call(ctx, req, res)
         break
 
       default:

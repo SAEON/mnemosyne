@@ -5,24 +5,29 @@ extensions = ['chomp@0.1:prettier']
 
 [[task]]
 name = 'start'
-env = { TZ='UTC', NODE_ENV='development'}
-deps = [ 'src/**/*.js' ]
+env = { TZ = 'UTC', NODE_ENV = 'development' }
+deps = ["test"]
 run = """
 node \
   --trace-warnings \
   bin/mnemosyne.js \
     --key TjWnZr4u7w!z%C*F-JaNdRgUkXp2s5v8 \
+    --login local \
     --login username \
     --login username2 \
-    --volume ./test \
-    --volume ./test/mnt1 \
-    --volume ./test/mnt2
+    --volume ./test-mnts \
+    --volume ./test-mnts/mnt1 \
+    --volume ./test-mnts/mnt2
 """
+
+[[task]]
+name = 'test'
+deps = ['src/**/*.js', "test/**/*.js"]
+run = "mocha"
 
 [[task]]
 name = 'lint'
 run = "eslint ."
-
 
 [[task]]
 name = 'prettier'

@@ -1,6 +1,6 @@
 import { stat } from 'fs/promises'
 import mime from 'mime'
-import { parseRangeHeader } from '../get/file/index.js'
+import { parseRangeHeader } from '../../../lib/range-fns.js'
 
 export default async function () {
   const {
@@ -34,20 +34,22 @@ export default async function () {
   }
 
   if (range) {
-    const { start, end } = parseRangeHeader(range, contentLength)
+    const ranges = parseRangeHeader(range, contentLength)
+    for (const { start, end } of ranges) {
+      // Invalid range
+      if (start === null || end === null || start >= contentLength || end >= contentLength) {
+        response.writeHead(416, { 'Content-Range': `bytes */${contentLength}` })
+        return response.end()
+      }
 
-    if (start === null || end === null || start >= contentLength || end >= contentLength) {
-      response.writeHead(416, { 'Content-Range': `bytes */${contentLength}` })
-      return response.end()
+      // Valid range
+      response.writeHead(206, {
+        'Content-Range': `bytes ${start}-${end}/${contentLength}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': end - start + 1,
+        'Content-Type': contentType,
+      })
     }
-
-    // Otherwise serve range-accepting response
-    response.writeHead(206, {
-      'Content-Range': `bytes ${start}-${end}/${contentLength}`,
-      'Accept-Ranges': 'bytes',
-      'Content-Length': end - start + 1,
-      'Content-Type': contentType,
-    })
   } else {
     response.writeHead(200, {
       'Content-Length': contentLength,

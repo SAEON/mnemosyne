@@ -1,3 +1,12 @@
 {
-  "cSpell.words": ["Dockerized", "geotiff", "mbuffer", "mnemosyne", "noindex", "somisana", "Zarr"]
+  "cSpell.words": [
+    "Dockerized",
+    "geotiff",
+    "keepalive",
+    "mbuffer",
+    "mnemosyne",
+    "noindex",
+    "somisana",
+    "Zarr"
+  ]
 }
