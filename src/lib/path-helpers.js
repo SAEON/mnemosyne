@@ -19,6 +19,9 @@ export async function getAbsolutePath(volume, pathname, i, method) {
   /**
    * PUT requests specify a
    * path that doesn't exist yet
+   *
+   * POST is treated the same as
+   * PUT in this case
    */
   if (method === 'PUT') {
     const dir =

@@ -25,44 +25,7 @@ export async function createResource() {
     return
   }
 
-  // Ensure that uploads are enabled for this server
-  if (!KEY) {
-    res.writeHead(405, { 'Content-Type': 'text/plain' })
-    res.write('PUT has been disabled for this server')
-    res.end()
-    return
-  }
-
-  // Ensure that a valid token is used
-  try {
-    authenticate(req)
-  } catch (e) {
-    error(e)
-    res.statusCode = 401
-    res.write('Unauthorized')
-    res.end()
-    return
-  }
-
   const { path } = _paths[0]
-
-  // Check if the resource exists
-  let exists
-  try {
-    await access(path)
-    exists = true
-  } catch {
-    exists = false
-  }
-
-  // If it exists return 409
-  if (exists) {
-    const msg = 'Conflict. Upload path already exists'
-    res.writeHead(409, msg, { 'Content-Type': 'text/plain' })
-    res.write(msg)
-    res.end()
-    return
-  }
 
   // Get upload path
   const dir = dirname(path)
@@ -86,6 +49,7 @@ export async function createResource() {
   let received = 0
   req.on('data', chunk => {
     received += chunk.length
+    console.info(`[${path}] Received ${received} bytes`)
   })
 
   req.pipe(stream)
@@ -103,6 +67,7 @@ export async function createResource() {
     stream.on('close', async () => {
       // Respond with new resource info
       const msg = `Received ${received} bytes`
+      console.info(`[${path}] complete`)
       res.writeHead(201, {
         'Content-Type': 'text/plain',
         'Content-Location': href,
@@ -115,5 +80,43 @@ export async function createResource() {
 }
 
 export default async function () {
+  // Ensure that uploads are enabled for this server
+  if (!KEY) {
+    res.writeHead(405, { 'Content-Type': 'text/plain' })
+    res.write('PUT has been disabled for this server')
+    res.end()
+    return
+  }
+
+  // Ensure that a valid token is used
+  try {
+    authenticate(req)
+  } catch (e) {
+    error(e)
+    res.statusCode = 401
+    res.write('Unauthorized')
+    res.end()
+    return
+  }
+
+  // Check if the resource exists
+  let exists
+  try {
+    await access(path)
+    exists = true
+  } catch {
+    exists = false
+  }
+
+  // If it exists return 409
+  if (exists) {
+    // TODO delete it and re-upload
+    const msg = 'Conflict. Upload path already exists'
+    res.writeHead(409, msg, { 'Content-Type': 'text/plain' })
+    res.write(msg)
+    res.end()
+    return
+  }
+
   return createResource.call(this)
 }
