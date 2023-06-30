@@ -37,10 +37,13 @@
     "zarr"
   ],
   "devDependencies": {
+    "chai": "^4.3.7",
     "eslint": "^8.43.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "prettier": "^2.8.8"
+    "node-mocks-http": "^1.12.2",
+    "prettier": "^2.8.8",
+    "sinon": "^15.2.0"
   },
   "dependencies": {
     "@hapi/accept": "^6.0.1",

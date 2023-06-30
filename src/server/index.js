@@ -5,11 +5,15 @@ import parseResource from './middleware/parse-resource.js'
 import setResponseHeaders from './middleware/set-response-headers.js'
 import checkContinue from './middleware/check-continue.js'
 
-const server = createServer(async (req, res) => {
-  // Log incoming request
+/**
+ * httpCallback
+ * Exported for testing purposes
+ * 
+ * @param {Object} req HTTP Request object
+ * @param {Object} res HTTP Response object
+ */
+export const httpCallback = async (req, res) => {
   info('HTTP request path', req.url)
-
-  // Create request context
   const ctx = { req, res, server }
 
   try {
@@ -48,11 +52,23 @@ const server = createServer(async (req, res) => {
         break
     }
   } catch (e) {
-    // Handle unexpected server error
     error('Unexpected server error', e)
     res.statusCode = 500
     res.end()
   }
-}).on('checkContinue', async (...args) => await checkContinue.call(server, ...args))
+}
+
+/**
+ * checkContinue handler
+ *
+ * Exported for testing reasons
+ * @param  {...any} args
+ */
+export const checkContinueHandler = async (...args) => {
+  await checkContinue.call(server, ...args)
+}
+
+const server = createServer(httpCallback)
+server.on('checkContinue', checkContinueHandler)
 
 export default server
