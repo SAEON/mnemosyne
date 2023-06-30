@@ -1,7 +1,7 @@
 import { URL } from 'url'
 import { VOLUMES } from '../../config/index.js'
 import { info } from '../../logger/index.js'
-import { getAbsolutePaths } from '../../lib/path-helpers.js'
+import { getAbsolutePaths } from '../../lib/path-fns.js'
 
 export default async function () {
   const { req } = this

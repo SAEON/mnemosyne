@@ -1,10 +1,12 @@
 import { KEY } from '../../../config/index.js'
 import { createWriteStream } from 'fs'
-import { access, unlink } from 'fs/promises'
+import { unlink } from 'fs/promises'
 import { error } from '../../../logger/index.js'
 import { mkdirp } from 'mkdirp'
 import { dirname } from 'path'
 import authenticate from '../../../lib/authenticate.js'
+import { isPathAccessible, getValidatedPath } from '../../../lib/path-fns.js'
+import { res201, res400, res401, res405, res409, res500 } from '../../../lib/http-fns.js'
 
 export default async function () {
   const {
@@ -18,9 +20,7 @@ export default async function () {
 
   // Ensure that uploads are enabled for this server
   if (!KEY) {
-    res.writeHead(405, { 'Content-Type': 'text/plain' })
-    res.write('PUT has been disabled for this server')
-    res.end()
+    res405(res)
     return
   }
 
@@ -29,41 +29,19 @@ export default async function () {
     authenticate(req)
   } catch (e) {
     error(e)
-    res.statusCode = 401
-    res.write('Unauthorized')
-    res.end()
+    res401(res)
     return
   }
 
-  // Check if the resource exists
-  let exists
-  try {
-    await access(path)
-    exists = true
-  } catch {
-    exists = false
-  }
+  // Validate the path
+  const path = getValidatedPath(res, _paths)
+  if (!path) return
 
-  // If it exists return 409
-  if (exists) {
-    // TODO delete it and re-upload
-    const msg = 'Conflict. Upload path already exists'
-    res.writeHead(409, msg, { 'Content-Type': 'text/plain' })
-    res.write(msg)
-    res.end()
+  // Check if resource already exists
+  if (await isPathAccessible(path)) {
+    res409(res)
     return
   }
-
-  if (_paths.length !== 1) {
-    const msg =
-      'Conflict. Ambiguous upload path specified targeting multiple possible volumes. Please specify an existing root directory.'
-    res.writeHead(409, msg, { 'Content-Type': 'text/plain' })
-    res.write(msg)
-    res.end()
-    return
-  }
-
-  const { path } = _paths[0]
 
   // Get upload path
   const dir = dirname(path)
@@ -78,9 +56,7 @@ export default async function () {
   stream.on('error', async err => {
     await unlink(path)
     error(err)
-    res.writeHead(500, { 'Content-Type': 'text/plain' })
-    res.write('Internal Server Error')
-    res.end()
+    res500(res)
   })
 
   // Keep track of how much is received
@@ -96,22 +72,15 @@ export default async function () {
   req.on('aborted', async () => {
     error('Connection terminated by client')
     await unlink(path)
-    res.writeHead(400, { 'Content-Type': 'text/plain' })
-    res.write('Bad Request')
-    res.end()
+    res400(res)
   })
 
+  // Respond with success
   await new Promise(resolve => {
     stream.on('close', async () => {
-      // Respond with new resource info
       const msg = `Received ${received} bytes`
       console.info(`[${path}] complete`)
-      res.writeHead(201, {
-        'Content-Type': 'text/plain',
-        'Content-Location': href,
-      })
-      res.write(msg)
-      res.end()
+      res201({ res, msg, href })
       resolve()
     })
   })

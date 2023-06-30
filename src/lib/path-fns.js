@@ -1,6 +1,7 @@
 import os from 'os'
 import { normalize, join, parse, sep } from 'path'
-import { stat, readdir } from 'fs/promises'
+import { stat, readdir, access, mkdtemp } from 'fs/promises'
+import { res409 } from './http-fns.js'
 
 export function getCacheDir() {
   switch (process.platform) {
@@ -11,6 +12,10 @@ export function getCacheDir() {
     default:
       return join(process.env.XDG_CACHE_HOME || os.homedir(), '.cache', 'mnemosyne')
   }
+}
+
+export const getTempDir = async () => {
+  return normalize(join(getCacheDir(), mkdtemp()))
 }
 
 export async function getAbsolutePath(volume, pathname, i, method) {
@@ -79,4 +84,30 @@ export async function getAbsolutePaths(volumes, pathname, method) {
     })
   )
   return paths.filter(Boolean)
+}
+
+/**
+ * Check if a path exists
+ * (is accessible or not)
+ */
+export const isPathAccessible = async p => {
+  try {
+    await access(p)
+    return true
+  } catch (error) {
+    console.error(`Error accessing path (ignore) ${p}:`, error)
+    return false
+  }
+}
+
+export const getValidatedPath = (res, _paths) => {
+  if (_paths.length !== 1) {
+    res409(
+      res,
+      'Conflict. Ambiguous upload path specified targeting multiple possible volumes. Please specify an existing root directory.'
+    )
+    return undefined
+  }
+  const { path } = _paths[0]
+  return path
 }

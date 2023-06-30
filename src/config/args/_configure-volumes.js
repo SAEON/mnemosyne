@@ -1,6 +1,6 @@
 import { mkdirp } from 'mkdirp'
 import { warn } from '../../logger/index.js'
-import { getCacheDir } from '../../lib/path-helpers.js'
+import { getCacheDir } from '../../lib/path-fns.js'
 import { readdir, stat } from 'fs/promises'
 import { join, normalize } from 'path'
 

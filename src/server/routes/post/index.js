@@ -1,17 +1,26 @@
 import { KEY } from '../../../config/index.js'
 import { createWriteStream } from 'fs'
-import { access, unlink } from 'fs/promises'
+import { isPathAccessible, getTempDir, getValidatedPath } from '../../../lib/path-fns.js'
+import { unlink, rename, rmdir } from 'fs/promises'
 import { error } from '../../../logger/index.js'
 import { mkdirp } from 'mkdirp'
-import { dirname } from 'path'
+import { dirname, join, normalize, basename } from 'path'
 import authenticate from '../../../lib/authenticate.js'
+import { res201, res400, res401, res405, res500 } from '../../../lib/http-fns.js'
 
 export default async function () {
+  const {
+    req,
+    res,
+    resource: {
+      _paths,
+      url: { href },
+    },
+  } = this
+
   // Ensure that uploads are enabled for this server
   if (!KEY) {
-    res.writeHead(405, { 'Content-Type': 'text/plain' })
-    res.write('PUT has been disabled for this server')
-    res.end()
+    res405(res)
     return
   }
 
@@ -20,41 +29,28 @@ export default async function () {
     authenticate(req)
   } catch (e) {
     error(e)
-    res.statusCode = 401
-    res.write('Unauthorized')
-    res.end()
+    res401(res)
     return
   }
 
-  // Check if the resource exists
-  let exists
-  try {
-    await access(path)
-    exists = true
-  } catch {
-    exists = false
-  }
+  // Validate the path
+  const path = getValidatedPath(res, _paths)
+  if (!path) return
 
-  // If it exists return 409
-  if (exists) {
-    // TODO delete it and re-upload
-    const msg = 'Conflict. Upload path already exists'
-    res.writeHead(409, msg, { 'Content-Type': 'text/plain' })
-    res.write(msg)
-    res.end()
-    return
+  /**
+   * Unlike with PUT requests,
+   * if the resource already exists
+   * then upload to a temp path, and once
+   * completed, mv the temp file to the
+   * intended location. This makes the
+   * update atomic
+   */
+  let tempDir = undefined
+  let tempPath = undefined
+  if (await isPathAccessible(path)) {
+    tempDir = await getTempDir()
+    tempPath = normalize(join(tempDir, basename(path)))
   }
-
-  if (_paths.length !== 1) {
-    const msg =
-      'Conflict. Ambiguous upload path specified targeting multiple possible volumes. Please specify an existing root directory.'
-    res.writeHead(409, msg, { 'Content-Type': 'text/plain' })
-    res.write(msg)
-    res.end()
-    return
-  }
-
-  const { path } = _paths[0]
 
   // Get upload path
   const dir = dirname(path)
@@ -63,22 +59,21 @@ export default async function () {
   await mkdirp(dir)
 
   // Stream file contents to disk
-  const stream = createWriteStream(path)
+  const stream = createWriteStream(tempPath || path)
 
   // Delete failed uploads
   stream.on('error', async err => {
-    await unlink(path)
+    await unlink(tempPath || path)
+    if (tempDir) await unlink(tempDir)
     error(err)
-    res.writeHead(500, { 'Content-Type': 'text/plain' })
-    res.write('Internal Server Error')
-    res.end()
+    res500(res)
   })
 
   // Keep track of how much is received
   let received = 0
   req.on('data', chunk => {
     received += chunk.length
-    console.info(`[${path}] Received ${received} bytes`)
+    console.info(`[${tempPath || path}] Received ${received} bytes`)
   })
 
   req.pipe(stream)
@@ -86,23 +81,22 @@ export default async function () {
   // Handle aborted requests
   req.on('aborted', async () => {
     error('Connection terminated by client')
-    await unlink(path)
-    res.writeHead(400, { 'Content-Type': 'text/plain' })
-    res.write('Bad Request')
-    res.end()
+    await unlink(tempPath || path)
+    if (tempDir) await unlink(tempDir)
+    res400(res)
   })
 
+  // Respond with success
   await new Promise(resolve => {
     stream.on('close', async () => {
-      // Respond with new resource info
       const msg = `Received ${received} bytes`
+      if (tempPath) {
+        await rename(tempPath, path)
+        await unlink(tempPath)
+        await rmdir(tempDir)
+      }
       console.info(`[${path}] complete`)
-      res.writeHead(201, {
-        'Content-Type': 'text/plain',
-        'Content-Location': href,
-      })
-      res.write(msg)
-      res.end()
+      res201({ res, msg, href })
       resolve()
     })
   })

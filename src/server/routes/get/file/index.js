@@ -1,6 +1,6 @@
 import { stat } from 'fs/promises'
 import streamFile from './_stream-file.js'
-import { parseRangeHeader } from '../../../../lib/range-fns.js'
+import { parseRangeHeader } from '../../../../lib/http-fns.js'
 
 export default async function serveFile() {
   const {

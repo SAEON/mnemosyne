@@ -1,6 +1,6 @@
 import { stat } from 'fs/promises'
 import mime from 'mime'
-import { parseRangeHeader } from '../../../lib/range-fns.js'
+import { parseRangeHeader } from '../../../lib/http-fns.js'
 
 export default async function () {
   const {
