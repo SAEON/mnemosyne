@@ -19,7 +19,7 @@ describe('Mnemosyne API tests', () => {
     expect(res.statusCode).to.equal(200)
   })
 
-  it('should respond GET /README.md', async () => {
+  it('should NOT respond GET /missing-file.md', async () => {
     const req = httpMocks.createRequest({
       method: 'GET',
       url: '/README.md',
@@ -27,6 +27,6 @@ describe('Mnemosyne API tests', () => {
 
     const res = httpMocks.createResponse()
     await httpCallback(req, res)
-    expect(res.statusCode).to.equal(200)
+    expect(res.statusCode).to.equal(404)
   })
 })
