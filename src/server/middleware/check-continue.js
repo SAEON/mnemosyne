@@ -1,7 +1,7 @@
 import parseResource from './parse-resource.js'
 import { error, info } from '../../logger/index.js'
 import { access } from 'fs/promises'
-import authenticate from '../../lib/authenticate.js'
+import authorize from '../../lib/authorize.js'
 import { res204, res401, res409 } from '../../lib/http-fns.js'
 
 /**
@@ -32,7 +32,7 @@ export default async function (req, res) {
   } = ctx
 
   try {
-    const user = authenticate(req)
+    const user = authorize(req)
     info('Authenticated (checkContinue)', user, path)
   } catch (e) {
     error(e)

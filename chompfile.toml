@@ -17,7 +17,9 @@ node \
     --login username2 \
     --volume ./test-mnts \
     --volume ./test-mnts/mnt1 \
-    --volume ./test-mnts/mnt2
+    --volume ./test-mnts/mnt2 \
+    --permission username:./test-mnts \
+    --permission username2:./test-mnts
 """
 
 [[task]]

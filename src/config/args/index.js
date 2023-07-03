@@ -1,5 +1,6 @@
 import { info } from '../../logger/index.js'
 import configureKeys from './_configure-keys.js'
+import configurePermissions from './_configure-permissions.js'
 import configureVolumes from './_configure-volumes.js'
 import logArgs from './_log-args.js'
 import yargs from './_yargs.js'
@@ -11,6 +12,7 @@ export async function initializeServer(argv) {
   logArgs(args)
 
   const crypto = await configureKeys(args)
+  const PERMISSIONS = await configurePermissions(args)
   await configureVolumes(args)
 
   const serverSettings = {
@@ -18,7 +20,8 @@ export async function initializeServer(argv) {
     HOSTNAME: args.hostname,
     VOLUMES: args.volume.sort(),
     KEY: args.key,
-    USERS: args.login,
+    LOGINS: args.login,
+    PERMISSIONS,
     encrypt: crypto ? crypto.encrypt : undefined,
     decrypt: crypto ? crypto.decrypt : undefined,
   }

@@ -5,7 +5,7 @@ import { unlink, rename, rmdir } from 'fs/promises'
 import { error, info } from '../../../logger/index.js'
 import { mkdirp } from 'mkdirp'
 import { dirname, join, normalize, basename } from 'path'
-import authenticate from '../../../lib/authenticate.js'
+import authorize from '../../../lib/authorize.js'
 import { res201, res400, res401, res405, res500 } from '../../../lib/http-fns.js'
 
 export default async function () {
@@ -26,7 +26,7 @@ export default async function () {
 
   // Ensure that a valid token is used
   try {
-    authenticate(req)
+    authorize(req)
   } catch (e) {
     error(e)
     res401(res)

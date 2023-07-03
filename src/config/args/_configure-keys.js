@@ -23,8 +23,8 @@ export default async function configureKeys(args) {
 
   if (login) {
     info('ACCESS TOKENS')
-    const l = login.reduce((a, c) => (c.length > a ? c.length : a), 0)
-    login.forEach(user => info(user.padEnd(l + 1, ' '), '::', encrypt(user)))
+    const longestLogin = login.reduce((a, c) => (c.length > a ? c.length : a), 0)
+    login.forEach(user => info(user.padEnd(longestLogin + 1, ' '), '::', encrypt(user)))
   } else {
     if (key) {
       warn('*** WARNING ***')

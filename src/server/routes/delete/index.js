@@ -1,7 +1,7 @@
 import { KEY } from '../../../config/index.js'
 import { unlink } from 'fs/promises'
-import { error } from '../../../logger/index.js'
-import authenticate from '../../../lib/authenticate.js'
+import { error, info } from '../../../logger/index.js'
+import authorize from '../../../lib/authorize.js'
 import { res204, res404, res401, res405, res500 } from '../../../lib/http-fns.js'
 import { validatePath } from '../../../lib/path-fns.js'
 
@@ -20,7 +20,7 @@ export default async function () {
 
   // Authenticate the request
   try {
-    authenticate(req)
+    authorize(req)
   } catch (e) {
     error(e.message)
     res401(res)
@@ -37,6 +37,7 @@ export default async function () {
   // Attempt to delete the file
   try {
     await unlink(path)
+    info('DELETED', path)
   } catch (e) {
     if (e.code === 'ENOENT') {
       res404(res)

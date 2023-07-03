@@ -4,7 +4,7 @@ import { unlink } from 'fs/promises'
 import { error, info } from '../../../logger/index.js'
 import { mkdirp } from 'mkdirp'
 import { dirname } from 'path'
-import authenticate from '../../../lib/authenticate.js'
+import authorize from '../../../lib/authorize.js'
 import { isPathAccessible, validatePath } from '../../../lib/path-fns.js'
 import { res201, res400, res401, res405, res409, res500 } from '../../../lib/http-fns.js'
 
@@ -26,7 +26,7 @@ export default async function () {
 
   // Ensure that a valid token is used
   try {
-    authenticate(req)
+    authorize(req)
   } catch (e) {
     error(e)
     res401(res)
