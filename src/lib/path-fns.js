@@ -1,6 +1,6 @@
 import os from 'os'
 import { normalize, join, parse, sep } from 'path'
-import { stat, readdir, access, mkdtemp } from 'fs/promises'
+import { stat, readdir, access } from 'fs/promises'
 import { res409 } from './http-fns.js'
 import { nanoid } from 'nanoid'
 import { error } from '../logger/index.js'
@@ -25,58 +25,48 @@ export const getTempDir = async () => {
   return join(getCacheDir(), nanoid())
 }
 
-export async function getAbsolutePath(volume, pathname, i, method) {
-  const normalizedPath = normalize(join(volume, pathname))
-
-  /**
-   * PUT requests specify a
-   * path that doesn't exist yet
-   *
-   * POST is treated the same as
-   * PUT in this case
-   */
-  if (method === 'PUT') {
-    const dir =
-      parse(pathname)
-        .dir.split(sep)
-        .filter(_ => _)[0] || '/'
-
-    try {
-      await stat(normalize(join(volume, dir)))
-      return { path: normalizedPath }
-    } catch (error) {
-      return undefined
-    }
+async function checkDirExists(volume, pathname) {
+  const dir = parse(pathname).dir.split(sep).filter(Boolean)[0] || '/'
+  try {
+    await stat(normalize(join(volume, dir)))
+    return true
+  } catch (error) {
+    return false
   }
+}
 
-  /**
-   * Other requests specify a
-   * path that needs to already
-   * exist
-   *  => GET
-   *  => HEAD
-   *  => OPTIONS
-   *  => POST
-   */
-
+async function fetchPathStats(normalizedPath) {
   try {
     const stats = await stat(normalizedPath)
     const size = stats.size
     const isFile = stats.isFile()
     const isDirectory = stats.isDirectory()
     const entries = isDirectory ? (await readdir(normalizedPath)).sort() : undefined
-    return {
-      path: normalizedPath,
-      stats,
-      size,
-      isFile,
-      isDirectory,
-      entries,
-      v: i,
-    }
+    return { stats, size, isFile, isDirectory, entries }
   } catch (error) {
     return undefined
   }
+}
+
+export async function getAbsolutePath(volume, pathname, i, method) {
+  const normalizedPath = normalize(join(volume, pathname))
+
+  if (['PUT', 'POST'].includes(method)) {
+    const dirExists = await checkDirExists(volume, pathname)
+    if (dirExists) {
+      return { path: normalizedPath }
+    }
+  } else {
+    const pathStats = await fetchPathStats(normalizedPath)
+    if (pathStats) {
+      return {
+        path: normalizedPath,
+        ...pathStats,
+        v: i,
+      }
+    }
+  }
+  return undefined
 }
 
 /**
@@ -107,14 +97,20 @@ export const isPathAccessible = async p => {
   }
 }
 
-export const getValidatedPath = (res, _paths) => {
-  if (_paths.length !== 1) {
-    res409(
-      res,
-      'Conflict. Ambiguous upload path specified targeting multiple possible volumes. Please specify an existing root directory.'
-    )
+export const validatePath = (response, paths, shouldSkipResponse = false) => {
+  // If the paths array doesn't contain exactly one item, return undefined
+  if (paths.length !== 1) {
+    // Only send response if not skipped
+    if (!shouldSkipResponse) {
+      const message =
+        'Conflict. Ambiguous upload path specified targeting multiple possible volumes. Please specify an existing root directory.'
+      res409(response, message)
+    }
     return undefined
   }
-  const { path } = _paths[0]
-  return path
+
+  // Return the first path in the array
+  const [firstPath] = paths
+  return firstPath.path
 }
+

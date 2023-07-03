@@ -1,6 +1,6 @@
 import { KEY } from '../../../config/index.js'
 import { createWriteStream } from 'fs'
-import { isPathAccessible, getTempDir, getValidatedPath } from '../../../lib/path-fns.js'
+import { isPathAccessible, getTempDir, validatePath } from '../../../lib/path-fns.js'
 import { unlink, rename, rmdir } from 'fs/promises'
 import { error, info } from '../../../logger/index.js'
 import { mkdirp } from 'mkdirp'
@@ -34,7 +34,7 @@ export default async function () {
   }
 
   // Validate the path
-  const path = getValidatedPath(res, _paths)
+  const path = validatePath(res, _paths)
   if (!path) return
 
   /**

@@ -3,7 +3,7 @@ import { unlink } from 'fs/promises'
 import { error } from '../../../logger/index.js'
 import authenticate from '../../../lib/authenticate.js'
 import { res204, res404, res401, res405, res500 } from '../../../lib/http-fns.js'
-import { getValidatedPath } from '../../../lib/path-fns.js'
+import { validatePath } from '../../../lib/path-fns.js'
 
 export default async function () {
   const {
@@ -22,14 +22,17 @@ export default async function () {
   try {
     authenticate(req)
   } catch (e) {
-    error(e)
+    error(e.message)
     res401(res)
     return
   }
 
   // Validate the path
-  const path = getValidatedPath(res, _paths)
-  if (!path) return
+  const path = validatePath(res, _paths, true)
+  if (!path) {
+    res404(res)
+    return
+  }
 
   // Attempt to delete the file
   try {

@@ -5,7 +5,7 @@ import { error, info } from '../../../logger/index.js'
 import { mkdirp } from 'mkdirp'
 import { dirname } from 'path'
 import authenticate from '../../../lib/authenticate.js'
-import { isPathAccessible, getValidatedPath } from '../../../lib/path-fns.js'
+import { isPathAccessible, validatePath } from '../../../lib/path-fns.js'
 import { res201, res400, res401, res405, res409, res500 } from '../../../lib/http-fns.js'
 
 export default async function () {
@@ -34,7 +34,7 @@ export default async function () {
   }
 
   // Validate the path
-  const path = getValidatedPath(res, _paths)
+  const path = validatePath(res, _paths)
   if (!path) return
 
   // Check if resource already exists
