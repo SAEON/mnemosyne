@@ -8,7 +8,7 @@ import checkContinue from './middleware/check-continue.js'
 /**
  * httpCallback
  * Exported for testing purposes
- * 
+ *
  * @param {Object} req HTTP Request object
  * @param {Object} res HTTP Response object
  */

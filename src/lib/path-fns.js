@@ -2,7 +2,14 @@ import os from 'os'
 import { normalize, join, parse, sep } from 'path'
 import { stat, readdir, access, mkdtemp } from 'fs/promises'
 import { res409 } from './http-fns.js'
+import { nanoid } from 'nanoid'
+import { error } from '../logger/index.js'
 
+/**
+ * Don't use os.tmpdir() as that
+ * will result in a cache that is
+ * reset on computer reboot
+ */
 export function getCacheDir() {
   switch (process.platform) {
     case 'darwin':
@@ -15,7 +22,7 @@ export function getCacheDir() {
 }
 
 export const getTempDir = async () => {
-  return normalize(join(getCacheDir(), mkdtemp()))
+  return join(getCacheDir(), nanoid())
 }
 
 export async function getAbsolutePath(volume, pathname, i, method) {
@@ -94,8 +101,8 @@ export const isPathAccessible = async p => {
   try {
     await access(p)
     return true
-  } catch (error) {
-    console.error(`Error accessing path (ignore) ${p}:`, error)
+  } catch (err) {
+    error(`Error accessing path (ignore) ${p}:`, err)
     return false
   }
 }

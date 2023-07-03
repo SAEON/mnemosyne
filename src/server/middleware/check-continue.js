@@ -2,6 +2,7 @@ import parseResource from './parse-resource.js'
 import { error, info } from '../../logger/index.js'
 import { access } from 'fs/promises'
 import authenticate from '../../lib/authenticate.js'
+import { res204, res401, res409 } from '../../lib/http-fns.js'
 
 /**
  * This middleware function is only called
@@ -35,9 +36,12 @@ export default async function (req, res) {
     info('Authenticated (checkContinue)', user, path)
   } catch (e) {
     error(e)
-    res.statusCode = 401
-    res.write('Unauthorized')
-    res.end()
+    res401(res)
+    return
+  }
+
+  if (req.method === 'DELETE' && !path) {
+    res204(res)
     return
   }
 
@@ -46,14 +50,11 @@ export default async function (req, res) {
     .then(() => true)
     .catch(() => false)
 
-  // If it exists return 409
   if (exists) {
-    // TODO - only respond this to authenticated users
-    const msg = 'Conflict. Upload path already exists'
-    res.writeHead(409, msg)
-    res.write(msg)
-    res.end()
-    return
+    if (req.method === 'PUT') {
+      res409(res)
+      return
+    }
   }
 
   // Otherwise continue the request

@@ -5,6 +5,7 @@
     "keepalive",
     "mbuffer",
     "mnemosyne",
+    "nanoid",
     "noindex",
     "somisana",
     "Zarr"

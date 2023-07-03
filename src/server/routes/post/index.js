@@ -2,7 +2,7 @@ import { KEY } from '../../../config/index.js'
 import { createWriteStream } from 'fs'
 import { isPathAccessible, getTempDir, getValidatedPath } from '../../../lib/path-fns.js'
 import { unlink, rename, rmdir } from 'fs/promises'
-import { error } from '../../../logger/index.js'
+import { error, info } from '../../../logger/index.js'
 import { mkdirp } from 'mkdirp'
 import { dirname, join, normalize, basename } from 'path'
 import authenticate from '../../../lib/authenticate.js'
@@ -57,15 +57,22 @@ export default async function () {
 
   // Ensure dir exists
   await mkdirp(dir)
+  if (tempDir) await mkdirp(tempDir)
 
   // Stream file contents to disk
   const stream = createWriteStream(tempPath || path)
 
   // Delete failed uploads
   stream.on('error', async err => {
-    await unlink(tempPath || path)
-    if (tempDir) await unlink(tempDir)
     error(err)
+    try {
+      await unlink(tempPath || path)
+      if (tempDir) await unlink(tempDir)
+    } catch (err) {
+      if (err.code !== 'ENOENT') {
+        throw err
+      }
+    }
     res500(res)
   })
 
@@ -73,16 +80,23 @@ export default async function () {
   let received = 0
   req.on('data', chunk => {
     received += chunk.length
-    console.info(`[${tempPath || path}] Received ${received} bytes`)
+    info(`[${tempPath || path}] Received ${received} bytes`)
   })
 
+  // Start the upload
   req.pipe(stream)
 
   // Handle aborted requests
   req.on('aborted', async () => {
     error('Connection terminated by client')
-    await unlink(tempPath || path)
-    if (tempDir) await unlink(tempDir)
+    try {
+      await unlink(tempPath || path)
+      if (tempDir) await unlink(tempDir)
+    } catch (err) {
+      if (err.code !== 'ENOENT') {
+        throw err
+      }
+    }
     res400(res)
   })
 
@@ -91,11 +105,17 @@ export default async function () {
     stream.on('close', async () => {
       const msg = `Received ${received} bytes`
       if (tempPath) {
+        info(`[${tempPath}] => renamed to [${path}]`)
         await rename(tempPath, path)
-        await unlink(tempPath)
-        await rmdir(tempDir)
+        try {
+          await rmdir(tempDir)
+        } catch (err) {
+          if (err.code !== 'ENOENT') {
+            throw err
+          }
+        }
       }
-      console.info(`[${path}] complete`)
+      info(`[${path}] complete`)
       res201({ res, msg, href })
       resolve()
     })

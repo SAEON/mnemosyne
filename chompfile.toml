@@ -6,7 +6,7 @@ extensions = ['chomp@0.1:prettier']
 [[task]]
 name = 'start'
 env = { TZ = 'UTC', NODE_ENV = 'development' }
-deps = ["test"]
+deps = ['src/**/*.js']
 run = """
 node \
   --trace-warnings \

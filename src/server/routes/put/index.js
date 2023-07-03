@@ -1,7 +1,7 @@
 import { KEY } from '../../../config/index.js'
 import { createWriteStream } from 'fs'
 import { unlink } from 'fs/promises'
-import { error } from '../../../logger/index.js'
+import { error, info } from '../../../logger/index.js'
 import { mkdirp } from 'mkdirp'
 import { dirname } from 'path'
 import authenticate from '../../../lib/authenticate.js'
@@ -63,7 +63,7 @@ export default async function () {
   let received = 0
   req.on('data', chunk => {
     received += chunk.length
-    console.info(`[${path}] Received ${received} bytes`)
+    info(`[${path}] Received ${received} bytes`)
   })
 
   req.pipe(stream)
@@ -79,7 +79,7 @@ export default async function () {
   await new Promise(resolve => {
     stream.on('close', async () => {
       const msg = `Received ${received} bytes`
-      console.info(`[${path}] complete`)
+      info(`[${path}] complete`)
       res201({ res, msg, href })
       resolve()
     })

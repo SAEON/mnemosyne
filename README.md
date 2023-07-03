@@ -211,6 +211,7 @@ find \
 ```
 
 ### PowerShell example (Windows)
+
 The equivalent to the `cURL` utility on Windows Platform is the `Invoke-RestMethod` tool. This is an example on how to use it to upload a single file to Mnemosyne from the PowerShell terminal
 
 ```powershell
@@ -227,6 +228,7 @@ Invoke-RestMethod `
     -ContentType "application/octet-stream" `
     -Verbose
 ```
+
 # Development
 
 Install Node.js v20.3. Then setup the project:
@@ -245,6 +247,9 @@ npm install
 
 # Start the app and write code!
 chomp --watch
+
+# In a separate terminal, start the testing server
+chomp test --watch
 ```
 
 Refer to [chompfile.toml](/chompfile.toml) to see the start command used for local development
