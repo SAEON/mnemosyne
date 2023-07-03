@@ -4,18 +4,24 @@ import configureVolumes from './_configure-volumes.js'
 import logArgs from './_log-args.js'
 import yargs from './_yargs.js'
 
-info('STARTING MNEMOSYNE SERVER')
+export async function initializeServer(argv) {
+  info('STARTING MNEMOSYNE SERVER')
 
-const args = yargs(process.argv.slice(2))
-logArgs(args)
+  const args = yargs(argv)
+  logArgs(args)
 
-const crypto = await configureKeys(args)
-await configureVolumes(args)
+  const crypto = await configureKeys(args)
+  await configureVolumes(args)
 
-export const PORT = args.port
-export const HOSTNAME = args.hostname
-export const VOLUMES = args.volume.sort()
-export const KEY = args.key
-export const USERS = args.login
-export const encrypt = crypto ? crypto.encrypt : undefined
-export const decrypt = crypto ? crypto.decrypt : undefined
+  const serverSettings = {
+    PORT: args.port,
+    HOSTNAME: args.hostname,
+    VOLUMES: args.volume.sort(),
+    KEY: args.key,
+    USERS: args.login,
+    encrypt: crypto ? crypto.encrypt : undefined,
+    decrypt: crypto ? crypto.decrypt : undefined,
+  }
+
+  return serverSettings
+}

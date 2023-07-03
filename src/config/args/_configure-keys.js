@@ -1,4 +1,4 @@
-import encryption from '../_encryption.js'
+import encryption from '../../lib/encryption.js'
 import { info, warn } from '../../logger/index.js'
 
 export default async function configureKeys(args) {
