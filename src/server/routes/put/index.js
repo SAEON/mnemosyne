@@ -34,8 +34,15 @@ export default async function () {
   }
 
   // Validate the path
-  const path = validatePath(res, _paths)
-  if (!path) return
+  const path = validatePath(_paths)
+  if (!path) {
+    res409(
+      res,
+      'Conflict. Ambiguous upload path specified targeting multiple possible volumes. Please specify an existing root directory.',
+    )
+    return
+  }
+  
 
   // Check if resource already exists
   if (await isPathAccessible(path)) {

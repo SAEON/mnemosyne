@@ -6,7 +6,7 @@ import { error, info } from '../../../logger/index.js'
 import { mkdirp } from 'mkdirp'
 import { dirname, join, normalize, basename } from 'path'
 import authorize from '../../../lib/authorize.js'
-import { res201, res400, res401, res405, res500 } from '../../../lib/http-fns.js'
+import { res201, res400, res401, res405, res409, res500 } from '../../../lib/http-fns.js'
 
 export default async function () {
   const {
@@ -34,8 +34,14 @@ export default async function () {
   }
 
   // Validate the path
-  const path = validatePath(res, _paths)
-  if (!path) return
+  const path = validatePath(_paths)
+  if (!path) {
+    res409(
+      res,
+      'Conflict. Ambiguous upload path specified targeting multiple possible volumes. Please specify an existing root directory.',
+    )
+    return
+  }
 
   /**
    * Unlike with PUT requests,

@@ -1,7 +1,6 @@
 import os from 'os'
 import { normalize, join, parse, sep } from 'path'
 import { stat, readdir, access } from 'fs/promises'
-import { res409 } from './http-fns.js'
 import { nanoid } from 'nanoid'
 import { error } from '../logger/index.js'
 
@@ -78,7 +77,7 @@ export async function getAbsolutePaths(volumes, pathname, method) {
   const paths = await Promise.all(
     volumes.map(async (volume, i) => {
       return await getAbsolutePath(volume, pathname, i, method)
-    })
+    }),
   )
   return paths.filter(Boolean)
 }
@@ -97,17 +96,9 @@ export const isPathAccessible = async p => {
   }
 }
 
-export const validatePath = (response, paths, shouldSkipResponse = false) => {
+export const validatePath = paths => {
   // If the paths array doesn't contain exactly one item, return undefined
-  if (paths.length !== 1) {
-    // Only send response if not skipped
-    if (!shouldSkipResponse) {
-      const message =
-        'Conflict. Ambiguous upload path specified targeting multiple possible volumes. Please specify an existing root directory.'
-      res409(response, message)
-    }
-    return undefined
-  }
+  if (paths?.length !== 1) return undefined
 
   // Return the first path in the array
   const [firstPath] = paths

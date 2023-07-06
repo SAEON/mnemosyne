@@ -38,11 +38,11 @@
   ],
   "devDependencies": {
     "chai": "^4.3.7",
-    "eslint": "^8.43.0",
+    "eslint": "^8.44.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
     "node-mocks-http": "^1.12.2",
-    "prettier": "^2.8.8",
+    "prettier": "^3.0.0",
     "sinon": "^15.2.0"
   },
   "dependencies": {

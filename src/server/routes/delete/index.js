@@ -28,7 +28,7 @@ export default async function () {
   }
 
   // Validate the path
-  const path = validatePath(res, _paths, true)
+  const path = validatePath(_paths)
   if (!path) {
     res404(res)
     return
