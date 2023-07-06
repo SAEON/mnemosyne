@@ -29,6 +29,10 @@ services:
       restart_policy:
         condition: any
         delay: 5s
+      resources:
+        limits:
+          cpus: "2"
+          memory: 250M
     volumes:
       - type: bind
         source: /mnt/somisana/mnemosyne

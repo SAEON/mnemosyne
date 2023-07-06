@@ -29,6 +29,10 @@ services:
       restart_policy:
         condition: any
         delay: 5s
+      resources:
+        limits:
+          cpus: "1"
+          memory: 150M
     volumes:
       - type: bind
         source: /mnemosyne-test-a
