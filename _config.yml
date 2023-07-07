@@ -1,3 +1,16 @@
 remote_theme: pages-themes/cayman@v0.2.0
 plugins:
   - jekyll-remote-theme
+
+title: Mnemosyne
+
+# Social media links
+social:
+  - title: GitHub
+    url: https://github.com/SAEON
+  - title: Twitter
+    url: https://twitter.com/Saeonews
+
+cayman:
+  show_downloads: true
+  show_vcounter: true
