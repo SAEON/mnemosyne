@@ -33,14 +33,14 @@ export default async function () {
       host,
       pathname,
       _paths,
-      query: { noindex = false },
+      query: { noindex = false, json: forceJson = false },
     },
     req: {
       headers: { accept = '' },
     },
   } = this
 
-  const json = accept.toLowerCase().includes('application/json') ? true : false
+  const json = forceJson || (accept.toLowerCase().includes('application/json') ? true : false)
 
   const listings = (
     await Promise.all(
@@ -59,12 +59,12 @@ export default async function () {
                 size: stats.size,
                 pathname,
               }
-            })
+            }),
           )
         } catch (error) {
           return []
         }
-      })
+      }),
     )
   )
     .flat()
@@ -96,16 +96,18 @@ export default async function () {
               .length === 1
 
           return {
-            parent: `${normalize(join(pathname, '..'))}`,
-            path: `${path}${!unique ? `?v=${v}` : ''}`,
+            parent: `${normalize(join(pathname, '..'))}${forceJson ? '?json' : ''}`,
+            path: `${path}${!unique ? `?v=${v}` : ''}${
+              isDirectory ? (forceJson ? '?json' : '') : ''
+            }`,
             v,
             entry,
             isFile,
             isDirectory,
             size,
           }
-        })
-      )
+        }),
+      ),
     )
     res.end()
   } else {
@@ -176,6 +178,12 @@ export default async function () {
               margin: 6px 8px;
               font-style: italic;
             }
+
+            #docs-link {
+              display: block;
+              float: right;
+              margin-right: 16px;
+            }
           </style>
         </head>
         <body>
@@ -184,6 +192,9 @@ export default async function () {
         <div id="header">
           <h1><a href="${protocol}://${host}">Mnemosyne file server</a></h1>
         </div>
+
+        <!-- Docs link -->
+        <a id="docs-link" target="_blank" href="https://saeon.github.io/mnemosyne/">API Docs</a>
 
         <!-- CONTENTS LISTINGS -->
         <div id="listing">
@@ -206,7 +217,7 @@ export default async function () {
                       ${text}
                     </span>
                     <a class="cell" href="${he.encode(
-                      `${path}${!unique ? `?v=${v}` : ''}`
+                      `${path}${!unique ? `?v=${v}` : ''}`,
                     )}">${entry}</a> 
                   </span>`
               })

@@ -11,8 +11,8 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
     - [Customize GET requests via URL params](#customize-get-requests-via-url-params)
     - [Customize GET requests via HTTP headers](#customize-get-requests-via-http-headers)
     - [Serving websites](#serving-websites)
-  - [Uploading files](#uploading-files)
-    - [cURL examples](#curl-examples)
+  - [Upload/update mode](#uploadupdate-mode)
+    - [cURL examples (uploads)](#curl-examples-uploads)
       - [Upload file as binary](#upload-file-as-binary)
       - [Specify a file to upload](#specify-a-file-to-upload)
       - [Chunked uploads](#chunked-uploads)
@@ -20,6 +20,8 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
         - [Stream from a file using mbuffer](#stream-from-a-file-using-mbuffer)
       - [Uploading a directory recursively](#uploading-a-directory-recursively)
     - [PowerShell example (Windows)](#powershell-example-windows)
+- [Updating files](#updating-files)
+- [Deleting files](#deleting-files)
 - [Development](#development)
   - [Deployment](#deployment)
     - [Docker](#docker)
@@ -33,7 +35,7 @@ A new format for cloud-optimized, multidimensional data (Zarr), and the potentia
 
 # Usage
 
-Mnemosyne is a relatively simple file server - `GET` HTTP requests for viewing files, and `PUT` HTTP requests for uploading files. Start the application with the `--key` argument (and at least one `--login`) to enable uploads. Otherwise uploads are disabled by default, the idea being that it's straightforward to share any directory on a server via HTTP Range requests.
+Mnemosyne is a relatively simple file server - `GET` HTTP requests for viewing files, and `PUT` HTTP requests for uploading files. Start the application with the `--key` argument (and at least one `--login` and `--permission`) to enable uploads. Otherwise uploads are disabled by default, the idea being that it's straightforward to share any directory on a server via HTTP Range requests.
 
 Turn your current directory into a COG-sharing HTTP Range server with a single command!
 
@@ -79,7 +81,10 @@ By default a GET request will serve (in order of preference):
 - An `index.html` file (served as a website) if present
 - The directory listing
 
-You can override this logic via specifying the URL param `?noindex`, which will serve the directory listing instead of a website
+You can override this logic via specifying URL params:
+
+- `?noindex`: For directories with an `index.html` file, this will serve the directory listing instead of a website
+- `?json`: This will return a JSON representation of a directory listing (useful in browser environments, but rather use the `Accept: Application/json` header for API calls)
 
 In the case where there are duplicate filenames (only possible at the root), use the param `?v=N` to specify which mounted volume you are referring to (where N is an integer starting at 0).
 
@@ -103,11 +108,21 @@ fetch('http://localhost:3000/directory?json')
 
 You can serve the website on a custom domain via registering a CNAME record and then configuring URL-rewrites to the desired folder. Currently this has to be done by manually adjusting Nginx configuration - [ask me to make this user-configurable](https://github.com/SAEON/mnemosyne/issues)!!
 
-## Uploading files
+## Upload/update mode
+Start the application with a `--key`, a `--login`, and a `--permission` to enable uploading, updating and deleting files. For example:
 
-Any files/folder in the exposed volume will be served. To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint.
+```sh
+npx @saeon/mnemosyne \
+  --volume /some/directory \
+  --login username \
+  --permission username:/some/directory
+```
 
-### cURL examples
+All files/folder in the exposed volume (`/some/directory` in this case) will be served, and the login `username` will have permission to write/edit `some/directory`. **_Permissions need to be granted explicitly_**.
+
+ To upload files to the server either add a directory/file to the exposed volume, or upload via the `HTTP PUT` API endpoint. Directories will be created to match the specified resource URL if they do not exist already.
+
+### cURL examples (uploads)
 
 Here are some examples using `cURL` (and some notes) using the default authentication token on localhost. (Look at server logs for authentication tokens):
 
@@ -228,6 +243,20 @@ Invoke-RestMethod `
     -Headers $headers `
     -ContentType "application/octet-stream" `
     -Verbose
+```
+
+# Updating files
+Use the HTTP `POST` method instead of the HTTP `PUT` method in the examples above. Note that this is actually an **_upsert_** operation, where the target resource is either created if it doesn't exist, or updated if it does (assuming correct permissions).
+
+# Deleting files
+Use the HTTP DELETE method to delete an existing file. For example (using `cURL`):
+
+```sh
+curl \
+  --silent \
+  -X DELETE \
+  -H "Authorization: Bearer f7efafd138da71cdcb0aa4767da9b6ee:1cc83802e7a4a831b17efa9ffecf4822" \
+  http://localhost:3000/some/deep/nested/directory/cog.tif
 ```
 
 # Development
