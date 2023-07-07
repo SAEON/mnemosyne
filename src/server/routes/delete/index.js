@@ -18,19 +18,12 @@ export default async function () {
     return
   }
 
-  // Authenticate the request
-  try {
-    authorize(req)
-  } catch (e) {
-    error(e.message)
-    res401(res)
-    return
-  }
-
   // Validate the path
   const path = validatePath(_paths)
-  if (!path) {
-    res404(res)
+
+  // Ensure that user has permission for the requested delete path
+  if (!authorize(user, path)) {
+    res401(res)
     return
   }
 

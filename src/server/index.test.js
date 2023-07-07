@@ -1,7 +1,7 @@
 import sinon from 'sinon'
 import { expect } from 'chai'
 import httpMocks from 'node-mocks-http'
-import { httpCallback } from '../src/server/index.js'
+import { httpCallback } from './index.js'
 
 function mockHttpRequest({ method, url, body = null, headers = {} }) {
   const req = httpMocks.createRequest({ method, url, body, headers })
@@ -38,7 +38,7 @@ describe('Mnemosyne API tests', () => {
           'Content-Type': 'text/plain; charset=utf-8',
         },
       },
-      405
+      405,
     )
   })
 })

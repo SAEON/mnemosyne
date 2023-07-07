@@ -24,25 +24,14 @@ export default async function () {
     return
   }
 
-  // Ensure that a valid token is used
-  try {
-    authorize(req)
-  } catch (e) {
-    error(e)
+  // Validate the path
+  const path = validatePath(_paths)
+
+  // Ensure that user has permission for the requested upload path
+  if (!authorize(user, path)) {
     res401(res)
     return
   }
-
-  // Validate the path
-  const path = validatePath(_paths)
-  if (!path) {
-    res409(
-      res,
-      'Conflict. Ambiguous upload path specified targeting multiple possible volumes. Please specify an existing root directory.',
-    )
-    return
-  }
-  
 
   // Check if resource already exists
   if (await isPathAccessible(path)) {

@@ -37,9 +37,19 @@ export default async function configurePermissions(args) {
   }
 
   info()
-  return (permission || []).reduce((permissions, current) => {
-    const [user, path] = current.split(':')
-    permissions[path] = [...new Set([...(permissions[path] || []), user])]
-    return permissions
-  }, {})
+  return (permission || []).reduce(
+    (permissions, current) => {
+      const [user, path] = current.split(':')
+
+      // paths convenience mapping
+      permissions.paths[path] = [...new Set([...(permissions.paths[path] || []), user])]
+
+      // users convenience mapping
+      permissions.users[user] = [...new Set([...(permissions.users[user] || []), path])]
+
+      // Continue reduce
+      return permissions
+    },
+    { users: {}, paths: {} },
+  )
 }

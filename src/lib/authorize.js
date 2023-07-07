@@ -1,15 +1,19 @@
-import { decrypt, LOGINS, PERMISSIONS } from '../config/index.js'
+export default function (user, path) {
+  if (!path) return false
 
-export default function (req) {
-  const { authorization } = req.headers
+  const allowedPaths = user.permissions.map(p => {
+    let path = p.replace(/^\.\//, '')
+    if (!path.endsWith('/')) {
+      path += '/'
+    }
+    return path
+  })
 
-  if (!authorization) throw new Error('Unauthorized')
-
-  // Check for valid token
-  const token = authorization.replace(/^Bearer\s+/i, '')
-  const user = decrypt(token)
-  if (!LOGINS.includes(user)) throw new Error('Unauthorized')
-
-  // Check if login is allowed for this path
-  return user
+  const authorized = allowedPaths.reduce((isAllowed, p) => {
+    if (path.startsWith(p)) {
+      isAllowed = true
+    }
+    return isAllowed
+  }, false)
+  return authorized
 }

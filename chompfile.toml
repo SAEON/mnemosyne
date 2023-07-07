@@ -18,14 +18,15 @@ node \
     --volume ./test-mnts \
     --volume ./test-mnts/mnt1 \
     --volume ./test-mnts/mnt2 \
+    --permission local:./test-mnts \
     --permission username:./test-mnts \
-    --permission username2:./test-mnts
+    --permission username2:./test-mnts/mnt2
 """
 
 [[task]]
 name = 'test'
-deps = ['src/**/*.js', "test/**/*.js"]
-run = "mocha"
+deps = ['src/**/*test.js']
+run = "mocha 'src/**/*.test.js'"
 
 [[task]]
 name = 'lint'

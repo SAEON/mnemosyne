@@ -1,8 +1,7 @@
-import parseResource from './parse-resource.js'
-import { error, info } from '../../logger/index.js'
 import { access } from 'fs/promises'
 import authorize from '../../lib/authorize.js'
-import { res204, res401, res409 } from '../../lib/http-fns.js'
+import { res401, res409 } from '../../lib/http-fns.js'
+import { validatePath } from '../../lib/path-fns.js'
 
 /**
  * This middleware function is only called
@@ -19,29 +18,21 @@ import { res204, res401, res409 } from '../../lib/http-fns.js'
  * required. For now, authentication is
  * necessary)
  */
-export default async function (req, res) {
-  const server = this
-
-  const ctx = { req, res }
-  await parseResource.call(ctx)
-
+export default async function () {
   const {
-    resource: {
-      _paths: [{ path }],
-    },
-  } = ctx
+    server,
+    auth: { user },
+    resource: { _paths },
+    req,
+    res,
+  } = this
 
-  try {
-    const user = authorize(req)
-    info('Authenticated (checkContinue)', user, path)
-  } catch (e) {
-    error(e)
+  // Validate the path
+  const path = validatePath(_paths)
+
+  // Ensure that user has permission for the requested path
+  if (!authorize(user, path)) {
     res401(res)
-    return
-  }
-
-  if (req.method === 'DELETE' && !path) {
-    res204(res)
     return
   }
 
@@ -51,10 +42,13 @@ export default async function (req, res) {
     .catch(() => false)
 
   if (exists) {
+    // PUT not allowed
     if (req.method === 'PUT') {
       res409(res)
       return
     }
+
+    // POST and DELETE are allowed
   }
 
   // Otherwise continue the request

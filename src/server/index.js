@@ -4,6 +4,7 @@ import { options, head, get, put, _404, post, httpDelete } from './routes/index.
 import parseResource from './middleware/parse-resource.js'
 import setResponseHeaders from './middleware/set-response-headers.js'
 import checkContinue from './middleware/check-continue.js'
+import userinfo from './middleware/userinfo.js'
 
 /**
  * httpCallback
@@ -14,10 +15,11 @@ import checkContinue from './middleware/check-continue.js'
  */
 export const httpCallback = async (req, res) => {
   info('HTTP request path', req.url)
-  const ctx = { req, res, server }
+  const ctx = { req, res, auth: {}, server }
 
   try {
     // Apply middleware
+    await userinfo.call(ctx)
     await parseResource.call(ctx)
     await setResponseHeaders.call(ctx)
 
@@ -64,8 +66,11 @@ export const httpCallback = async (req, res) => {
  * Exported for testing reasons
  * @param  {...any} args
  */
-export const checkContinueHandler = async (...args) => {
-  await checkContinue.call(server, ...args)
+export const checkContinueHandler = async (req, res) => {
+  const ctx = { req, res, auth: {}, server }
+  await userinfo.call(ctx)
+  await parseResource.call(ctx)
+  await checkContinue.call(ctx, req, res)
 }
 
 const server = createServer(httpCallback)

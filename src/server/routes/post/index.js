@@ -6,12 +6,13 @@ import { error, info } from '../../../logger/index.js'
 import { mkdirp } from 'mkdirp'
 import { dirname, join, normalize, basename } from 'path'
 import authorize from '../../../lib/authorize.js'
-import { res201, res400, res401, res405, res409, res500 } from '../../../lib/http-fns.js'
+import { res201, res400, res401, res405, res500 } from '../../../lib/http-fns.js'
 
 export default async function () {
   const {
     req,
     res,
+    auth: { user },
     resource: {
       _paths,
       url: { href },
@@ -24,22 +25,12 @@ export default async function () {
     return
   }
 
-  // Ensure that a valid token is used
-  try {
-    authorize(req)
-  } catch (e) {
-    error(e)
-    res401(res)
-    return
-  }
-
   // Validate the path
   const path = validatePath(_paths)
-  if (!path) {
-    res409(
-      res,
-      'Conflict. Ambiguous upload path specified targeting multiple possible volumes. Please specify an existing root directory.',
-    )
+
+  // Ensure that user has permission for the requested upload path
+  if (!authorize(user, path)) {
+    res401(res)
     return
   }
 
