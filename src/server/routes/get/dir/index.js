@@ -96,8 +96,8 @@ export default async function () {
               .length === 1
 
           return {
-            parent: `${normalize(join(pathname, '..'))}&json`,
-            path: `${path}${!unique ? `?v=${v}` : ''}${isDirectory ? '&json' : ''}`,
+            parent: `${normalize(join(pathname, '..'))}`,
+            path: `${path}${!unique ? `?v=${v}` : ''}`,
             v,
             entry,
             isFile,

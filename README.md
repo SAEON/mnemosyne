@@ -9,6 +9,7 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
 - [Usage](#usage)
   - [Viewing/retrieving files](#viewingretrieving-files)
     - [Customize GET requests via URL params](#customize-get-requests-via-url-params)
+    - [Customize GET requests via HTTP headers](#customize-get-requests-via-http-headers)
     - [Serving websites](#serving-websites)
   - [Uploading files](#uploading-files)
     - [cURL examples](#curl-examples)
@@ -78,14 +79,14 @@ By default a GET request will serve (in order of preference):
 - An `index.html` file (served as a website) if present
 - The directory listing
 
-You can override this logic via specifying URL params:
-
-- `?noindex`: For directories with an `index.html` file, this will serve the directory listing instead of a website
-- `?json`: This will return a JSON representation of a directory listing
+You can override this logic via specifying the URL param `?noindex`, which will serve the directory listing instead of a website
 
 In the case where there are duplicate filenames (only possible at the root), use the param `?v=N` to specify which mounted volume you are referring to (where N is an integer starting at 0).
 
 **NOTE - all files are publicly available**
+
+### Customize GET requests via HTTP headers
+You can request a JSON representation of a directory listing by specifying `Accept: Application/json` in the HTTP headers
 
 ### Serving websites
 
