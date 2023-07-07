@@ -23,6 +23,7 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
 - [Updating files](#updating-files)
 - [Deleting files](#deleting-files)
 - [Development](#development)
+  - [Testing](#testing)
   - [Deployment](#deployment)
     - [Docker](#docker)
   - [Publishing](#publishing)
@@ -261,7 +262,7 @@ curl \
 
 # Development
 
-Install Node.js v20.3. Then setup the project:
+Install Node.js v20.3.1 Then setup the project:
 
 ```sh
 # Clone the repository
@@ -277,12 +278,23 @@ npm install
 
 # Start the app and write code!
 chomp --watch
-
-# In a separate terminal, start the testing server
-chomp test --watch
 ```
 
 Refer to [chompfile.toml](/chompfile.toml) to see the start command used for local development
+
+## Testing
+There are some integration tests in the `test/` folder, and some unit tests in the `src/` folder. To run:
+
+```sh
+chomp test
+chomp unit-tests
+```
+
+The unit tests are run on every save, but it may be helpful to run tests as a separate server. To do this, use the `--watch` flag with chomp:
+
+```sh
+chomp test --watch 
+```
 
 ## Deployment
 

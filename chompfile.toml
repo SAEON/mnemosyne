@@ -6,7 +6,7 @@ extensions = ['chomp@0.1:prettier']
 [[task]]
 name = 'start'
 env = { TZ = 'UTC', NODE_ENV = 'development' }
-deps = ['src/**/*.js']
+deps = ['unit-tests']
 run = """
 node \
   --trace-warnings \
@@ -24,9 +24,14 @@ node \
 """
 
 [[task]]
+name = 'unit-tests'
+deps = ['src/**/*.js']
+run = "mocha 'src/**/*.test.js'"
+
+[[task]]
 name = 'test'
 deps = ['src/**/*test.js']
-run = "mocha 'src/**/*.test.js'"
+run = "mocha 'src/**/*.test.js' 'test/**/*.test.js'"
 
 [[task]]
 name = 'lint'

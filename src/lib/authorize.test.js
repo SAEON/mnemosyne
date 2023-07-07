@@ -9,11 +9,11 @@ describe('Mnemosyne permissions model tests', () => {
 
   const testPaths = {
     okay: ['dir/file.txt', 'dir2/sub/file.txt'],
-    bad: [null, undefined, '/', 'dir', 'dir3/file.txt', 'dir2/sub3/file.txt'],
+    bad: [null, undefined, '', '.', '..', './', '/', 'dir', 'dir3/file.txt', 'dir2/sub3/file.txt'],
   }
 
   describe('Authorized users', () => {
-    it('should authorize upload for valid paths', async () => {
+    it('permissible uploads', async () => {
       testPaths.okay.forEach(path => {
         const authorized = authorize(user, path)
         expect(authorized).to.be.true
