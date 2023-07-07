@@ -13,8 +13,12 @@ services:
       --key $KEY
       --volume /somisana
       --volume /osgeo
+      --login somisana
       --login gr.moncrieff@saeon.nrf.ac.za
       --login zd.smith@saeon.nrf.ac.za
+      --permission somisana:/somisana
+      --permission zd.smith@saeon.nrf.ac.za:/somisana
+      --permission gr.moncrieff@saeon.nrf.ac.za:/osgeo
     deploy:
       replicas: 1
       placement:

@@ -15,6 +15,10 @@ services:
       --volume /mnemosyne-test-b
       --login gr.moncrieff@saeon.nrf.ac.za
       --login zd.smith@saeon.nrf.ac.za
+      --permission gr.moncrieff@saeon.nrf.ac.za:/mnemosyne-test-a
+      --permission gr.moncrieff@saeon.nrf.ac.za:/mnemosyne-test-b
+      --permission zd.smith@saeon.nrf.ac.za:/mnemosyne-test-a
+      --permission zd.smith@saeon.nrf.ac.za:/mnemosyne-test-b
     deploy:
       replicas: 1
       placement:
