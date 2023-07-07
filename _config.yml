@@ -3,6 +3,7 @@ plugins:
   - jekyll-remote-theme
 
 title: Mnemosyne
+description: HTTP-Range server
 
 # Social media links
 social:
@@ -11,6 +12,4 @@ social:
   - title: Twitter
     url: https://twitter.com/Saeonews
 
-cayman:
-  show_downloads: true
-  show_vcounter: true
+show_downloads: true
