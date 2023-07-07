@@ -1,6 +1,6 @@
 # mnemosyne
 
-A very simple HTTP-range supporting file server. Stream your file in, and stream your file out! Named after the goddess of memory in Greek mythology.
+A very simple HTTP-range supporting file server. Stream your file in, and stream your file out! Named after the goddess of memory and file systems.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
