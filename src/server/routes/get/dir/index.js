@@ -33,9 +33,14 @@ export default async function () {
       host,
       pathname,
       _paths,
-      query: { noindex = false, json = false },
+      query: { noindex = false },
+    },
+    req: {
+      headers: { accept = '' },
     },
   } = this
+
+  const json = accept.toLowerCase().includes('application/json') ? true : false
 
   const listings = (
     await Promise.all(
