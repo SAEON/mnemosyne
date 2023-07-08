@@ -30,7 +30,7 @@ run = "mocha 'src/**/*.test.js'"
 
 [[task]]
 name = 'test'
-deps = ['src/**/*test.js']
+deps = ['src/**/*test.js', 'test/**/*test.js']
 run = "mocha 'src/**/*.test.js' 'test/**/*.test.js'"
 
 [[task]]

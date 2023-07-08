@@ -1,8 +1,20 @@
 import os from 'os'
 import { normalize, join, parse, sep } from 'path'
-import { stat, readdir, access } from 'fs/promises'
+import { stat, readdir, access, lstat, rmdir, unlink } from 'fs/promises'
 import { nanoid } from 'nanoid'
 import { error } from '../logger/index.js'
+
+// Don't forget to handle errors!
+export async function deletePath(path) {
+  const stats = await lstat(path)
+  if (stats.isDirectory()) {
+    await rmdir(path, { recursive: false })
+  } else if (stats.isFile()) {
+    await unlink(path)
+  } else {
+    throw new Error('Unexpected file descriptor found - not a directory or a file')
+  }
+}
 
 /**
  * Don't use os.tmpdir() as that

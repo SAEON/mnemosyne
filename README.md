@@ -36,7 +36,7 @@ A new format for cloud-optimized, multidimensional data (Zarr), and the potentia
 
 # Usage
 
-Mnemosyne is a relatively simple file server - `GET` HTTP requests for viewing files, and `PUT` HTTP requests for uploading files. Start the application with the `--key` argument (and at least one `--login` and `--permission`) to enable uploads. Otherwise uploads are disabled by default, the idea being that it's straightforward to share any directory on a server via HTTP Range requests.
+Mnemosyne is a relatively simple file server - `GET` HTTP requests for viewing files, `PUT` HTTP requests for uploading files, `POST` HTTP requests for upserting files, and `DELETE` HTTP requests for deleting files and (empty) directories. Start the application with the `--key` argument (and at least one `--login` and `--permission`) to enable uploads. Otherwise uploads are disabled by default, the idea being that it's straightforward to share any directory on a server via HTTP Range requests.
 
 Turn your current directory into a COG-sharing HTTP Range server with a single command!
 
@@ -110,10 +110,13 @@ fetch('http://localhost:3000/directory?json')
 You can serve the website on a custom domain via registering a CNAME record and then configuring URL-rewrites to the desired folder. Currently this has to be done by manually adjusting Nginx configuration - [ask me to make this user-configurable](https://github.com/SAEON/mnemosyne/issues)!!
 
 ## Upload/update mode
-Start the application with a `--key`, a `--login`, and a `--permission` to enable uploading, updating and deleting files. For example:
+Start the application with a `--key`, a `--login`, and a `--permission` to enable uploading, updating and deleting files. **_The server will log an appropriate key to use for upload/update mode when started in read-only mode._**
+
+For example:
 
 ```sh
 npx @saeon/mnemosyne \
+  --key <256-bit (32-byte) cryptographic key for use with the AES-256-CBC encryption algorithm.>
   --volume /some/directory \
   --login username \
   --permission username:/some/directory
@@ -250,7 +253,7 @@ Invoke-RestMethod `
 Use the HTTP `POST` method instead of the HTTP `PUT` method in the examples above. Note that this is actually an **_upsert_** operation, where the target resource is either created if it doesn't exist, or updated if it does (assuming correct permissions).
 
 # Deleting files
-Use the HTTP DELETE method to delete an existing file. For example (using `cURL`):
+Use the HTTP DELETE method to delete an existing file or empty directory (trying to delete a non-empty directory will result in a `409` response). For example, to delete a file using `cURL`:
 
 ```sh
 curl \
@@ -313,7 +316,7 @@ NODE_ENV=production \
 TZ=UTC \
   node \
     src \
-      --key <super-long-secret>
+      --key <256-bit (32-byte) cryptographic key for use with the AES-256-CBC encryption algorithm.>
       --volume /path/to/directory
       --volume /other/path/to/directory
       --login some-user
@@ -354,7 +357,7 @@ docker run \
   -v /some/host/directory:/mnt1 \
   -v /some/other/host/directory:/mnt2 \
   mnemosyne \
-    --key yoursupersecretkey \
+    --key <256-bit (32-byte) cryptographic key for use with the AES-256-CBC encryption algorithm.> \
     --volume /mnt1 \
     --volume /mnt2 \
     --login user1 \

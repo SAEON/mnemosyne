@@ -19,26 +19,46 @@ describe('Mnemosyne API tests', () => {
   afterEach(() => {
     sinon.restore()
   })
-
-  it('should respond GET /', async () => {
-    await testHttpRequest({ method: 'GET', url: '/' }, 200)
-  })
-
-  it('should NOT respond GET /missing-file.md', async () => {
-    await testHttpRequest({ method: 'GET', url: '/README.md' }, 404)
-  })
-
-  it('should be in read-only mode', async () => {
-    await testHttpRequest(
-      {
-        method: 'PUT',
-        url: '/README.md',
-        body: 'hello world',
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
+  
+  describe('Read only mode', () => {
+    it('Uploads disabled', async () => {
+      await testHttpRequest(
+        {
+          method: 'PUT',
+          url: '/README.md',
+          body: 'hello world',
+          headers: {
+            'Content-Type': 'text/plain; charset=utf-8',
+          },
         },
-      },
-      405,
-    )
+        405,
+      )
+    })
+
+    it('should respond GET /', async () => {
+      await testHttpRequest({ method: 'GET', url: '/' }, 200)
+    })
+
+    it('should NOT respond GET /missing-file.md', async () => {
+      await testHttpRequest({ method: 'GET', url: '/README.md' }, 404)
+    })
+  })
+
+  describe('Upload/update mode', () => {
+    it('Should respond PUT path', async () => {
+      expect(1).to.equal(2)
+    })
+
+    it('Should not respond PUT directory', async () => {
+      expect(1).to.equal(2)
+    })
+
+    it('Should respond DELETE path', async () => {
+      expect(1).to.equal(2)
+    })
+
+    it('Should respond DELETE directory', async () => {
+      expect(1).to.equal(2)
+    })
   })
 })

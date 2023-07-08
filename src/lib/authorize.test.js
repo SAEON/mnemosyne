@@ -12,6 +12,27 @@ describe('Mnemosyne permissions model tests', () => {
     bad: [null, undefined, '', '.', '..', './', '/', 'dir', 'dir3/file.txt', 'dir2/sub3/file.txt'],
   }
 
+  describe('Invalid user', () => {
+    it('Should return unauthorized', async () => {
+      const invalidUsers = [
+        null,
+        '',
+        undefined,
+        'no-user',
+        {},
+        [],
+        1,
+        false,
+        true,
+        { username: '', permissions: [] },
+      ]
+      invalidUsers.forEach(user => {
+        const authorized = authorize(user, 'file.txt')
+        expect(authorized).to.be.false
+      })
+    })
+  })
+
   describe('Authorized users', () => {
     it('permissible uploads', async () => {
       testPaths.okay.forEach(path => {

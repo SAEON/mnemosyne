@@ -21,7 +21,7 @@ export default args =>
       type: 'array',
     })
     .option('login', {
-      alias: 'u',
+      alias: 'l',
       type: 'array',
     })
     .option('permission', {

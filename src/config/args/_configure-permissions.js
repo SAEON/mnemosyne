@@ -3,17 +3,11 @@ import { info, warn } from '../../logger/index.js'
 export default async function configurePermissions(args) {
   const { key, login, permission } = args
 
-  if (!key || key.toLowerCase() === 'false') {
+  if (key && login && !permission) {
     info('*** INFO ***')
-    info('Authentication key CLI argument (--key) not provided')
-    info('Uploading is disabled!')
+    info('No permissions (--permission) set')
+    info('Uploading/updating is disabled!')
     info()
-
-    if (login) {
-      warn('*** WARNING ***')
-      warn('Permission specified (--permission) without providing an application key (--key)')
-      warn()
-    }
     return
   }
 

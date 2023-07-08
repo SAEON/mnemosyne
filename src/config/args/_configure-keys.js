@@ -1,4 +1,4 @@
-import encryption from '../../lib/encryption.js'
+import encryption, { generateKey } from '../../lib/encryption.js'
 import { info, warn } from '../../logger/index.js'
 
 export default async function configureKeys(args) {
@@ -6,8 +6,9 @@ export default async function configureKeys(args) {
 
   if (!key || key.toLowerCase() === 'false') {
     info('*** INFO ***')
-    info('Authentication key CLI argument (--key) not provided')
-    info('Uploading is disabled!')
+    info(`Authentication key CLI argument (--key) not provided. Starting in read-only mode...`)
+    info(`To start the server with full edit/upload capabilities, pass the flag:`)
+    info(`  --key ${generateKey()}`)
     info()
 
     if (login) {
