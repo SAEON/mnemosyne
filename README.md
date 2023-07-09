@@ -146,7 +146,7 @@ cat ./some/local/cog.tiff \
     --progress-bar \
     --keepalive-time 1200 \
     -X PUT \
-    -H "Authorization: Bearer f7efafd138da71cdcb0aa4767da9b6ee:1cc83802e7a4a831b17efa9ffecf4822" \
+    -H "Authorization: Bearer fd1ddb014036c75f8f11532f330ab42d:403494a94ebf44728cd63e02a3f9c070" \
     -H "Content-Type: application/octet-stream" \
     --data-binary @- \
     http://localhost:3000/some/deep/nested/directory/cog.tif \
@@ -162,7 +162,7 @@ curl \
   --progress-bar \
   --keepalive-time 1200 \
   -X PUT \
-  -H "Authorization: Bearer f7efafd138da71cdcb0aa4767da9b6ee:1cc83802e7a4a831b17efa9ffecf4822" \
+  -H "Authorization: Bearer fd1ddb014036c75f8f11532f330ab42d:403494a94ebf44728cd63e02a3f9c070" \
   -T \
   ./some/local/cog.tiff \
   http://localhost:3000/some/deep/nested/directory/cog.tif \
@@ -176,6 +176,7 @@ And then that file can be retrieved at `http://localhost:3000/some/deep/nested/d
 This is useful for uploading large files via cURL as contents are never fully buffered in memory.
 
 ##### Stream from a file
+I'm not sure if there is any benefit to this approach over specifying `-T /path/to/file` as above.
 
 ```sh
 cat ./some/local/cog.tiff \
@@ -183,7 +184,7 @@ cat ./some/local/cog.tiff \
     --progress-bar \
     --keepalive-time 1200 \
     -X PUT \
-    -H "Authorization: Bearer f7efafd138da71cdcb0aa4767da9b6ee:1cc83802e7a4a831b17efa9ffecf4822" \
+    -H "Authorization: Bearer fd1ddb014036c75f8f11532f330ab42d:403494a94ebf44728cd63e02a3f9c070" \
     -H "Content-Type: application/octet-stream" \
     -T \
     - \
@@ -204,7 +205,7 @@ mbuffer \
     --keepalive-time 1200 \
     -X PUT \
     -H "Content-Type: application/octet-stream" \
-    -H "Authorization: Bearer f7efafd138da71cdcb0aa4767da9b6ee:1cc83802e7a4a831b17efa9ffecf4822" \
+    -H "Authorization: Bearer fd1ddb014036c75f8f11532f330ab42d:403494a94ebf44728cd63e02a3f9c070" \
     --data-binary @- \
     http://localhost:3000/some/deep/nested/directory/cog.tif \
       | cat
@@ -223,7 +224,7 @@ find \
     --progress-bar \
     --keepalive-time 1200 \
     -X PUT \
-    -H "Authorization: Bearer f7efafd138da71cdcb0aa4767da9b6ee:1cc83802e7a4a831b17efa9ffecf4822" \
+    -H "Authorization: Bearer fd1ddb014036c75f8f11532f330ab42d:403494a94ebf44728cd63e02a3f9c070" \
     --create-dirs \
     -T {} \
     http://localhost:3000/some/nested/directory/{} \; \
@@ -238,7 +239,7 @@ The equivalent to the `cURL` utility on Windows Platform is the `Invoke-RestMeth
 cd /to/the/directory/with/your/file
 $FILENAME = "some-file.tiff"
 $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-$headers.Add("Authorization", "Bearer f7efafd138da71cdcb0aa4767da9b6ee:1cc83802e7a4a831b17efa9ffecf4822")
+$headers.Add("Authorization", "Bearer fd1ddb014036c75f8f11532f330ab42d:403494a94ebf44728cd63e02a3f9c070")
 
 Invoke-RestMethod `
     -Uri "http://localhost:3000/some/nested/directory/$FILENAME" `
@@ -259,7 +260,7 @@ Use the HTTP DELETE method to delete an existing file or empty directory (trying
 curl \
   --silent \
   -X DELETE \
-  -H "Authorization: Bearer f7efafd138da71cdcb0aa4767da9b6ee:1cc83802e7a4a831b17efa9ffecf4822" \
+  -H "Authorization: Bearer fd1ddb014036c75f8f11532f330ab42d:403494a94ebf44728cd63e02a3f9c070" \
   http://localhost:3000/some/deep/nested/directory/cog.tif
 ```
 
@@ -322,6 +323,7 @@ TZ=UTC \
       --login some-user
       --login some-user2
       --login some-user@gmail.com
+      --permission some-user:/path/to/directory
 
 # Look at the startup logs, and pass access tokens to the relevant users
 ```
@@ -361,7 +363,10 @@ docker run \
     --volume /mnt1 \
     --volume /mnt2 \
     --login user1 \
-    --login user2
+    --login user2 \
+    --permission user1:/mnt1
+    --permission user1:/mnt2
+    --permission user2:/mnt2/some/sub/directory/only
 ```
 
 ## Publishing

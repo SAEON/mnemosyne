@@ -11,14 +11,14 @@ run = """
 node \
   --trace-warnings \
   bin/mnemosyne.js \
-    --key TjWnZr4u7w!z%C*F-JaNdRgUkXp2s5v8 \
-    --login local \
+    --key 3569bdd87dbbbf73bd06cdbda35a2e773325acd027c6304c37eda5b1783097ea \
+    --login localdev \
     --login username \
     --login username2 \
     --volume ./test-mnts \
     --volume ./test-mnts/mnt1 \
     --volume ./test-mnts/mnt2 \
-    --permission local:./test-mnts \
+    --permission localdev:./test-mnts \
     --permission username:./test-mnts \
     --permission username2:./test-mnts/mnt2
 """
