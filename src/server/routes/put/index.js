@@ -12,6 +12,7 @@ export default async function () {
   const {
     req,
     res,
+    auth: { user },
     resource: {
       _paths,
       url: { href },

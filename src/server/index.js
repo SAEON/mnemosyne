@@ -5,6 +5,7 @@ import parseResource from './middleware/parse-resource.js'
 import setResponseHeaders from './middleware/set-response-headers.js'
 import checkContinue from './middleware/check-continue.js'
 import userinfo from './middleware/userinfo.js'
+import { res500 } from '../lib/http-fns.js'
 
 /**
  * httpCallback
@@ -55,8 +56,7 @@ export const httpCallback = async (req, res) => {
     }
   } catch (e) {
     error('Unexpected server error', e)
-    res.statusCode = 500
-    res.end()
+    res500(res)
   }
 }
 
