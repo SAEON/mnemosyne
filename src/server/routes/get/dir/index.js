@@ -69,10 +69,20 @@ export default async function () {
   )
     .flat()
     .sort(({ entry: a }, { entry: b }) => {
-      if (a.toUpperCase() > b.toUpperCase()) return 1
-      if (b.toUpperCase() > a.toUpperCase()) return -1
+      const nameA = a.split('.').slice(0, -1).join('.')
+      const nameB = b.split('.').slice(0, -1).join('.')
+      const extA = a.split('.').pop()
+      const extB = b.split('.').pop()
+
+      if (nameA.toUpperCase() > nameB.toUpperCase()) return 1
+      if (nameB.toUpperCase() > nameA.toUpperCase()) return -1
+
+      if (extA.toUpperCase() > extB.toUpperCase()) return 1
+      if (extB.toUpperCase() > extA.toUpperCase()) return -1
+
       return 0
     })
+    
 
   // Serve an index.html file if it exists
   const indexFiles = !noindex && !json && listings.filter(({ entry }) => entry === 'index.html')

@@ -52,7 +52,17 @@ async function fetchPathStats(normalizedPath) {
     const size = stats.size
     const isFile = stats.isFile()
     const isDirectory = stats.isDirectory()
-    const entries = isDirectory ? (await readdir(normalizedPath)).sort() : undefined
+    const entries = isDirectory
+      ? (await readdir(normalizedPath)).sort((a, b) => {
+          const nameA = a.split('.').slice(0, -1).join('.')
+          const nameB = b.split('.').slice(0, -1).join('.')
+          if (nameA !== nameB) {
+            return nameA.localeCompare(nameB)
+          } else {
+            return a.localeCompare(b)
+          }
+        })
+      : undefined
     return { stats, size, isFile, isDirectory, entries }
   } catch (error) {
     return undefined
