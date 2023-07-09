@@ -131,7 +131,7 @@ export default async function () {
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width">
-          <title>${he.encode(pathname)}</title>
+          <title>Mnemosyne ${he.encode(pathname)}</title>
 
           <style>
             html, body {

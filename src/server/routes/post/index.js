@@ -1,8 +1,8 @@
 import { KEY } from '../../../config/index.js'
 import { createWriteStream } from 'fs'
 import { isPathAccessible, getTempDir, validatePath } from '../../../lib/path-fns.js'
-import { unlink, rename, rmdir } from 'fs/promises'
-import { error, info } from '../../../logger/index.js'
+import { unlink, rename, copyFile, rmdir } from 'fs/promises'
+import { error, info, warn } from '../../../logger/index.js'
 import { mkdirp } from 'mkdirp'
 import { dirname, join, normalize, basename } from 'path'
 import authorize from '../../../lib/authorize.js'
@@ -45,6 +45,7 @@ export default async function () {
   let tempDir = undefined
   let tempPath = undefined
   if (await isPathAccessible(path)) {
+    console.log(path)
     tempDir = await getTempDir()
     tempPath = normalize(join(tempDir, basename(path)))
   }
@@ -97,22 +98,48 @@ export default async function () {
     res400(res)
   })
 
-  // Respond with success
+  // Process the request
   await new Promise(resolve => {
     stream.on('close', async () => {
       const msg = `Received ${received} bytes`
+
       if (tempPath) {
-        info(`[${tempPath}] => renamed to [${path}]`)
-        await rename(tempPath, path)
+        /**
+         * Attempt to rename the file first, as it's the most efficient method.
+         * If the cache directory and the target path are on different volumes,
+         * this may fail. In such a case, we fall back to copying the file to
+         * the new volume and deleting the temp file.
+         */
+        try {
+          await rename(tempPath, path)
+          info(`File renamed from [${tempPath}] to [${path}]`)
+        } catch (renameErr) {
+          warn(
+            `Renaming from [${tempPath}] to [${path}] failed. Falling back to copy/delete...`,
+            renameErr,
+          )
+          try {
+            await copyFile(tempPath, path)
+            await unlink(tempPath)
+            info(`File copied from [${tempPath}] to [${path}]`)
+          } catch (copyDeleteErr) {
+            throw new Error(
+              `Failed to copy/delete from [${tempPath}] to [${path}]: ${copyDeleteErr}`,
+            )
+          }
+        }
+
+        // Attempt to remove the temporary directory
         try {
           await rmdir(tempDir)
-        } catch (err) {
-          if (err.code !== 'ENOENT') {
-            throw err
+        } catch (rmdirErr) {
+          if (rmdirErr.code !== 'ENOENT') {
+            throw new Error(`Failed to remove temporary directory [${tempDir}]: ${rmdirErr}`)
           }
         }
       }
-      info(`[${path}] complete`)
+
+      info(`File transfer to [${path}] completed`)
       res201({ res, msg, href })
       resolve()
     })
