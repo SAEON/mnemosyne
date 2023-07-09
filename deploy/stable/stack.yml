@@ -17,7 +17,7 @@ services:
       --login gr.moncrieff@saeon.nrf.ac.za
       --login zd.smith@saeon.nrf.ac.za
       --permission somisana:/somisana
-      --permission zd.smith@saeon.nrf.ac.za:/timeline-content
+      --permission zd.smith@saeon.nrf.ac.za:/somisana/timeline-content
       --permission gr.moncrieff@saeon.nrf.ac.za:/osgeo
     deploy:
       replicas: 1
