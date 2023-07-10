@@ -4,13 +4,7 @@ import { parseRangeHeader } from '../../../lib/http-fns.js'
 import { validatePath } from '../../../lib/path-fns.js'
 import { res409 } from '../../../lib/http-fns.js'
 
-export default async function () {
-  const {
-    req,
-    res,
-    resource: { _paths },
-  } = this
-
+export default async function ({ req, res, resource: { _paths } }) {
   const path = validatePath(_paths)
   if (!path) {
     res409(res)

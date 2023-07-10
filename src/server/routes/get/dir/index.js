@@ -1,45 +1,21 @@
 import { stat } from 'fs/promises'
-import { join, normalize } from 'path'
-import he from 'he'
-import serveFile from '../../get/file/index.js'
-import humanReadableBytes from '../../../../lib/human-readable-bytes.js'
+import { createReadStream } from 'fs'
+import { join, normalize, resolve } from 'path'
+import { res500 } from '../../../../lib/http-fns.js'
+import serveFile from '../file/index.js'
+import { error } from '../../../../logger/index.js'
 
-const getBackLinks = ctx => {
-  const {
-    resource: { protocol, host, pathname },
-  } = ctx
-
-  if (pathname === '/') {
-    return `<a href="${protocol}://${host}">.</a>/`
-  }
-
-  return pathname
-    .split('/')
-    .slice(0, -1)
-    .map((path, i, arr) => arr.slice(0, i + 1))
-    .map(p => p.join('/'))
-    .reduce(
-      (str, p) =>
-        `${str}${`<a href="${protocol}://${host}${p}">${p.split('/').pop() || '.'}</a>`}/`,
-      ''
-    )
-}
-
-export default async function () {
-  const {
-    res,
-    resource: {
-      protocol,
-      host,
-      pathname,
-      _paths,
-      query: { noindex = false, json: forceJson = false },
-    },
-    req: {
-      headers: { accept = '' },
-    },
-  } = this
-
+export default async function ({
+  res,
+  resource: {
+    pathname,
+    _paths,
+    query: { noindex = false, json: forceJson = false },
+  },
+  req: {
+    headers: { accept = '' },
+  },
+}) {
   const json = forceJson || (accept.toLowerCase().includes('application/json') ? true : false)
 
   const listings = (
@@ -82,7 +58,6 @@ export default async function () {
 
       return 0
     })
-    
 
   // Serve an index.html file if it exists
   const indexFiles = !noindex && !json && listings.filter(({ entry }) => entry === 'index.html')
@@ -121,128 +96,18 @@ export default async function () {
     )
     res.end()
   } else {
-    // Set headers
     res.setHeader('content-type', 'text/html')
+    const htmlPath = resolve(normalize(join('./src/html-client', 'index.html')))
+    const readStream = createReadStream(htmlPath)
 
-    // Create directory listing HTML
-    const html = `
-      <!doctype html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width">
-          <title>Mnemosyne ${he.encode(pathname)}</title>
+    readStream.on('error', e => {
+      error('Error reading file:', e)
+      res500(res)
+    })
 
-          <style>
-            html, body {
-              margin: 0;
-              padding: 0;
-              font-family: monospace;
-            }
-
-            #header {
-              display: flex;
-              justify-content: center;
-              border-bottom: 1px solid grey;
-              margin-bottom: 12px;
-            }
-            
-            #header > h1 {
-              margin: 12px;
-              align-items: center;
-              font-size: 24px;
-            }
-
-            #listing {
-              margin: 2px 8px;
-            }
-
-            #listing > h2 {
-              font-size: 16px;
-            }
-
-            #listing > #entries {
-              display: table;
-            }
-
-            #listing > #entries > .entry {
-              display: table-row;
-              margin: 4px 0;
-            }
-
-            #listing > #entries > .entry > .cell {
-              display: table-cell;
-            }
-
-            #listing > #entries > .entry > .cell:not(:first-child) {
-              padding-left: 12px;
-            }
-
-            #footer {
-              position: fixed;
-              bottom: 0;
-              right: 0;
-            }
-
-            #footer > p {
-              margin: 6px 8px;
-              font-style: italic;
-            }
-
-            #docs-link {
-              display: block;
-              float: right;
-              margin-right: 16px;
-            }
-          </style>
-        </head>
-        <body>
-
-        <!-- PAGE HEADER -->
-        <div id="header">
-          <h1><a href="${protocol}://${host}">Mnemosyne file server</a></h1>
-        </div>
-
-        <!-- Docs link -->
-        <a id="docs-link" target="_blank" href="https://saeon.github.io/mnemosyne/">API Docs</a>
-
-        <!-- CONTENTS LISTINGS -->
-        <div id="listing">
-          <h2>${getBackLinks(this)}${he.encode(pathname.split('/').pop())}</h2>
-          <div id="entries">
-            ${listings
-              .map(({ isFile, size, entry, pathname, v }, i, arr) => {
-                const icon = isFile ? '🖺' : '🗀'
-                const text = isFile ? humanReadableBytes(size) : '..'
-                const path = normalize(join(pathname, entry))
-                const unique =
-                  arr.filter(({ pathname, entry }) => normalize(join(pathname, entry)) === path)
-                    .length === 1
-                return `
-                  <span class="entry">
-                    <span class="cell">
-                      ${icon}
-                    </span>
-                    <span class="cell">
-                      ${text}
-                    </span>
-                    <a class="cell" href="${he.encode(
-                      `${path}${!unique ? `?v=${v}` : ''}`,
-                    )}">${entry}</a> 
-                  </span>`
-              })
-              .join('\n')}
-          </div>
-        </div>
-
-        <!-- FOOTER -->
-        <div id="footer">
-          <p>Node.js ${process.version}</p>
-        </div>
-        </body>
-      </html>`
-
-    res.write(html)
-    res.end()
+    readStream.pipe(res)
+    readStream.on('close', () => {
+      res.end()
+    })
   }
 }

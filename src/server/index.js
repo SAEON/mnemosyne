@@ -10,6 +10,8 @@ import applyMiddleware, {
 } from './middleware/index.js'
 import { res404, res500 } from '../lib/http-fns.js'
 
+let server
+
 // Exported to be testable
 export const httpCallback = async (req, res) => {
   info('HTTP request path', req.url)
@@ -19,30 +21,37 @@ export const httpCallback = async (req, res) => {
     // Apply middleware
     await applyMiddleware(ctx, userinfo, parseResource, cors)
 
-    // Route request based on method
+    /**
+     * Route request based on method
+     * Routes can either access ctx via
+     * and argument, or via 'this'. Providing
+     * ctx via the instance is useful in the
+     * case of passing ctx along to subsequent
+     * functions
+     */
     switch (req.method?.toUpperCase()) {
       case 'HEAD':
-        await head.call(ctx, req, res)
+        await head.call(ctx, ctx)
         break
 
       case 'OPTIONS':
-        await options.call(ctx, req, res)
+        await options.call(ctx, ctx)
         break
 
       case 'GET':
-        await get.call(ctx, req, res)
+        await get.call(ctx, ctx)
         break
 
       case 'PUT':
-        await put.call(ctx, req, res)
+        await put.call(ctx, ctx)
         break
 
       case 'POST':
-        await post.call(ctx, req, res)
+        await post.call(ctx, ctx)
         break
 
       case 'DELETE':
-        await httpDelete.call(ctx, req, res)
+        await httpDelete.call(ctx, ctx)
         break
 
       default:
@@ -56,16 +65,22 @@ export const httpCallback = async (req, res) => {
 }
 
 // Exported to be testable
-export const checkContinueHandler = async (req, res) =>
-  await applyMiddleware(
-    createContext(req, res, server),
-    userinfo,
-    parseResource,
-    cors,
-    checkContinue,
-  )
+export const checkContinueHandler = async (req, res) => {
+  try {
+    await applyMiddleware(
+      createContext(req, res, server),
+      userinfo,
+      parseResource,
+      cors,
+      checkContinue,
+    )
+  } catch (e) {
+    error('Unexpected server error', e)
+    res500(res)
+  }
+}
 
-var server = createServer(httpCallback)
+server = createServer(httpCallback)
 server.on('checkContinue', checkContinueHandler)
 
 export default server

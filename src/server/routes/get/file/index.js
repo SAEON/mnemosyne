@@ -2,43 +2,41 @@ import { stat } from 'fs/promises'
 import streamFile from './_stream-file.js'
 import { parseRangeHeader } from '../../../../lib/http-fns.js'
 
-export default async function serveFile() {
-  const {
-    req: request,
-    res: response,
-    resource: {
-      _paths: [{ path: file }],
-    },
-  } = this
-
+export default async function serveFile({
+  req,
+  res,
+  resource: {
+    _paths: [{ path: file }],
+  },
+}) {
   const { size: contentLength } = await stat(file)
-  const { range } = request.headers
+  const { range } = req.headers
 
   if (range) {
     const ranges = parseRangeHeader(range, contentLength)
     for (const { start, end } of ranges) {
       // Invalid range
       if (start === null || end === null || start >= contentLength || end >= contentLength) {
-        response.writeHead(416, { 'Content-Range': `bytes */${contentLength}` })
-        return response.end()
+        res.writeHead(416, { 'Content-Range': `bytes */${contentLength}` })
+        return res.end()
       }
 
       // Valid range
-      response.statusCode = 206
-      response.setHeader('Content-Range', `bytes ${start}-${end}/${contentLength}`)
-      response.setHeader('Accept-Ranges', 'bytes')
+      res.statusCode = 206
+      res.setHeader('Content-Range', `bytes ${start}-${end}/${contentLength}`)
+      res.setHeader('Accept-Ranges', 'bytes')
       await streamFile({
         size: contentLength,
         contentLength: end - start + 1,
-        request,
-        response,
+        request: req,
+        response: res,
         file,
         start,
         end,
       })
     }
   } else {
-    response.statusCode = 200
-    streamFile({ size: contentLength, contentLength, request, response, file })
+    res.statusCode = 200
+    streamFile({ size: contentLength, contentLength, request: req, response: res, file })
   }
 }
