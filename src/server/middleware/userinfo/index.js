@@ -1,5 +1,5 @@
-import { decrypt, LOGINS, PERMISSIONS } from '../../config/index.js'
-import { error } from '../../logger/index.js'
+import { decrypt, LOGINS, PERMISSIONS } from '../../../config/index.js'
+import { error } from '../../../logger/index.js'
 
 export default async function () {
   const {

@@ -1,16 +1,18 @@
 import { warn } from '../../../logger/index.js'
-import _404 from '../404/index.js'
 import serveFile from './file/index.js'
 import serveDir from './dir/index.js'
+import { res404 } from '../../../lib/http-fns.js'
 
 export default async function () {
   const {
+    res,
     resource: { _paths, pathname },
   } = this
 
   if (_paths.length === 0) {
     warn('Requested resource does not exist', pathname)
-    return _404.call(this)
+    res404(res)
+    return
   }
 
   const file = _paths.find(({ isFile: f }) => f)

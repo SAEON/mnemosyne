@@ -1,28 +1,23 @@
 import { createServer } from 'http'
 import { info, error } from '../logger/index.js'
-import { options, head, get, put, _404, post, httpDelete } from './routes/index.js'
-import parseResource from './middleware/parse-resource.js'
-import setResponseHeaders from './middleware/set-response-headers.js'
-import checkContinue from './middleware/check-continue.js'
-import userinfo from './middleware/userinfo.js'
-import { res500 } from '../lib/http-fns.js'
+import { options, head, get, put, post, httpDelete } from './routes/index.js'
+import applyMiddleware, {
+  cors,
+  checkContinue,
+  userinfo,
+  parseResource,
+  createContext,
+} from './middleware/index.js'
+import { res404, res500 } from '../lib/http-fns.js'
 
-/**
- * httpCallback
- * Exported for testing purposes
- *
- * @param {Object} req HTTP Request object
- * @param {Object} res HTTP Response object
- */
+// Exported to be testable
 export const httpCallback = async (req, res) => {
   info('HTTP request path', req.url)
-  const ctx = { req, res, auth: {}, server }
+  const ctx = createContext(req, res, server)
 
   try {
     // Apply middleware
-    await userinfo.call(ctx)
-    await parseResource.call(ctx)
-    await setResponseHeaders.call(ctx)
+    await applyMiddleware(ctx, userinfo, parseResource, cors)
 
     // Route request based on method
     switch (req.method?.toUpperCase()) {
@@ -51,7 +46,7 @@ export const httpCallback = async (req, res) => {
         break
 
       default:
-        await _404.call(ctx, req, res)
+        res404(res)
         break
     }
   } catch (e) {
@@ -60,20 +55,17 @@ export const httpCallback = async (req, res) => {
   }
 }
 
-/**
- * checkContinue handler
- *
- * Exported for testing reasons
- * @param  {...any} args
- */
-export const checkContinueHandler = async (req, res) => {
-  const ctx = { req, res, auth: {}, server }
-  await userinfo.call(ctx)
-  await parseResource.call(ctx)
-  await checkContinue.call(ctx, req, res)
-}
+// Exported to be testable
+export const checkContinueHandler = async (req, res) =>
+  await applyMiddleware(
+    createContext(req, res, server),
+    userinfo,
+    parseResource,
+    cors,
+    checkContinue,
+  )
 
-const server = createServer(httpCallback)
+var server = createServer(httpCallback)
 server.on('checkContinue', checkContinueHandler)
 
 export default server

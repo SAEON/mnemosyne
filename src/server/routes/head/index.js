@@ -1,26 +1,23 @@
 import { stat } from 'fs/promises'
 import mime from 'mime'
 import { parseRangeHeader } from '../../../lib/http-fns.js'
+import { validatePath } from '../../../lib/path-fns.js'
+import { res409 } from '../../../lib/http-fns.js'
 
 export default async function () {
   const {
-    req: request,
-    res: response,
+    req,
+    res,
     resource: { _paths },
   } = this
 
-  if (_paths.length > 1) {
-    const msg =
-      "Conflict. An ambiguous resource path was provided. Please include the 'v' (volume) and 'e' (entry) URL parameters to specify the desired resource unambiguously."
-    response.writeHead(409, msg, { 'Content-Type': 'text/plain' })
-    response.write(msg)
-    response.end()
+  const path = validatePath(_paths)
+  if (!path) {
+    res409(res)
     return
   }
 
-  const { path } = _paths[0]
-
-  const { range } = request.headers
+  const { range } = req.headers
 
   let contentLength
   let contentType
@@ -28,8 +25,8 @@ export default async function () {
     contentLength = (await stat(path)).size
     contentType = mime.getType(path)
   } catch (error) {
-    response.statusCode = 404
-    response.end()
+    res.statusCode = 404
+    res.end()
     return
   }
 
@@ -38,12 +35,12 @@ export default async function () {
     for (const { start, end } of ranges) {
       // Invalid range
       if (start === null || end === null || start >= contentLength || end >= contentLength) {
-        response.writeHead(416, { 'Content-Range': `bytes */${contentLength}` })
-        return response.end()
+        res.writeHead(416, { 'Content-Range': `bytes */${contentLength}` })
+        return res.end()
       }
 
       // Valid range
-      response.writeHead(206, {
+      res.writeHead(206, {
         'Content-Range': `bytes ${start}-${end}/${contentLength}`,
         'Accept-Ranges': 'bytes',
         'Content-Length': end - start + 1,
@@ -51,12 +48,12 @@ export default async function () {
       })
     }
   } else {
-    response.writeHead(200, {
+    res.writeHead(200, {
       'Content-Length': contentLength,
       'Content-Type': contentType,
       'Accept-Ranges': 'bytes',
     })
   }
 
-  response.end()
+  res.end()
 }

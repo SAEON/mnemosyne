@@ -1,7 +1,7 @@
 import { access } from 'fs/promises'
-import authorize from '../../lib/authorize.js'
-import { res401, res409 } from '../../lib/http-fns.js'
-import { validatePath } from '../../lib/path-fns.js'
+import authorize from '../../../lib/authorize.js'
+import { res401, res409 } from '../../../lib/http-fns.js'
+import { validatePath } from '../../../lib/path-fns.js'
 
 /**
  * This middleware function is only called
