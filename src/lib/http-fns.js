@@ -1,22 +1,27 @@
 export const parseRangeHeader = function (rangeHeader, contentLength) {
-  const range = rangeHeader.replace(/bytes=/, '').split('-')
-  const start = parseInt(range[0], 10)
-  const end = range[1] ? parseInt(range[1], 10) : contentLength - 1
+  const ranges = rangeHeader.replace(/bytes=/, '').split(',')
 
-  if (isNaN(start) && isNaN(end)) {
-    return { start: null, end: null }
-  }
+  return ranges.map(range => {
+    const [startStr, endStr] = range.split('-')
+    const start = parseInt(startStr, 10)
+    const end = endStr ? parseInt(endStr, 10) : contentLength - 1
 
-  if (isNaN(start)) {
-    return { start: contentLength - end, end }
-  }
+    if (isNaN(start) && isNaN(end)) {
+      return { start: null, end: null }
+    }
 
-  if (isNaN(end)) {
-    return { start, end: contentLength - 1 }
-  }
+    if (isNaN(start)) {
+      return { start: contentLength - end, end: contentLength - 1 }
+    }
 
-  return [{ start, end }]
+    if (isNaN(end)) {
+      return { start, end: contentLength - 1 }
+    }
+
+    return { start, end }
+  })
 }
+
 
 export const res201 = ({ res, msg, href }) => {
   res.writeHead(201, {

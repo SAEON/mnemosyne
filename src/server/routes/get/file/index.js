@@ -13,28 +13,34 @@ export default async function serveFile({
   const { range } = req.headers
 
   if (range) {
-    const ranges = parseRangeHeader(range, contentLength)
-    for (const { start, end } of ranges) {
-      // Invalid range
-      if (start === null || end === null || start >= contentLength || end >= contentLength) {
-        res.writeHead(416, { 'Content-Range': `bytes */${contentLength}` })
-        return res.end()
-      }
-
-      // Valid range
-      res.statusCode = 206
-      res.setHeader('Content-Range', `bytes ${start}-${end}/${contentLength}`)
-      res.setHeader('Accept-Ranges', 'bytes')
-      await streamFile({
-        size: contentLength,
-        contentLength: end - start + 1,
-        request: req,
-        response: res,
-        file,
-        start,
-        end,
-      })
+    if (!range.toLowerCase().trim().startsWith(`bytes=`)) {
+      res.status(416).send('Range Not Satisfiable')
+      return
     }
+
+    const ranges = parseRangeHeader(range, contentLength)
+    // If multiple ranges are specified, only use the first valid one
+    const validRanges = ranges.filter(
+      ({ start, end }) =>
+        start !== null && end !== null && start < contentLength && end < contentLength,
+    )
+    if (validRanges.length === 0) {
+      res.writeHead(416, { 'Content-Range': `bytes */${contentLength}` })
+      return res.end()
+    }
+    const { start, end } = validRanges[0]
+    res.statusCode = 206
+    res.setHeader('Content-Range', `bytes ${start}-${end}/${contentLength}`)
+    res.setHeader('Accept-Ranges', 'bytes')
+    await streamFile({
+      size: contentLength,
+      contentLength: end - start + 1,
+      request: req,
+      response: res,
+      file,
+      start,
+      end,
+    })
   } else {
     res.statusCode = 200
     streamFile({ size: contentLength, contentLength, request: req, response: res, file })

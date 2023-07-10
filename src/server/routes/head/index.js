@@ -25,21 +25,31 @@ export default async function ({ req, res, resource: { _paths } }) {
   }
 
   if (range) {
-    const ranges = parseRangeHeader(range, contentLength)
-    for (const { start, end } of ranges) {
-      // Invalid range
-      if (start === null || end === null || start >= contentLength || end >= contentLength) {
-        res.writeHead(416, { 'Content-Range': `bytes */${contentLength}` })
-        return res.end()
-      }
+    if (!range.toLowerCase().trim().startsWith(`bytes=`)) {
+      res.status(416).send('Range Not Satisfiable')
+      return
+    }
 
+    const ranges = parseRangeHeader(range, contentLength)
+    console.log(ranges)
+
+    // Assume that the first valid range should be used for HEAD response.
+    const firstValidRange = ranges.find(
+      ({ start, end }) =>
+        start !== null && end !== null && start < contentLength && end < contentLength,
+    )
+
+    if (firstValidRange) {
       // Valid range
       res.writeHead(206, {
-        'Content-Range': `bytes ${start}-${end}/${contentLength}`,
-        'Accept-Ranges': 'bytes',
-        'Content-Length': end - start + 1,
+        'Content-Range': `bytes ${firstValidRange.start}-${firstValidRange.end}/${contentLength}`,
+        'Content-Length': firstValidRange.end - firstValidRange.start + 1,
         'Content-Type': contentType,
+        'Accept-Ranges': 'bytes',
       })
+    } else {
+      // Invalid range
+      res.writeHead(416, { 'Content-Range': `bytes */${contentLength}` })
     }
   } else {
     res.writeHead(200, {

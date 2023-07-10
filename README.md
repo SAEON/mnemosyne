@@ -69,7 +69,7 @@ curl \
 
 ```
 curl \
-  -H "Range bytes=12-20" \
+  -H "Range: bytes=12-20" \
   -X GET \
   http://localhost:3000/filename.tif
 ```
