@@ -1,57 +1,61 @@
 import { createServer } from 'http'
 import { info, error } from '../logger/index.js'
-import { options, head, get, put, _404, post, httpDelete } from './routes/index.js'
-import parseResource from './middleware/parse-resource.js'
-import setResponseHeaders from './middleware/set-response-headers.js'
-import checkContinue from './middleware/check-continue.js'
-import userinfo from './middleware/userinfo.js'
-import { res500 } from '../lib/http-fns.js'
+import { options, head, get, put, post, httpDelete } from './routes/index.js'
+import applyMiddleware, {
+  cors,
+  checkContinue,
+  userinfo,
+  parseResource,
+  createContext,
+} from './middleware/index.js'
+import { res404, res500 } from '../lib/http-fns.js'
 
-/**
- * httpCallback
- * Exported for testing purposes
- *
- * @param {Object} req HTTP Request object
- * @param {Object} res HTTP Response object
- */
+let server
+
+// Exported to be testable
 export const httpCallback = async (req, res) => {
   info('HTTP request path', req.url)
-  const ctx = { req, res, auth: {}, server }
+  const ctx = createContext(req, res, server)
 
   try {
     // Apply middleware
-    await userinfo.call(ctx)
-    await parseResource.call(ctx)
-    await setResponseHeaders.call(ctx)
+    await applyMiddleware(ctx, userinfo, parseResource, cors)
 
-    // Route request based on method
+    /**
+     * Route request based on method
+     * Routes can either access ctx via
+     * and argument, or via 'this'. Providing
+     * ctx via the instance is useful in the
+     * case of passing ctx along to subsequent
+     * functions
+     */
     switch (req.method?.toUpperCase()) {
       case 'HEAD':
-        await head.call(ctx, req, res)
+        await head.call(ctx, ctx)
         break
 
       case 'OPTIONS':
-        await options.call(ctx, req, res)
+        await options.call(ctx, ctx)
         break
 
       case 'GET':
-        await get.call(ctx, req, res)
+        await get.call(ctx, ctx)
         break
 
       case 'PUT':
-        await put.call(ctx, req, res)
+        await put.call(ctx, ctx)
         break
 
       case 'POST':
-        await post.call(ctx, req, res)
+        await post.call(ctx, ctx)
         break
 
       case 'DELETE':
-        await httpDelete.call(ctx, req, res)
+        await httpDelete.call(ctx, ctx)
         break
 
       default:
-        await _404.call(ctx, req, res)
+        res404(res)
         break
     }
   } catch (e) {
@@ -60,20 +64,23 @@ export const httpCallback = async (req, res) => {
   }
 }
 
-/**
- * checkContinue handler
- *
- * Exported for testing reasons
- * @param  {...any} args
- */
+// Exported to be testable
 export const checkContinueHandler = async (req, res) => {
-  const ctx = { req, res, auth: {}, server }
-  await userinfo.call(ctx)
-  await parseResource.call(ctx)
-  await checkContinue.call(ctx, req, res)
+  try {
+    await applyMiddleware(
+      createContext(req, res, server),
+      userinfo,
+      parseResource,
+      cors,
+      checkContinue,
+    )
+  } catch (e) {
+    error('Unexpected server error', e)
+    res500(res)
+  }
 }
 
-const server = createServer(httpCallback)
+server = createServer(httpCallback)
 server.on('checkContinue', checkContinueHandler)
 
 export default server

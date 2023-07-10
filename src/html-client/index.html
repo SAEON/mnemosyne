@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mnemosyne</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Courier New', monospace;
+        background-color: #82828d;
+        color: #ffffff;
+        line-height: 1;
+      }
+
+      a {
+        color: #ffffff;
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: #cccccc;
+      }
+
+      #header {
+        display: flex;
+        justify-content: center;
+        border-bottom: 1px solid #ffffff;
+        margin-bottom: 16px;
+        /* padding: 12px; */
+        background-color: #00003f;
+      }
+
+      #header > h1 {
+        font-size: 1.4em;
+        text-align: center;
+      }
+
+      #listing {
+        margin: 2px 8px;
+      }
+
+      #listing > h2 {
+        font-size: 1em;
+        margin-bottom: 12px;
+      }
+
+      #listing > #entries {
+        display: table;
+        font-size: 0.8em;
+      }
+
+      #listing > #entries > .entry {
+        display: table-row;
+        margin: 4px 0;
+      }
+
+      #listing > #entries > .entry > .cell {
+        display: table-cell;
+        padding: 5px;
+      }
+
+      #listing > #entries > .entry > .cell:not(:first-child) {
+        padding-left: 12px;
+      }
+
+      #footer {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        background-color: #00003f;
+        color: #ffffff;
+        padding: 4px 8px;
+      }
+
+      #footer > p {
+        margin: 0;
+        font-style: italic;
+        font-size: 0.75em;
+      }
+
+      #docs-link {
+        display: block;
+        float: right;
+        margin-right: 16px;
+        padding: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- PAGE HEADER -->
+    <header>
+      <div id="header">
+        <h1><a href="/">Mnemosyne file server</a></h1>
+      </div>
+    </header>
+
+    <!-- Docs link -->
+    <a id="docs-link" target="_blank" href="https://saeon.github.io/mnemosyne/">API Docs</a>
+
+    <!-- Directory tree -->
+    <main>
+      <div id="listing">
+        <h2 id="backlinks">backlinks</h2>
+        <div id="entries"></div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+      <div id="footer">
+        <p>© NRF-SAEON 2023</p>
+      </div>
+    </footer>
+
+    <script>
+      function createBacklinks() {
+        const { protocol, host, pathname } = window.location
+        const el = document.getElementById('backlinks')
+        let html
+
+        if (pathname === '/') {
+          html = `<a href="${protocol}//${host}">.</a>/`
+        } else {
+          html = pathname
+            .split('/')
+            .slice(0, -1)
+            .map((path, i, arr) => arr.slice(0, i + 1))
+            .map(p => p.join('/'))
+            .reduce(
+              (str, p) =>
+                `${str}${`<a href="${protocol}//${host}${p}">${p.split('/').pop() || '.'}</a>`}/`,
+              '',
+            )
+        }
+
+        el.innerHTML = html
+      }
+
+      async function fetchListings() {
+        const res = await fetch(window.location.href, {
+          method: 'GET',
+          headers: {
+            Accept: 'Application/json',
+          },
+        })
+
+        return await res.json()
+      }
+
+      const humanReadableBytes = (bytes, si = false, dp = 1) => {
+        const thresh = si ? 1000 : 1024
+
+        if (Math.abs(bytes) < thresh) {
+          return bytes + 'B'
+        }
+
+        const units = si
+          ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+          : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+        let u = -1
+        const r = 10 ** dp
+
+        do {
+          bytes /= thresh
+          ++u
+        } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1)
+
+        return bytes.toFixed(dp) + units[u]
+      }
+
+      function createTree(listings) {
+        const el = document.getElementById('entries')
+
+        el.innerHTML = listings
+          .map(({ isFile, size, entry, path, v }, i, arr) => {
+            const icon = isFile ? '🖺' : '🗀'
+            const text = isFile ? humanReadableBytes(size) : '..'
+            const fullPath = path
+            const unique = arr.filter(({ path, entry }) => path + entry === fullPath).length === 1
+            return `
+              <span class="entry">
+                <span class="cell">${icon}</span>
+                <span class="cell">${text}</span>
+                <a class="cell" href="${fullPath
+                  .replace(/&/g, '&amp;')
+                  .replace(/</g, '&lt;')
+                  .replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;')
+                  .replace(/'/g, '&#039;')}">
+                  ${entry}
+                </a> 
+              </span>`
+          })
+          .join('\n')
+      }
+
+      document.addEventListener('DOMContentLoaded', async () => {
+        createBacklinks()
+        const listings = await fetchListings()
+        createTree(listings)
+      })
+    </script>
+  </body>
+</html>

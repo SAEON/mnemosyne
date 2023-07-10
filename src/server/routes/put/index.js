@@ -8,17 +8,15 @@ import authorize from '../../../lib/authorize.js'
 import { isPathAccessible, validatePath } from '../../../lib/path-fns.js'
 import { res201, res400, res401, res405, res409, res500 } from '../../../lib/http-fns.js'
 
-export default async function () {
-  const {
-    req,
-    res,
-    auth: { user },
-    resource: {
-      _paths,
-      url: { href },
-    },
-  } = this
-
+export default async function ({
+  req,
+  res,
+  auth: { user },
+  resource: {
+    _paths,
+    url: { href },
+  },
+}) {
   // Ensure that uploads are enabled for this server
   if (!KEY) {
     res405(res)

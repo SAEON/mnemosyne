@@ -1,7 +1,7 @@
 import { URL } from 'url'
-import { VOLUMES } from '../../config/index.js'
-import { info } from '../../logger/index.js'
-import { getAbsolutePaths } from '../../lib/path-fns.js'
+import { VOLUMES } from '../../../config/index.js'
+import { info } from '../../../logger/index.js'
+import { getAbsolutePaths } from '../../../lib/path-fns.js'
 
 export default async function () {
   const { req } = this
@@ -17,14 +17,14 @@ export default async function () {
   // Parse the query string
   const query = [...searchParams.keys()].reduce(
     (params, key) => ({ ...params, [key]: searchParams.get(key) || true }),
-    {}
+    {},
   )
 
   // Work out the possible absolute paths available for entry
   const _paths = await getAbsolutePaths(VOLUMES, pathname, req.method.toUpperCase()).then(
     __paths => {
       return __paths.filter(_path => !query.v || _path.v == query.v)
-    }
+    },
   )
 
   info('Resource request path (OR)\n', _paths.map(({ path }) => path).join('\n '))

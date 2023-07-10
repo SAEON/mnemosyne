@@ -57,7 +57,7 @@ export const res405 = res => {
   res.end()
 }
 
-export const res409 = (res, msg = 'Conflict. Upload path already exists') => {
+export const res409 = (res, msg = 'Conflict') => {
   res.writeHead(409, msg, { 'Content-Type': 'text/plain' })
   res.write(msg)
   res.end()
