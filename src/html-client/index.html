@@ -111,7 +111,7 @@
     <!-- FOOTER -->
     <footer>
       <div id="footer">
-        <p>© NRF-SAEON 2023</p>
+        <p id="footer-p"></p>
       </div>
     </footer>
 
@@ -197,7 +197,14 @@
           .join('\n')
       }
 
+      function footer() {
+        const el = document.getElementById('footer-p')
+        el.innerHTML = `© NRF-SAEON 2022 - ${new Date().getFullYear()}`
+
+      }
+
       document.addEventListener('DOMContentLoaded', async () => {
+        footer()
         createBacklinks()
         const listings = await fetchListings()
         createTree(listings)
