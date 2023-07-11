@@ -9,7 +9,7 @@ import applyMiddleware, {
   createContext,
 } from './middleware/index.js'
 import { res404, res500 } from '../lib/http-fns.js'
-import serveHtmlClient from './_serve-html-client.js'
+import serveHtmlClient from './_serve-client.js'
 
 let server
 
@@ -42,11 +42,11 @@ export const httpCallback = async (req, res) => {
       /**
        * The HTML client is served for directory listings, when Accept: Application/json
        * is not present in the request headers. the HTML client then fetches static assets
-       * from /src/server/html-client, so this case takes care of that
+       * from /client, so this case takes care of that
        */
       case 'GET':
-        const pathname = `.${new URL(req.url, `http://${req.headers.host}`).pathname}`
-        if (pathname.startsWith('./html-client/')) {
+        const pathname = `${new URL(req.url, `http://${req.headers.host}`).pathname}`
+        if (pathname.startsWith('/client/')) {
           await serveHtmlClient(res, pathname)
         } else {
           await get.call(ctx, ctx)

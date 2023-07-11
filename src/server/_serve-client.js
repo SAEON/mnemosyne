@@ -4,9 +4,11 @@ import path from 'path'
 import mime from 'mime'
 import { error } from '../logger/index.js'
 import { res404, res500 } from '../lib/http-fns.js'
+import { basePath } from '../config/index.js'
 
-export default async function (res, pathname) {
-  pathname = path.join('./', 'src/server', pathname)
+export default async function (res, _pathname) {
+  // The request already points to /client/*
+  const pathname = path.join(basePath, _pathname)
 
   try {
     // Check if file exists
