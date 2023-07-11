@@ -39,7 +39,7 @@ services:
           memory: 250M
     volumes:
       - type: bind
-        source: /mnt/somisana/mnemosyne
+        source: /mnt/somisana
         target: /somisana
       - type: bind
         source: /mnt/osgeo/mnemosyne
