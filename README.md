@@ -253,6 +253,7 @@ Invoke-RestMethod `
 
 ## Customizing the client
 To customize the HTML client, override the `/client` directory your own `/client` directory, that contains an `index.html` file and related static assets. In the case of using the Dockerfile provided in this repo, mount your website client to `/mnemosyne/client`.
+
 # Updating files
 Use the HTTP `POST` method instead of the HTTP `PUT` method in the examples above. Note that this is actually an **_upsert_** operation, where the target resource is either created if it doesn't exist, or updated if it does (assuming correct permissions).
 
