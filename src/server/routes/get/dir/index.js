@@ -97,7 +97,7 @@ export default async function ({
     res.end()
   } else {
     res.setHeader('content-type', 'text/html')
-    const htmlPath = resolve(normalize(join('./src/html-client', 'index.html')))
+    const htmlPath = resolve(normalize(join('src/server/html-client', 'index.html')))
     const readStream = createReadStream(htmlPath)
 
     readStream.on('error', e => {
