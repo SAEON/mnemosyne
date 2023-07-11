@@ -20,6 +20,7 @@ A very simple HTTP-range supporting file server. Stream your file in, and stream
         - [Stream from a file using mbuffer](#stream-from-a-file-using-mbuffer)
       - [Uploading a directory recursively](#uploading-a-directory-recursively)
     - [PowerShell example (Windows)](#powershell-example-windows)
+  - [Customizing the client](#customizing-the-client)
 - [Updating files](#updating-files)
 - [Deleting files](#deleting-files)
 - [Development](#development)
@@ -250,6 +251,8 @@ Invoke-RestMethod `
     -Verbose
 ```
 
+## Customizing the client
+To customize the HTML client, override the `/client` directory your own `/client` directory, that contains an `index.html` file and related static assets. In the case of using the Dockerfile provided in this repo, mount your website client to `/mnemosyne/client`.
 # Updating files
 Use the HTTP `POST` method instead of the HTTP `PUT` method in the examples above. Note that this is actually an **_upsert_** operation, where the target resource is either created if it doesn't exist, or updated if it does (assuming correct permissions).
 

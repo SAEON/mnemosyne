@@ -1,12 +1,12 @@
 FROM node:20.3.1-alpine
 
-ARG TC=UTC
+ARG TZ=UTC
 ARG NODE_ENV=production
 
-ENV TC=$TC
+ENV TZ=$TZ
 ENV NODE_ENV=$NODE_ENV
 
-WORKDIR /app
+WORKDIR /mnemosyne
 COPY . .
 RUN npm ci --omit=dev
 EXPOSE 3000

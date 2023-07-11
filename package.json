@@ -1,6 +1,6 @@
 {
   "name": "@saeon/mnemosyne",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A very simple HTTP-range supporting file server. Stream your file in, and stream your file out! Named after the goddess of memory in Greek mythology.",
   "type": "module",
   "repository": {
@@ -10,6 +10,7 @@
   "files": [
     "bin/",
     "src/",
+    "client/",
     "README.md",
     "package.json",
     "LICENSE"
