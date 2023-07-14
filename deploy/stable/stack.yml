@@ -35,8 +35,8 @@ services:
         delay: 5s
       resources:
         limits:
-          cpus: "2"
-          memory: 250M
+          cpus: "3"
+          memory: 4G
     volumes:
       - type: bind
         source: /mnt/somisana/data
