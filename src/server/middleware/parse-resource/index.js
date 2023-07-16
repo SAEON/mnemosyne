@@ -4,7 +4,7 @@ import { info } from '../../../logger/index.js'
 import { getAbsolutePaths } from '../../../lib/path-fns.js'
 
 export default async function () {
-  const { req } = this
+  const { id, req } = this
 
   // Incoming URL
   const protocol = req.headers['x-forwarded-proto'] || 'http'
@@ -27,7 +27,7 @@ export default async function () {
     },
   )
 
-  info('Resource request path (OR)\n', _paths.map(({ path }) => path).join('\n '))
+  info(`[REQ ${id}]`, 'Resource request path (OR)\n', _paths.map(({ path }) => path).join('\n '))
 
   /**
    * Append the 'resource'

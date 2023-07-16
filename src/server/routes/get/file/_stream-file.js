@@ -4,9 +4,9 @@ import zlib, { createBrotliCompress, createDeflate, createGzip } from 'node:zlib
 import { pipeline } from 'node:stream/promises'
 import mime from 'mime'
 import StreamThrottle from './_stream-throttle.js'
-import { error } from '../../../../logger/index.js'
+import { error, info } from '../../../../logger/index.js'
 
-export default async ({ size, contentLength, request, response, file, start, end }) => {
+export default async ({ id, size, contentLength, request, response, file, start, end }) => {
   const encoding = Accept.encoding(request.headers['accept-encoding'], ['gzip', 'deflate', 'br'])
 
   response.setHeader('Content-Type', mime.getType(file))
@@ -19,13 +19,16 @@ export default async ({ size, contentLength, request, response, file, start, end
   }
 
   const raw = createReadStream(file, { start, end })
-  const throttleFileRead = new StreamThrottle({ rate: 1e7 }) // 10MB
-  const throttleResStream = new StreamThrottle({ rate: 1e7 }) // 10MB
+  const throttleFileRead = new StreamThrottle({ rate: 1250000 }) // 10MB/s
+  const throttleResStream = new StreamThrottle({ rate: 1250000 }) // 10MB/s
 
   let transform = null
   let contentEncoding = null
+  let streamsToDestroy = [raw, throttleFileRead, transform, throttleResStream] // Keep track of streams to destroy
+
   switch (encoding) {
     case 'deflate':
+      info(id, 'serving deflate')
       contentEncoding = 'deflate'
       transform = createDeflate({
         level: 4,
@@ -34,6 +37,7 @@ export default async ({ size, contentLength, request, response, file, start, end
       break
 
     case 'gzip':
+      info(id, 'serving gzip')
       contentEncoding = 'gzip'
       transform = createGzip({
         level: 4,
@@ -42,6 +46,7 @@ export default async ({ size, contentLength, request, response, file, start, end
       break
 
     case 'br':
+      info(id, 'serving br')
       contentEncoding = 'br'
       transform = createBrotliCompress({
         flush: zlib.constants.BROTLI_OPERATION_PROCESS,
@@ -59,12 +64,18 @@ export default async ({ size, contentLength, request, response, file, start, end
   try {
     if (contentEncoding) {
       response.setHeader('Content-Encoding', contentEncoding)
-      await pipeline(raw, throttleFileRead, transform, throttleResStream, response)
+      await pipeline(raw.pipe(throttleFileRead).pipe(transform).pipe(throttleResStream), response)
     } else {
-      await pipeline(raw, throttleFileRead, throttleResStream, response)
+      info(id, 'No content encoding')
+      await pipeline(raw.pipe(throttleFileRead).pipe(throttleResStream), response)
     }
   } catch (e) {
     error('An error occurred:', e)
     response.end()
+  } finally {
+    // Destroy all streams to clean up resources
+    streamsToDestroy.forEach(stream => {
+      stream?.destroy()
+    })
   }
 }

@@ -3,6 +3,7 @@ import streamFile from './_stream-file.js'
 import { parseRangeHeader } from '../../../../lib/http-fns.js'
 
 export default async function serveFile({
+  id,
   req,
   res,
   resource: {
@@ -33,6 +34,7 @@ export default async function serveFile({
     res.setHeader('Content-Range', `bytes ${start}-${end}/${contentLength}`)
     res.setHeader('Accept-Ranges', 'bytes')
     await streamFile({
+      id,
       size: contentLength,
       contentLength: end - start + 1,
       request: req,
@@ -43,6 +45,6 @@ export default async function serveFile({
     })
   } else {
     res.statusCode = 200
-    streamFile({ size: contentLength, contentLength, request: req, response: res, file })
+    streamFile({ id, size: contentLength, contentLength, request: req, response: res, file })
   }
 }
