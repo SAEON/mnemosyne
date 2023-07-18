@@ -7,7 +7,7 @@ import StreamThrottle from './_stream-throttle.js'
 import { error, info } from '../../../../logger/index.js'
 
 const RATE_LIMIT = 16777216 // 16MB/s
-const HIGH_WATER = 524288
+const HIGH_WATER = 16384
 
 export default async ({ id, size, contentLength, request, response, file, start, end }) => {
   const encoding = Accept.encoding(request.headers['accept-encoding'], ['gzip', 'deflate', 'br'])
@@ -23,7 +23,7 @@ export default async ({ id, size, contentLength, request, response, file, start,
 
   const raw = createReadStream(file, { start, end })
   const throttleFileRead = new StreamThrottle({ rate: RATE_LIMIT, highWaterMark: HIGH_WATER })
-  const throttleResStream = new StreamThrottle({ rate: RATE_LIMIT })
+  const throttleResStream = new StreamThrottle({ rate: RATE_LIMIT, highWaterMark: HIGH_WATER })
 
   let transform = null
   let contentEncoding = null
