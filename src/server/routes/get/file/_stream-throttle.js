@@ -1,6 +1,6 @@
 import { Transform } from 'stream'
 
-const CHUNK_SIZE = 8388608 // bytes per second
+const CHUNK_SIZE = 16777216 // 16MB/s
 
 class ThrottleTransform extends Transform {
   constructor({ rate = CHUNK_SIZE, ...options }) {
