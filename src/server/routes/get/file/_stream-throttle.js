@@ -1,47 +1,34 @@
 import { Transform } from 'stream'
 
-const CHUNK_SIZE = 1e7 // 10MB
+const CHUNK_SIZE = 8388608 // bytes per second
 
 class ThrottleTransform extends Transform {
-  constructor(options) {
-    super({ ...options, highWaterMark: options?.rate || CHUNK_SIZE })
-    this.chunkSize = options?.rate || CHUNK_SIZE
-    this.bytesRead = 0
-    this.lastTime = null
-    this.delay = 0
+  constructor({ rate = CHUNK_SIZE, ...options }) {
+    super({ ...options })
+    this.rate = rate
+    this.chunkSize = 0
+    this.startTime = null
   }
 
   _transform(chunk, encoding, callback) {
-    try {
-      this.bytesRead += chunk.length
-      this.push(chunk)
+    this.chunkSize += chunk.length
 
-      const now = Date.now()
-      if (this.lastTime === null) {
-        this.lastTime = now
-      }
+    if (!this.startTime) {
+      this.startTime = process.hrtime.bigint()
+    }
 
-      const elapsed = now - this.lastTime
-      const bytesPerSecond = this.bytesRead / (elapsed / 1000)
+    const elapsed = Number(process.hrtime.bigint() - this.startTime) / 1e9 // convert nanoseconds to seconds
+    const expectedTime = this.chunkSize / this.rate
+    const remainingTime = expectedTime - elapsed
 
-      if (bytesPerSecond > this.chunkSize) {
-        this.delay = Math.max(this.delay + elapsed, 0)
-      } else {
-        this.delay = Math.max(this.delay - elapsed, 0)
-      }
-
-      this.lastTime = now
-      this.bytesRead = 0
-
-      if (this.delay > 0) {
-        setTimeout(() => {
-          callback()
-        }, this.delay)
-      } else {
+    if (remainingTime > 0) {
+      setTimeout(() => {
+        this.push(chunk)
         callback()
-      }
-    } catch (err) {
-      callback(err)
+      }, remainingTime * 1000) // convert seconds to milliseconds
+    } else {
+      this.push(chunk)
+      callback()
     }
   }
 }

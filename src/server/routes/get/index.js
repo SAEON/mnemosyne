@@ -3,9 +3,9 @@ import serveFile from './file/index.js'
 import serveDir from './dir/index.js'
 import { res404 } from '../../../lib/http-fns.js'
 
-export default async function ({ res, resource: { _paths, pathname } }) {
+export default async function ({ id, res, resource: { _paths, pathname } }) {
   if (_paths.length === 0) {
-    warn('Requested resource does not exist', pathname)
+    warn(id, 'Requested resource does not exist', pathname)
     res404(res)
     return
   }

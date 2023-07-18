@@ -6,6 +6,8 @@ import mime from 'mime'
 import StreamThrottle from './_stream-throttle.js'
 import { error, info } from '../../../../logger/index.js'
 
+const RATE_LIMIT = 8388608
+
 export default async ({ id, size, contentLength, request, response, file, start, end }) => {
   const encoding = Accept.encoding(request.headers['accept-encoding'], ['gzip', 'deflate', 'br'])
 
@@ -19,8 +21,8 @@ export default async ({ id, size, contentLength, request, response, file, start,
   }
 
   const raw = createReadStream(file, { start, end })
-  const throttleFileRead = new StreamThrottle({ rate: 1250000 }) // 10MB/s
-  const throttleResStream = new StreamThrottle({ rate: 1250000 }) // 10MB/s
+  const throttleFileRead = new StreamThrottle({ rate: RATE_LIMIT })
+  const throttleResStream = new StreamThrottle({ rate: RATE_LIMIT })
 
   let transform = null
   let contentEncoding = null
