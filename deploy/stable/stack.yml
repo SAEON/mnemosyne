@@ -23,7 +23,7 @@ services:
       mode: global
       placement:
         constraints:
-          - node.labels.global-apps == true
+          - node.labels.apps == true
       rollback_config:
         parallelism: 0
       update_config:
