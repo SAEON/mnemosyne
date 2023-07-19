@@ -21,11 +21,9 @@ services:
       --permission gr.moncrieff@saeon.nrf.ac.za:/osgeo
     deploy:
       mode: global
-      replicas: 1
       placement:
         constraints:
-          - node.labels.apps == true
-          - node.labels.apps2 == true
+          - node.labels.global-apps == true
       rollback_config:
         parallelism: 0
       update_config:
