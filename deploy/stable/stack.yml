@@ -20,10 +20,11 @@ services:
       --permission zd.smith@saeon.nrf.ac.za:/somisana/timeline-content
       --permission gr.moncrieff@saeon.nrf.ac.za:/osgeo
     deploy:
-      replicas: 1
+      mode: global
       placement:
         constraints:
           - node.labels.apps == true
+          - node.labels.apps2 == true
       rollback_config:
         parallelism: 0
       update_config:
