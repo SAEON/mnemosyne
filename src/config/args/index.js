@@ -22,6 +22,7 @@ export async function initializeServer(argv) {
     KEY: args.key,
     LOGINS: args.login,
     PERMISSIONS,
+    DOWNLOAD_THROTTLE: args['throttle-downloads'],
     encrypt: crypto ? crypto.encrypt : undefined,
     decrypt: crypto ? crypto.decrypt : undefined,
   }

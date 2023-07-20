@@ -12,6 +12,11 @@ export default args =>
       default: '0.0.0.0',
       type: 'string',
     })
+    .option('throttle-downloads', {
+      alias: 't',
+      default: 16777216, // 16MB/s
+      type: 'number',
+    })
     .option('key', {
       alias: 'k',
       type: 'string',

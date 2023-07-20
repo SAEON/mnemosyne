@@ -9,7 +9,16 @@ const currentFilePath = fileURLToPath(import.meta.url)
 // Get the root of the repo
 export const basePath = path.resolve(currentFilePath, '../../../')
 
-export const { PORT, HOSTNAME, VOLUMES, KEY, LOGINS, PERMISSIONS, encrypt, decrypt } =
-  await initializeServer(process.argv.slice(2))
+export const {
+  PORT,
+  HOSTNAME,
+  VOLUMES,
+  KEY,
+  LOGINS,
+  PERMISSIONS,
+  DOWNLOAD_THROTTLE,
+  encrypt,
+  decrypt,
+} = await initializeServer(process.argv.slice(2))
 
 info('Directory root', basePath)

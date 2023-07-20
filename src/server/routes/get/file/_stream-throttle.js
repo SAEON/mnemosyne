@@ -1,6 +1,5 @@
 import { Transform } from 'stream'
-
-const CHUNK_SIZE = 16777216 // 16MB/s
+import { DOWNLOAD_THROTTLE as CHUNK_SIZE } from '../../../../config/index.js'
 
 class ThrottleTransform extends Transform {
   constructor({ rate = CHUNK_SIZE, ...options }) {

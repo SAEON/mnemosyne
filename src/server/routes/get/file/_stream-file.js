@@ -3,10 +3,10 @@ import { createReadStream } from 'node:fs'
 import zlib, { createBrotliCompress, createDeflate, createGzip } from 'node:zlib'
 import { pipeline } from 'node:stream/promises'
 import mime from 'mime'
+import { DOWNLOAD_THROTTLE as RATE_LIMIT } from '../../../../config/index.js'
 import StreamThrottle from './_stream-throttle.js'
 import { error, info } from '../../../../logger/index.js'
 
-const RATE_LIMIT = 16777216 // 16MB/s
 const HIGH_WATER = 32768 // 32KB/s
 
 export default async ({ id, size, contentLength, request, response, file, start, end }) => {

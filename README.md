@@ -2,6 +2,12 @@
 
 A very simple HTTP-range supporting file server. Stream your file in, and stream your file out! Named after the goddess of memory and file systems.
 
+Supports:
+
+- Multiple directory mounts
+- Rate-limiting downloads
+- Permission-based uploads/updates/deletes
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
@@ -43,6 +49,11 @@ Turn your current directory into a COG-sharing HTTP Range server with a single c
 
 ```sh
 npx @saeon/mnemosyne -v ./
+
+# Or throttle downloads per file to 2MB/s
+npx @saeon/mnemosyne \
+  -v ./ \
+  -t 2097152 
 ```
 
 Things to note:

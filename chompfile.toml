@@ -11,6 +11,7 @@ run = """
 node \
   --trace-warnings \
   bin/mnemosyne.js \
+    --throttle-downloads 16777216 \
     --key 3569bdd87dbbbf73bd06cdbda35a2e773325acd027c6304c37eda5b1783097ea \
     --login localdev \
     --login username \
