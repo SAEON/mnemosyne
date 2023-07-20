@@ -5,11 +5,4 @@ plugins:
 title: Mnemosyne
 description: HTTP-Range server
 
-# Social media links
-social:
-  - title: GitHub
-    url: https://github.com/SAEON
-  - title: Twitter
-    url: https://twitter.com/Saeonews
-
 show_downloads: true
