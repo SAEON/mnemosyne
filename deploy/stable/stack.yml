@@ -17,7 +17,7 @@ services:
       --login gr.moncrieff@saeon.nrf.ac.za
       --login somisana-team
       --permission somisana:/somisana
-      --permission somisana-team:/somisana/observations
+      --permission somisana-team:/somisana/somisana/observations
       --permission gr.moncrieff@saeon.nrf.ac.za:/osgeo
     deploy:
       mode: global
