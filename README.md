@@ -229,19 +229,19 @@ mbuffer \
 For example, a Zarr directory
 
 ```sh
-find \
-  /path/to/directory.zarr \
-  -type f \
-  -exec \
+base_dir=$(pwd)/path/to/dir.zarr
+find "$base_dir" -type f -exec sh -c '
+    f="$1"
+    base="$2"
+    url=http://localhost:3000/mnt1/dir.zarr/${f#$base/}
     curl \
     --progress-bar \
     --keepalive-time 1200 \
     -X PUT \
     -H "Authorization: Bearer fd1ddb014036c75f8f11532f330ab42d:403494a94ebf44728cd63e02a3f9c070" \
     --create-dirs \
-    -T {} \
-    http://localhost:3000/some/nested/directory/{} \; \
-      | cat
+    -T "$f" \
+    $url' sh {} "$base_dir" \; | cat
 ```
 
 ### PowerShell example (Windows)
