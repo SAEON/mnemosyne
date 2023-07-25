@@ -167,9 +167,7 @@ cat ./some/local/cog.tiff \
 ```
 
 #### Specify a file to upload
-
-Better than the previous example because the file is streamed (`-T`)
-
+I think this will stream the contents of the file
 ```sh
 curl \
   --progress-bar \
