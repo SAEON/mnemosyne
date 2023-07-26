@@ -112,8 +112,7 @@ export const isPathAccessible = async p => {
   try {
     await access(p)
     return true
-  } catch (err) {
-    error(`Error accessing path (ignore) ${p}:`, err)
+  } catch {
     return false
   }
 }
