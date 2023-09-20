@@ -5,11 +5,22 @@ import { pipeline } from 'node:stream/promises'
 import mime from 'mime'
 import { DOWNLOAD_THROTTLE as RATE_LIMIT } from '../../../../config/index.js'
 import StreamThrottle from './_stream-throttle.js'
+import { PassThrough } from 'node:stream'
 import { error, info } from '../../../../logger/index.js'
 
 const HIGH_WATER = 32768 // 32KB/s
 
-export default async ({ id, size, contentLength, request, response, file, start, end }) => {
+export default async function ({
+  id,
+  size,
+  contentLength,
+  request,
+  response,
+  file,
+  start,
+  end,
+  Transform: TransformFileContent = PassThrough,
+}) {
   const encoding = Accept.encoding(request.headers['accept-encoding'], ['gzip', 'deflate', 'br'])
 
   response.setHeader('Content-Type', mime.getType(file))
@@ -23,11 +34,12 @@ export default async ({ id, size, contentLength, request, response, file, start,
 
   const raw = createReadStream(file, { start, end })
   const throttleFileRead = new StreamThrottle({ rate: RATE_LIMIT, highWaterMark: HIGH_WATER })
+  TransformFileContent = new TransformFileContent(this)
   const throttleResStream = new StreamThrottle({ rate: RATE_LIMIT })
 
   let transform = null
   let contentEncoding = null
-  let streamsToDestroy = [raw, throttleFileRead, transform, throttleResStream] // Keep track of streams to destroy
+  let streamsToDestroy = [raw, TransformFileContent, throttleFileRead, transform, throttleResStream] // Keep track of streams to destroy
 
   switch (encoding) {
     case 'deflate':
@@ -67,10 +79,20 @@ export default async ({ id, size, contentLength, request, response, file, start,
   try {
     if (contentEncoding) {
       response.setHeader('Content-Encoding', contentEncoding)
-      await pipeline(raw.pipe(throttleFileRead).pipe(transform).pipe(throttleResStream), response)
+      await pipeline(
+        raw
+          .pipe(TransformFileContent)
+          .pipe(throttleFileRead)
+          .pipe(transform)
+          .pipe(throttleResStream),
+        response,
+      )
     } else {
       info(id, 'No content encoding')
-      await pipeline(raw.pipe(throttleFileRead).pipe(throttleResStream), response)
+      await pipeline(
+        raw.pipe(TransformFileContent).pipe(throttleFileRead).pipe(throttleResStream),
+        response,
+      )
     }
   } catch (e) {
     error('An error occurred:', e)

@@ -11,14 +11,6 @@ services:
     image: $DOCKER_IMAGE
     command: >-
       --key $KEY
-      --volume /somisana
-      --volume /osgeo
-      --login somisana
-      --login gr.moncrieff@saeon.nrf.ac.za
-      --login somisana-team
-      --permission somisana:/somisana
-      --permission somisana-team:/somisana/somisana/observations
-      --permission gr.moncrieff@saeon.nrf.ac.za:/osgeo
     deploy:
       mode: global
       placement:

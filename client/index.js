@@ -80,7 +80,7 @@ function createTree(listings) {
 
 function footer() {
   const el = document.getElementById('footer-p')
-  el.innerHTML = `© NRF-SAEON 2022 - ${new Date().getFullYear()}`
+  el.innerHTML = `© Zach Smith 2022 - ${new Date().getFullYear()}`
 }
 
 /**

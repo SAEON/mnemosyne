@@ -56,7 +56,7 @@ jobs:
       DEPLOY_SOURCE: deploy/${{ inputs.stack }}/stack.yml
       STACK_COMPOSE_PATH: /home/runner/mnemosyne/deploy/${{ inputs.stack }}/stack.yml
       STACK_CONFIG_PATH: /home/runner/mnemosyne/deploy/${{ inputs.stack }}/stack.env
-    runs-on: saeon
+    runs-on: TODO
     steps:
       - name: Check out source code (shared)
         uses: actions/checkout@master

@@ -8,6 +8,7 @@ export default async function serveFile({
   res,
   resource: {
     _paths: [{ path: file }],
+    Transform,
   },
 }) {
   const { size: contentLength } = await stat(file)
@@ -33,18 +34,27 @@ export default async function serveFile({
     res.statusCode = 206
     res.setHeader('Content-Range', `bytes ${start}-${end}/${contentLength}`)
     res.setHeader('Accept-Ranges', 'bytes')
-    await streamFile({
+    await streamFile.call(this, {
       id,
       size: contentLength,
       contentLength: end - start + 1,
       request: req,
       response: res,
       file,
+      Transform,
       start,
       end,
     })
   } else {
     res.statusCode = 200
-    streamFile({ id, size: contentLength, contentLength, request: req, response: res, file })
+    streamFile.call(this, {
+      id,
+      size: contentLength,
+      contentLength,
+      request: req,
+      response: res,
+      file,
+      Transform,
+    })
   }
 }

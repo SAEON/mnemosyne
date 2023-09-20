@@ -19,6 +19,7 @@ node \
     --volume ./test-mnts \
     --volume ./test-mnts/mnt1 \
     --volume ./test-mnts/mnt2 \
+    --volume /home/zach/code/esm-x \
     --permission localdev:./test-mnts \
     --permission username:./test-mnts \
     --permission username2:./test-mnts/mnt2

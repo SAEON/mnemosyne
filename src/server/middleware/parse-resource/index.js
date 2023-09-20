@@ -42,5 +42,6 @@ export default async function () {
     pathname,
     _paths,
     query,
+    searchParams,
   }
 }

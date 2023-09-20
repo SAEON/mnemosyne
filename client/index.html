@@ -4,35 +4,69 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mnemosyne</title>
+
+    <script
+      id="esm-x"
+      loading="circular"
+      src="https://unpkg.com/@zachsa/esm-x@1.0.23/dist/index.js"
+    ></script>
+
+    <!--
+      JSPM Generator Import Map
+      Edit URL: https://generator.jspm.io/#bc47DsIwEATQLRASh/E6G5Nft5fgAFZigWHzs5eCiqsTKSkp5xUzcz4BXL5wmzSqhAHYL7PIbHuJYVJ22GIFPA7RPjM36LButviOdvQaUvTCFdIVyf1Xm/UjIcPeaiROL5NCVi6wwwLuyS+PVZjqbYdgzVwjEZaQgu/VDPPI1GKJxfFn98N+2iUHBLsA
+    -->
+    <script type="importmap-shim" src="/client/importmap.json"></script>
+
+    <!-- ES Module Shims -->
+    <script
+      async
+      src="https://ga.jspm.io/npm:es-module-shims@1.8.0/dist/es-module-shims.js"
+      crossorigin="anonymous"
+    ></script>
+
     <link rel="stylesheet" href="/client/style.css" />
+    <!-- <script src="/client/index.js"></script>  -->
   </head>
   <body>
+    <div id="root"></div>
     <!-- PAGE HEADER -->
-    <header>
+    <!-- <header>
       <div id="header">
         <h1><a href="/">Mnemosyne file server</a></h1>
       </div>
-    </header>
+    </header> -->
 
     <!-- Docs link -->
-    <a id="docs-link" target="_blank" href="https://saeon.github.io/mnemosyne/">API Docs</a>
+    <!-- <a id="docs-link" target="_blank" href="https://zachsa.github.io/mnemosyne/">API Docs</a> -->
 
     <!-- Directory tree -->
-    <main>
+    <!-- <main>
       <div id="listing">
         <h2 id="backlinks">backlinks</h2>
         <div id="entries"></div>
       </div>
-    </main>
+    </main> -->
 
     <!-- FOOTER -->
-    <footer>
+    <!-- <footer>
       <div id="footer">
         <p id="footer-p"></p>
       </div>
-    </footer>
+    </footer> -->
 
-    <!-- JavaScript -->
-    <script src="/client/index.js"></script>
+    <script type="esm-x">
+      import React, { lazy, Suspense } from 'react'
+      import { LinearProgress } from '@mui/material'
+      import ReactDOM from 'react-dom/client'
+
+      const App = lazy(() => import(`${window.origin}/client/app.jsx`))
+
+      const root = ReactDOM.createRoot(document.getElementById('root'))
+      root.render(
+        <Suspense fallback={<LinearProgress />}>
+          <App />
+        </Suspense>
+      )
+    </script>
   </body>
 </html>

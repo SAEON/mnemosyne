@@ -40,7 +40,7 @@ Supports:
 
 # Background
 
-A new format for cloud-optimized, multidimensional data (Zarr), and the potential need for SAEON to host (or at least test hosting) cloud-optimized-geotiffs (COGs) makes this quick project worthwhile.
+A new format for cloud-optimized, multidimensional data (Zarr), and the potential need to host (or at least test hosting) cloud-optimized-geotiffs (COGs) makes this quick project worthwhile.
 
 # Usage
 
@@ -49,10 +49,10 @@ Mnemosyne is a relatively simple file server - `GET` HTTP requests for viewing f
 Turn your current directory into a COG-sharing HTTP Range server with a single command!
 
 ```sh
-npx @saeon/mnemosyne -v ./
+npx @mnemosyne/server -v ./
 
 # Or throttle downloads per file to 2MB/s
-npx @saeon/mnemosyne \
+npx @mnemosyne/server \
   -v ./ \
   -t 2097152 
 ```
@@ -128,7 +128,7 @@ Start the application with a `--key`, a `--login`, and a `--permission` to enabl
 For example:
 
 ```sh
-npx @saeon/mnemosyne \
+npx @mnemosyne/server \
   --key <256-bit (32-byte) cryptographic key for use with the AES-256-CBC encryption algorithm.>
   --volume /some/directory \
   --login username \
@@ -284,7 +284,7 @@ Install Node.js v20.3.1 Then setup the project:
 
 ```sh
 # Clone the repository
-git clone git@github.com:SAEON/mnemosyne.git
+git clone git@github.com:zachsa/mnemosyne.git
 cd mnemosyne
 
 # Install chomp CLI
@@ -320,7 +320,7 @@ Use a process manager such as `pm2` to restart on failure. See below for Dockeri
 
 ```sh
 # Clone the repository
-git clone git@github.com:SAEON/mnemosyne.git
+git clone git@github.com:zachsa/mnemosyne.git
 cd mnemosyne
 
 # Install dependencies from lockfile
