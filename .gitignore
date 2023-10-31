@@ -12,6 +12,7 @@ lerna-debug.log*
 !/test-mnts/README.md
 /test-mnts/mnt1/*
 !/test-mnts/mnt1/
+!/test-mnts/mnt1/website/
 !/test-mnts/mnt1/README.md
 /test-mnts/mnt2/*
 !/test-mnts/mnt2/

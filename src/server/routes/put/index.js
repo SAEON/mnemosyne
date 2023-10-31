@@ -58,7 +58,6 @@ export default async function ({
   let received = 0
   req.on('data', chunk => {
     received += chunk.length
-    info(`[${path}] Received ${received} bytes`)
   })
 
   req.pipe(stream)

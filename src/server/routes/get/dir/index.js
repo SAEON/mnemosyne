@@ -1,7 +1,7 @@
 import { stat } from 'fs/promises'
 import { createReadStream } from 'fs'
-import { join, normalize, resolve } from 'path'
-import { res500 } from '../../../../lib/http-fns.js'
+import { join, normalize } from 'path'
+import { res302, res500 } from '../../../../lib/http-fns.js'
 import serveFile from '../file/index.js'
 import { error } from '../../../../logger/index.js'
 import { basePath } from '../../../../config/index.js'
@@ -12,11 +12,19 @@ export default async function ({
     pathname,
     _paths,
     query: { noindex = false, json: forceJson = false },
+    searchParams,
   },
   req: {
     headers: { accept = '' },
   },
 }) {
+  // 302 to / if necessary
+  if (!pathname.match(/\/$/)) {
+    const q = searchParams.toString() === '' ? '' : `?${searchParams}`
+    res302(res, q, pathname)
+    return
+  }
+
   const json = forceJson || (accept.toLowerCase().includes('application/json') ? true : false)
 
   const listings = (
@@ -64,9 +72,13 @@ export default async function ({
   const indexFiles = !noindex && !json && listings.filter(({ entry }) => entry === 'index.html')
   if (indexFiles?.length === 1) {
     const { directory, entry } = indexFiles[0]
-    return serveFile.call({
+    const path = normalize(join(directory, entry))
+    return serveFile.call(this, {
       ...this,
-      resource: { ...this.resource, _paths: [{ path: normalize(join(directory, entry)) }] },
+      resource: {
+        ...this.resource,
+        _paths: [{ path }],
+      },
     })
   }
 
