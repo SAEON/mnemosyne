@@ -1,22 +1,33 @@
 import React from 'react'
 import { useQuery, gql } from '@apollo/client'
 import Div from '../div.jsx'
+import Span from '../span.jsx'
+import { Link } from '@mui/material'
+import { File as FileIcon, Folder as FolderIcon } from '../icons.jsx'
 import humanReadableBytes from './_human-readable-bytes.js'
+import Backlinks from './backlinks.jsx'
 
 export default () => {
-  const { data, error, loading } = useQuery(gql`
-    query {
-      listings @rest(type: "Listing", path: "/") {
-        parent
-        path
-        v
-        entry
-        isFile
-        isDirectory
-        size
+  const { data, error, loading } = useQuery(
+    gql`
+      query ($path: String) {
+        listings @rest(type: "Listing", path: $path) {
+          parent
+          path
+          v
+          entry
+          isFile
+          isDirectory
+          size
+        }
       }
-    }
-  `)
+    `,
+    {
+      variables: {
+        path: window.location.pathname,
+      },
+    },
+  )
 
   if (loading) {
     return null
@@ -28,17 +39,27 @@ export default () => {
 
   return (
     <Div sx={{ margin: theme => theme.spacing(2) }}>
-      {data.listings.map(({ isFile, size, entry, path, v }, i, arr) => {
-        const icon = isFile ? '🖺' : '🗀'
-        const text = isFile ? humanReadableBytes(size) : '..'
-        const fullPath = path
-        return (
-          <div>
-            <span class="entry">
-              <span class="cell">{icon}</span>
-              <span class="cell">{text}</span>
-              <a
-                class="cell"
+      <Backlinks />
+      <Div sx={{ marginTop: theme => theme.spacing(1) }} />
+      <Div sx={{ display: 'table' }}>
+        {data.listings.map(({ isFile, size, entry, path, v }, i, arr) => {
+          const Icon = isFile ? FileIcon : FolderIcon
+          const text = isFile ? humanReadableBytes(size) : '..'
+          const fullPath = path
+          return (
+            <Div sx={{ display: 'table-row' }}>
+              <Span sx={{ display: 'table-cell' }}>
+                <Icon fontSize="small" />
+              </Span>
+              <Span sx={{ display: 'table-cell', paddingLeft: theme => theme.spacing(1) }}>
+                {text}
+              </Span>
+              <Link
+                sx={{
+                  display: 'table-cell',
+                  fontSize: '0.8em',
+                  paddingLeft: theme => theme.spacing(1),
+                }}
                 href={`${fullPath
                   .replace(/&/g, '&amp;')
                   .replace(/</g, '&lt;')
@@ -47,11 +68,11 @@ export default () => {
                   .replace(/'/g, '&#039;')}`}
               >
                 {entry}
-              </a>
-            </span>
-          </div>
-        )
-      })}
+              </Link>
+            </Div>
+          )
+        })}
+      </Div>
     </Div>
   )
 }

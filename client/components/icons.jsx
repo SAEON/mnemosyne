@@ -2,7 +2,29 @@ import React from 'react'
 import { SvgIcon } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import Path from '/client/components/path.jsx'
-import { mdiMenu, mdiAccountCircle, mdiApi, mdiGithub, mdiLogin, mdiLogout, mdiCog } from '@mdi/js'
+import {
+  mdiMenu,
+  mdiAccountCircle,
+  mdiApi,
+  mdiGithub,
+  mdiLogin,
+  mdiLogout,
+  mdiCog,
+  mdiFile,
+  mdiFolder,
+} from '@mdi/js'
+
+export const Folder = styled(props => (
+  <SvgIcon {...props}>
+    <Path d={mdiFolder} />
+  </SvgIcon>
+))({})
+
+export const File = styled(props => (
+  <SvgIcon {...props}>
+    <Path d={mdiFile} />
+  </SvgIcon>
+))({})
 
 export const Cog = styled(props => (
   <SvgIcon {...props}>
