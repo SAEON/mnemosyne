@@ -38,6 +38,12 @@ export const res204 = res => {
   res.end()
 }
 
+export const res302 = (res, q, pathname) => {
+  res.statusCode = 302
+  res.setHeader('location', `${pathname}/${q}`)
+  res.end()
+}
+
 export const res400 = res => {
   res.writeHead(400, { 'Content-Type': 'text/plain' })
   res.write('Bad Request')

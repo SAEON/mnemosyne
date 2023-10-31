@@ -76,7 +76,6 @@ export default async function ({
   let received = 0
   req.on('data', chunk => {
     received += chunk.length
-    info(`[${tempPath || path}] Received ${received} bytes`)
   })
 
   // Start the upload

@@ -1,6 +1,6 @@
 {
   "name": "@saeon/mnemosyne",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A very simple HTTP-range supporting file server. Stream your file in, and stream your file out! Named after the goddess of memory in Greek mythology.",
   "type": "module",
   "repository": {
@@ -38,20 +38,20 @@
     "zarr"
   ],
   "devDependencies": {
-    "chai": "^4.3.7",
-    "eslint": "^8.45.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-prettier": "^5.0.0",
-    "node-mocks-http": "^1.12.2",
-    "prettier": "^3.0.0",
-    "sinon": "^15.2.0"
+    "chai": "^4.3.10",
+    "eslint": "^8.52.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "node-mocks-http": "^1.13.0",
+    "prettier": "^3.0.3",
+    "sinon": "^17.0.0"
   },
   "dependencies": {
-    "@hapi/accept": "^6.0.2",
+    "@hapi/accept": "^6.0.3",
     "mime": "^3.0.0",
     "mkdirp": "^3.0.1",
     "mocha": "^10.2.0",
-    "nanoid": "^4.0.2",
+    "nanoid": "^5.0.2",
     "yargs": "^17.7.2"
   },
   "engines": {
@@ -60,7 +60,7 @@
   "contributors": [
     {
       "name": "Zach Smith",
-      "email": "zd.smith@saeon.nrf.ac.za"
+      "email": "zachsmith.sa@gmail.com"
     }
   ]
 }
