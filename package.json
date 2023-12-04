@@ -38,26 +38,27 @@
     "zarr"
   ],
   "devDependencies": {
-    "@apollo/client": "^3.8.7",
+    "@apollo/client": "^3.8.8",
     "@mdi/js": "^7.3.67",
-    "@mui/material": "^5.14.16",
+    "@mui/material": "^5.14.19",
     "apollo-link-rest": "^0.9.0",
     "chai": "^4.3.10",
-    "eslint": "^8.53.0",
-    "eslint-config-prettier": "^9.0.0",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.0.1",
     "graphql": "^16.8.1",
     "node-mocks-http": "^1.13.0",
-    "prettier": "^3.0.3",
+    "prettier": "^3.1.0",
     "qs": "^6.11.2",
     "sinon": "^17.0.1"
   },
   "dependencies": {
     "@hapi/accept": "^6.0.3",
-    "mime": "^3.0.0",
+    "jspm": "^3.1.0",
+    "mime": "^4.0.0",
     "mkdirp": "^3.0.1",
     "mocha": "^10.2.0",
-    "nanoid": "^5.0.3",
+    "nanoid": "^5.0.4",
     "yargs": "^17.7.2"
   },
   "engines": {

@@ -1,4 +1,4 @@
-FROM node:21.1-alpine
+FROM node:21.2-alpine
 
 ARG TZ=UTC
 ARG NODE_ENV=production
