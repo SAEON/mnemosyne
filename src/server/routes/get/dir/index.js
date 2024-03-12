@@ -38,6 +38,8 @@ export default async function ({
               return {
                 v,
                 directory: path,
+                modified: stats.mtime,
+                created: stats.ctime,
                 entry,
                 isFile: stats.isFile(),
                 isDirectory: stats.isDirectory(),
@@ -87,7 +89,7 @@ export default async function ({
     res.setHeader('content-type', 'application/json')
     res.write(
       JSON.stringify(
-        listings.map(({ isFile, isDirectory, size, entry, v }, i, arr) => {
+        listings.map(({ isFile, isDirectory, created, modified, size, entry, v }, i, arr) => {
           const path = normalize(join(pathname, entry))
           const unique =
             arr.filter(({ pathname, entry }) => normalize(join(pathname, entry)) === path)
@@ -100,6 +102,8 @@ export default async function ({
             }`,
             v,
             entry,
+            modified,
+            created,
             isFile,
             isDirectory,
             size,
